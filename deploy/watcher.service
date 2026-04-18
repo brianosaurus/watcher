@@ -1,0 +1,24 @@
+[Unit]
+Description=Leeroy Chainkins bot watcher (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/watcher
+Environment="PATH=/home/ubuntu/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/ubuntu/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8765 --workers 1 --no-access-log
+Restart=on-failure
+RestartSec=5
+# Only kill the uvicorn main process on stop/restart. Spawned bots are placed in
+# new sessions via start_new_session=True and must survive a watcher restart.
+KillMode=process
+# Protect /usr, /boot, /etc from writes; leave /home writable so bots we spawn
+# can write their own logs / DBs.
+ProtectSystem=full
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leeroy Chainkins</title>
+<link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="/static/leeroy_chainkins.png" alt="Leeroy Chainkins" class="logo">
+    <h1>Leeroy Chainkins</h1>
+  </div>
+  <div class="meta">
+    <span id="host">–</span>
+    <span id="clock">–</span>
+    <span id="refresh-status" class="ok">idle</span>
+  </div>
+</header>
+
+<main>
+  <section id="summary" class="summary"></section>
+  <section id="bots" class="bots"></section>
+</main>
+
+<footer>
+  <span>auto-refresh every 10s · <a href="/api/status">raw json</a></span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

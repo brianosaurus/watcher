@@ -1,0 +1,32 @@
+[
+  {
+    "key": "memeorator:walletgate_hot",
+    "display_name": "walletgate hot (dry)",
+    "project": "memeorator",
+    "script": "memeorator.py",
+    "name_pattern": "^walletgate_hot",
+    "cwd": "/home/ubuntu/memeorator",
+    "start_command": "./walletgate_hot_run.sh",
+    "start_log": "/home/ubuntu/memeorator/walletgate_hot_cron.log"
+  },
+  {
+    "key": "memeorator:follower_30h",
+    "display_name": "wallet follower 30h (dry)",
+    "project": "memeorator",
+    "script": "wallet_follower.py",
+    "name_pattern": "^follower_30h",
+    "cwd": "/home/ubuntu/memeorator",
+    "start_command": "./follower_30h.sh",
+    "start_log": "/home/ubuntu/memeorator/follower_30h_cron.log"
+  },
+  {
+    "key": "statalyzer:exp_combined",
+    "display_name": "statalyzer combined (LIVE)",
+    "project": "statalyzer",
+    "script": "statalyzer.py",
+    "name_pattern": "^exp_combined$",
+    "cwd": "/home/ubuntu/statalyzer",
+    "start_command": "./exp_combined_run.sh",
+    "start_log": "/home/ubuntu/statalyzer/logs/exp_combined.log"
+  }
+]
