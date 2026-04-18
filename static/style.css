@@ -111,7 +111,7 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 .tag.stopped { background: rgba(210, 153, 34, 0.15); color: var(--warn); border-color: var(--warn); }
 .tag.project { background: rgba(88, 166, 255, 0.12); color: var(--accent); border-color: var(--accent); }
 
-.bot .body { padding: 10px 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.bot .body { padding: 10px 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .bot .body .kv { display: flex; flex-direction: column; }
 .bot .body .kv .k { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
 .bot .body .kv .v { font-size: 13px; font-weight: 500; }

@@ -20,6 +20,16 @@ function fmtPnl(v) {
   return `${sign}${v.toFixed(4)}`;
 }
 
+function fmtSol(v) {
+  if (v === null || v === undefined) return "–";
+  return `${v.toFixed(3)} SOL`;
+}
+
+function fmtUsd(v) {
+  if (v === null || v === undefined) return "–";
+  return `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function el(tag, attrs = {}, children = []) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -90,6 +100,7 @@ function renderBot(bot) {
   const pos = bot.positions || {};
   const pnl = pos.realized_pnl;
   const pnlClass = pnl == null ? "" : pnl > 0 ? "good" : pnl < 0 ? "bad" : "";
+  const wallet = bot.wallet && !bot.wallet.error ? bot.wallet : null;
 
   const body = el("div", { class: "body" }, [
     el("div", { class: "kv" }, [
@@ -108,6 +119,14 @@ function renderBot(bot) {
     el("div", { class: "kv" }, [
       el("div", { class: "k" }, "realized pnl"),
       el("div", { class: "v " + pnlClass }, fmtPnl(pnl)),
+    ]),
+    el("div", { class: "kv" }, [
+      el("div", { class: "k" }, "wallet sol"),
+      el("div", { class: "v" }, wallet ? fmtSol(wallet.sol) : "–"),
+    ]),
+    el("div", { class: "kv" }, [
+      el("div", { class: "k" }, "wallet value"),
+      el("div", { class: "v" }, wallet ? fmtUsd(wallet.usd) : "–"),
     ]),
   ]);
 
@@ -175,6 +194,9 @@ async function refresh() {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     document.getElementById("host").textContent = data.host;
+    document.getElementById("sol-price").textContent = data.sol_usd_price
+      ? `SOL ${fmtUsd(data.sol_usd_price)}`
+      : "SOL –";
     document.getElementById("clock").textContent = new Date(data.now * 1000).toISOString().replace("T", " ").slice(0, 19) + "Z";
     renderSummary(data.bots);
     const root = document.getElementById("bots");

@@ -10,6 +10,8 @@ import signal
 import sqlite3
 import subprocess
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -194,9 +196,72 @@ def _process_cwd(proc: psutil.Process) -> Path:
         return HOME
 
 
+# --- SOL price (cached, free CoinGecko endpoint) ----------------------------
+
+_SOL_PRICE_CACHE: dict[str, float] = {"ts": 0.0, "usd": 0.0}
+_SOL_PRICE_TTL_S = 60.0
+
+def _sol_usd_price() -> float | None:
+    now = time.time()
+    if _SOL_PRICE_CACHE["usd"] > 0 and (now - _SOL_PRICE_CACHE["ts"]) < _SOL_PRICE_TTL_S:
+        return _SOL_PRICE_CACHE["usd"]
+    url = "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "leeroy-chainkins/1.0"})
+        with urllib.request.urlopen(req, timeout=3.0) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        usd = float(data["solana"]["usd"])
+        if usd <= 0:
+            raise ValueError("non-positive price")
+        _SOL_PRICE_CACHE["usd"] = usd
+        _SOL_PRICE_CACHE["ts"] = now
+        return usd
+    except (urllib.error.URLError, OSError, ValueError, KeyError, json.JSONDecodeError) as e:
+        log.warning("sol price fetch failed: %s", e)
+        # Fall back to last known price if we have one, otherwise None.
+        return _SOL_PRICE_CACHE["usd"] or None
+
+
+def _wallet_summary(db_path: Path, sol_price: float | None) -> dict[str, Any] | None:
+    """Return {sol, usd, source, ts} from whichever snapshot table the DB has."""
+    conn = _safe_open_db(db_path)
+    if conn is None:
+        return None
+    try:
+        tables = {r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        )}
+        # Memeorator-style: native SOL balance
+        if "snapshots" in tables:
+            row = conn.execute(
+                "SELECT timestamp, portfolio_value_sol FROM snapshots "
+                "WHERE portfolio_value_sol IS NOT NULL "
+                "ORDER BY timestamp DESC LIMIT 1"
+            ).fetchone()
+            if row and row["portfolio_value_sol"] is not None:
+                sol = float(row["portfolio_value_sol"])
+                usd = sol * sol_price if sol_price else None
+                return {"sol": sol, "usd": usd, "source": "sol", "ts": float(row["timestamp"])}
+        # Statalyzer-style: native USD value
+        if "portfolio_snapshots" in tables:
+            row = conn.execute(
+                "SELECT timestamp, total_value FROM portfolio_snapshots "
+                "ORDER BY timestamp DESC LIMIT 1"
+            ).fetchone()
+            if row and row["total_value"] is not None:
+                usd = float(row["total_value"])
+                sol = usd / sol_price if sol_price else None
+                return {"sol": sol, "usd": usd, "source": "usd", "ts": float(row["timestamp"])}
+        return None
+    except sqlite3.Error as e:
+        return {"error": str(e)}
+    finally:
+        conn.close()
+
+
 # --- Building bot rows -------------------------------------------------------
 
-def _describe_running(proc: psutil.Process, script: str) -> dict[str, Any] | None:
+def _describe_running(proc: psutil.Process, script: str, sol_price: float | None = None) -> dict[str, Any] | None:
     try:
         cmdline = proc.cmdline()
     except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -226,6 +291,7 @@ def _describe_running(proc: psutil.Process, script: str) -> dict[str, Any] | Non
         return None
 
     positions = _positions_summary(db_path) if db_path else None
+    wallet = _wallet_summary(db_path, sol_price) if db_path else None
     log_path = _guess_log(cwd, db_path, experiment)
     log_tail = _tail_log(log_path) if log_path else []
 
@@ -246,10 +312,11 @@ def _describe_running(proc: psutil.Process, script: str) -> dict[str, Any] | Non
         "cpu_pct": round(cpu, 1),
         "mem_mb": round(mem_mb, 1),
         "positions": positions,
+        "wallet": wallet,
     }
 
 
-def _scan_running() -> list[dict[str, Any]]:
+def _scan_running(sol_price: float | None = None) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for proc in psutil.process_iter(["pid"]):
         try:
@@ -259,7 +326,7 @@ def _scan_running() -> list[dict[str, Any]]:
         script = next((s for s, p in SCRIPT_PATTERNS.items() if p.search(joined)), None)
         if script is None:
             continue
-        row = _describe_running(proc, script)
+        row = _describe_running(proc, script, sol_price)
         if row is not None:
             out.append(row)
     return out
@@ -292,15 +359,16 @@ def _role_stub(role: BotRole) -> dict[str, Any]:
         "cpu_pct": 0.0,
         "mem_mb": 0.0,
         "positions": None,
+        "wallet": None,
         "role_key": role.key,
         "can_start": True,
         "can_stop": False,
     }
 
 
-def _build_bots() -> list[dict[str, Any]]:
+def _build_bots(sol_price: float | None = None) -> list[dict[str, Any]]:
     roles = _load_roles()
-    running = _scan_running()
+    running = _scan_running(sol_price)
 
     matched_role_keys: set[str] = set()
     bots: list[dict[str, Any]] = []
@@ -392,10 +460,12 @@ app = FastAPI(title="Leeroy Chainkins")
 
 @app.get("/api/status")
 def status() -> dict[str, Any]:
+    sol_price = _sol_usd_price()
     return {
         "host": os.uname().nodename,
         "now": int(time.time()),
-        "bots": _build_bots(),
+        "sol_usd_price": sol_price,
+        "bots": _build_bots(sol_price),
     }
 
 
