@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Vite/React build output (regenerated from frontend/ by `npm run build`)
+/static/
+
+# Runtime/local state (not source)
+/actions.log
+/bc_reset.epoch
+.claude/settings.local.json
