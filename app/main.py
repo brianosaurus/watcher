@@ -23,6 +23,9 @@ log = logging.getLogger("watcher")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 STATIC_DIR = REPO_ROOT / "static"
+# Global reset marker: all cards (bots + sections) only count data with ts >= this epoch.
+# `echo $(date +%s) > ~/watcher/reset.epoch` on Frankfurt; delete the file to clear.
+_RESET_FILE = REPO_ROOT / "reset.epoch"
 
 HOME = Path(os.path.expanduser("~"))
 
@@ -114,15 +117,19 @@ def _load_true_pnl(db_path: Path) -> dict:
         return {}
 
 
-def _balance_series(db_path: Path, max_points: int = 80) -> list[dict[str, float]]:
+def _balance_series(db_path: Path, max_points: int = 80,
+                    since_ts: float | None = None) -> list[dict[str, float]]:
     """native SOL vs total wallet value (SOL) over time, from balance_series.json
     (written by true_pnl_reconciler). Makes the 'cash rising / net worth falling'
-    split visible: native climbs as the bot liquidates LSTs, total drifts down."""
+    split visible: native climbs as the bot liquidates LSTs, total drifts down.
+    `since_ts` scopes to a reset window (points with t >= since_ts)."""
     try:
         import json as _json
         s = _json.loads((db_path.parent / "balance_series.json").read_text())
     except Exception:
         return []
+    if since_ts is not None:
+        s = [x for x in s if x.get("t", 0) >= since_ts]
     if len(s) > max_points:
         stride = len(s) / max_points
         s = [s[min(len(s) - 1, int(i * stride))] for i in range(max_points)]
@@ -1025,8 +1032,12 @@ def _describe_running(proc: psutil.Process, script: str, sol_price: float | None
     project = PROJECT_BY_SCRIPT.get(script, "?")
     # statalyzer's DB persists across restarts, so scope its positions stats to the
     # current run (entry_time >= process start). memeorator's positions come from the
-    # log, not the DB, so it isn't scoped here.
-    stat_since = create_time if project == "statalyzer" else None
+    # log, not the DB, so it isn't scoped here. A global reset marker (reset.epoch) can
+    # further clamp the window to a manual "from N ago" time.
+    reset_ts = _read_reset_ts(_RESET_FILE)
+    stat_since = None
+    if project == "statalyzer":
+        stat_since = create_time if reset_ts is None else max(create_time, reset_ts)
     positions = _positions_summary(db_path, since_ts=stat_since) if db_path else None
 
     # Wallet SOL: for a LIVE bot with a known on-chain wallet, the real balance is
@@ -1170,7 +1181,7 @@ def _describe_running(proc: psutil.Process, script: str, sol_price: float | None
         "wallet": wallet,
         "pnl_series": pnl_series,
         "winrate_series": winrate_series,
-        "balance_series": (_balance_series(db_path) if (db_path and project == "statalyzer") else []),
+        "balance_series": (_balance_series(db_path, since_ts=stat_since) if (db_path and project == "statalyzer") else []),
         "trade_phase_series": trade_phase_series,
         "slot_delta_series": slot_delta_series,
         "wallet_series": wallet_series,
@@ -1221,9 +1232,8 @@ _SECTION_CONFIGS = [
         "wallet_pubkey": "FyXKk2Bs4Du82Lw3nE2g2ifQ2rL7ZoRzJdCBVZddH5si",
         "timing_log": Path("/tmp/bc_live.log"),
         "log_file": Path("/tmp/bc_live.log"),  # tail shown on the card (vs the raw jsonl)
-        # Non-destructive reset: only count trades/timing/slots/wallet with ts >= the epoch
-        # in this file. `echo $(date +%s) > ~/watcher/bc_reset.epoch` on Frankfurt resets.
-        "reset_file": REPO_ROOT / "bc_reset.epoch",
+        # Global reset marker shared with the bot cards (see _RESET_FILE).
+        "reset_file": _RESET_FILE,
     },
 ]
 
