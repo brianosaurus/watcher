@@ -20,13 +20,23 @@
     "start_log": "/home/ubuntu/memeorator/follower_30h_cron.log"
   },
   {
-    "key": "statalyzer:exp_combined",
-    "display_name": "statalyzer combined (LIVE)",
+    "key": "memeorator:follower_live",
+    "display_name": "wallet follower (LIVE)",
+    "project": "memeorator",
+    "script": "wallet_follower.py",
+    "name_pattern": "^follower_live",
+    "cwd": "/home/ubuntu/memeorator",
+    "start_command": "./follower_live.sh",
+    "start_log": "/home/ubuntu/memeorator/follower_live_cron.log"
+  },
+  {
+    "key": "statalyzer:exp_final",
+    "display_name": "statalyzer exp_final (LIVE)",
     "project": "statalyzer",
     "script": "statalyzer.py",
-    "name_pattern": "^exp_combined$",
+    "name_pattern": "^exp_final$",
     "cwd": "/home/ubuntu/statalyzer",
-    "start_command": "./exp_combined_run.sh",
-    "start_log": "/home/ubuntu/statalyzer/logs/exp_combined.log"
+    "start_command": "./exp_final_run.sh",
+    "start_log": "/home/ubuntu/statalyzer/logs/exp_final.log"
   }
 ]

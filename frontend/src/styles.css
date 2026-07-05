@@ -45,14 +45,12 @@ header h1 {
   font-weight: 400;
   letter-spacing: 1px;
   color: #f5e9c9;
-  text-shadow:
-    0 0 12px rgba(248, 81, 73, 0.35),
-    0 2px 0 rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 12px rgba(248, 81, 73, 0.35), 0 2px 0 rgba(0, 0, 0, 0.6);
   line-height: 1;
 }
 header .meta { display: flex; gap: 16px; color: var(--muted); font-size: 12px; }
-#refresh-status.ok { color: var(--good); }
-#refresh-status.err { color: var(--bad); }
+header .meta .ok { color: var(--good); }
+header .meta .err { color: var(--bad); }
 
 main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 
@@ -70,6 +68,8 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 }
 .summary .card .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 .summary .card .value { font-size: 22px; font-weight: 600; margin-top: 4px; }
+.summary .card .value.good { color: var(--good); }
+.summary .card .value.bad { color: var(--bad); }
 
 .bots {
   display: grid;
@@ -110,6 +110,7 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 .tag.dry { background: rgba(139, 148, 158, 0.15); color: var(--muted); }
 .tag.stopped { background: rgba(210, 153, 34, 0.15); color: var(--warn); border-color: var(--warn); }
 .tag.project { background: rgba(88, 166, 255, 0.12); color: var(--accent); border-color: var(--accent); }
+.tag.paper { background: rgba(210, 153, 34, 0.12); color: var(--warn); border-color: var(--warn); }
 
 .bot .body { padding: 10px 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .bot .body .kv { display: flex; flex-direction: column; }
@@ -117,6 +118,46 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 .bot .body .kv .v { font-size: 13px; font-weight: 500; }
 .bot .body .kv .v.good { color: var(--good); }
 .bot .body .kv .v.bad { color: var(--bad); }
+.bot .body .kv.sub .v { font-size: 12px; font-weight: 400; color: var(--text); }
+.bot .body .kv.sub .k { opacity: 0.8; }
+
+.bot .chart-status {
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  background: rgba(210, 153, 34, 0.1);
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* charts (Recharts) */
+.bot .chart-wrap {
+  padding: 8px 10px 6px;
+  border-top: 1px solid var(--border);
+  background: #0b1017;
+}
+.chart-box { margin-bottom: 8px; }
+.chart-box:last-child { margin-bottom: 0; }
+.chart-cap {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.85;
+  margin: 0 0 2px 2px;
+}
+.chart-empty {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--muted);
+  padding: 18px 0;
+  text-align: center;
+}
+.recharts-cartesian-axis-tick-value { font-family: ui-monospace, monospace; }
+.recharts-legend-item-text { color: var(--muted) !important; }
+.recharts-tooltip-item { font-family: ui-monospace, monospace; }
 
 .bot .log {
   margin: 0;
@@ -127,7 +168,7 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
   line-height: 1.4;
   white-space: pre;
   overflow-x: auto;
-  max-height: 220px;
+  max-height: 480px;
   overflow-y: auto;
   color: #b5bac1;
 }
@@ -144,40 +185,6 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 
 .bot.not-running { opacity: 0.72; }
 .bot.not-running .head { background: rgba(210, 153, 34, 0.04); }
-
-.bot .actions {
-  display: flex;
-  gap: 8px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.15);
-}
-.btn {
-  flex: 1;
-  appearance: none;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
-  padding: 7px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  letter-spacing: 0.4px;
-  transition: background 0.1s, border-color 0.1s;
-}
-.btn:hover:not(:disabled) { background: #262c36; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn.start:not(:disabled) { border-color: var(--good); color: var(--good); }
-.btn.start:hover:not(:disabled) { background: rgba(63, 185, 80, 0.12); }
-.btn.stop:not(:disabled) { border-color: var(--bad); color: var(--bad); }
-.btn.stop:hover:not(:disabled) { background: rgba(248, 81, 73, 0.12); }
-.btn.stop.live:not(:disabled) {
-  border-color: var(--live);
-  color: #fff;
-  background: rgba(248, 81, 73, 0.2);
-}
-.btn.stop.live:hover:not(:disabled) { background: rgba(248, 81, 73, 0.35); }
 
 .empty-state {
   padding: 40px;
