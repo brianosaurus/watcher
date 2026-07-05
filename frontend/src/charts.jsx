@@ -139,6 +139,25 @@ export function TradePhaseChart({ data }) {
   )
 }
 
+export function BuySwapChart({ data }) {
+  const title = 'Buy Swap # (swap index at entry · lower = earlier)'
+  if (!data || data.length < 2) return <Empty title={title} msg="no buy-swap history" />
+  const hi = Math.max(1, ...data.map((p) => p.buy_swap))
+  return (
+    <ChartBox title={title}>
+      <LineChart data={data} margin={{ top: 6, right: 12, bottom: 2, left: 0 }}>
+        <CartesianGrid stroke={GRID} strokeDasharray="2 3" vertical={false} />
+        {xAxis()}
+        <YAxis tick={axisTick} stroke={GRID} width={30} domain={[0, hi]} allowDecimals={false} />
+        <Tooltip contentStyle={tipStyle} labelFormatter={fmtChartTime}
+          formatter={(v) => [v + '', 'buy swap #']} />
+        <Line type="monotone" dataKey="buy_swap" stroke={PHASE.submit} strokeWidth={1.6}
+          dot={false} isAnimationActive={false} />
+      </LineChart>
+    </ChartBox>
+  )
+}
+
 export function PaperChart({ data, unit }) {
   const sol = unit === 'SOL'
   const title = sol

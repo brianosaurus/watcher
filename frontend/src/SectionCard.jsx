@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { fmtMs } from './format.js'
-import { WalletChart, TradePhaseChart, SlotDeltaChart } from './charts.jsx'
+import { WalletChart, TradePhaseChart, SlotDeltaChart, BuySwapChart } from './charts.jsx'
 
 function KV({ k, v, cls = '' }) {
   return (
@@ -56,6 +56,10 @@ export default function SectionCard({ section: s }) {
           <KV k="slot Δ" v={(s.slot_delta != null ? String(s.slot_delta) : '–') +
             (s.median_slot_delta != null ? ` (med ${s.median_slot_delta} · ~${Math.round(s.median_slot_delta * 400)}ms)` : '')} />
         </>}
+        {s.buy_swap != null && (
+          <KV k="buy swap #" v={String(s.buy_swap) +
+            (s.median_buy_swap != null ? ` (med ${s.median_buy_swap})` : '')} />
+        )}
       </div>
 
       <div className="chart-status">Gathering data for retrain</div>
@@ -63,6 +67,7 @@ export default function SectionCard({ section: s }) {
         {(s.wallet_series || []).length >= 2 && <WalletChart data={s.wallet_series} />}
         {(s.trade_phase_series || []).length >= 2 && <TradePhaseChart data={s.trade_phase_series} />}
         {(s.slot_delta_series || []).length >= 2 && <SlotDeltaChart data={s.slot_delta_series} />}
+        {(s.buy_swap_series || []).length >= 2 && <BuySwapChart data={s.buy_swap_series} />}
       </div>
 
       {logLines.length

@@ -1159,6 +1159,21 @@ def _describe_running(proc: psutil.Process, script: str, sol_price: float | None
                     for p in phase_series if p.get("slot_delta") is not None
                 ]
 
+    # Live on-chain SOL wallet balance chart: for any LIVE bot with a known wallet, reuse
+    # the getBalance samples the watcher already collects each poll (see _chain_sol_balance
+    # / _CHAIN_BAL_HISTORY). This drives the statalyzer wallet chart. memeorator already
+    # builds its own wallet_series from log lines above, so don't clobber it.
+    if chain_pubkey and mode == "LIVE" and not wallet_series:
+        wallet_series = _chain_balance_series(chain_pubkey)
+        if reset_ts is not None:
+            wallet_series = [p for p in wallet_series if p["t"] >= reset_ts]
+
+    # Scope statalyzer's per-close slot-Δ series to the reset/run window so a long log tail
+    # (which can span days of reconciliation lines) doesn't stretch the chart's x-axis.
+    if project == "statalyzer" and stat_since is not None:
+        slot_delta_series = [p for p in slot_delta_series if p["t"] >= stat_since]
+        trade_phase_series = [p for p in trade_phase_series if p["t"] >= stat_since]
+
     log_tail = _tail_log(log_path) if log_path else []
 
     return {
@@ -1230,8 +1245,10 @@ _SECTION_CONFIGS = [
         "tag": "live",
         "tag_class": "live",
         "wallet_pubkey": "FyXKk2Bs4Du82Lw3nE2g2ifQ2rL7ZoRzJdCBVZddH5si",
-        "timing_log": Path("/tmp/bc_live.log"),
-        "log_file": Path("/tmp/bc_live.log"),  # tail shown on the card (vs the raw jsonl)
+        "timing_log": Path("/home/ubuntu/memeorator/bc_staged.log"),
+        "log_file": Path("/home/ubuntu/memeorator/bc_staged.log"),  # tail shown on the card
+        # Per-trade "buy_swap" (swap index at entry) from bc_real_trades.jsonl.
+        "buy_swap_file": HOME / "memeorator" / "bc_real_trades.jsonl",
         # Global reset marker shared with the bot cards (see _RESET_FILE).
         "reset_file": _RESET_FILE,
     },
@@ -1245,6 +1262,42 @@ def _read_reset_ts(path: Path | None) -> float | None:
         return float(path.read_text().strip())
     except (OSError, ValueError):
         return None
+
+
+def _buy_swap_stats(path: Path, reset_ts: float | None = None, max_points: int = 120) -> dict[str, Any]:
+    """Per-trade `buy_swap` (swap index at entry) from a jsonl (each line has ts + buy_swap).
+    Returns {buy_swap (latest), median_buy_swap, mean_buy_swap, buy_swap_series} or {}."""
+    if not path.exists() or not path.is_file():
+        return {}
+    try:
+        rows: list[tuple[float, float]] = []
+        with path.open() as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    x = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                bs, ts = x.get("buy_swap"), x.get("ts")
+                if bs is None or ts is None:
+                    continue
+                if reset_ts is not None and float(ts) < reset_ts:
+                    continue
+                rows.append((float(ts), float(bs)))
+        if not rows:
+            return {}
+        rows.sort()
+        vals = [v for _, v in rows]
+        return {
+            "buy_swap": int(rows[-1][1]),
+            "median_buy_swap": _median(vals),
+            "mean_buy_swap": round(sum(vals) / len(vals), 2),
+            "buy_swap_series": [{"t": t, "buy_swap": round(v, 2)} for t, v in _downsample(rows, max_points)],
+        }
+    except OSError:
+        return {}
 
 # bc_live.py per-trade timing, e.g.:
 #   15:58:31 TIMING 6yft7ZE4 | signal->enter=5 enter->buildstart=0 build=0 sign=0
@@ -1412,6 +1465,9 @@ def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int 
             "updated": trades[-1].get("ts") if trades else None,
         }
         # Per-trade timing (build/submit/confirm) + slot deltas from the bot's log.
+        bsf = cfg.get("buy_swap_file")
+        if bsf is not None:
+            out.update(_buy_swap_stats(bsf, reset_ts))
         tlog = cfg.get("timing_log")
         if tlog is not None:
             out.update(_bc_live_timings(tlog, time.time(), reset_ts))
