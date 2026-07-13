@@ -1,0 +1,376 @@
+<title>Latency → Validator Revenue · a five-step notebook</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ :root { color-scheme: dark; }
+ * { box-sizing:border-box; }
+ body { margin:0; background:#23272a; color:#f0f2f4; font-size:16px; line-height:1.62;
+   font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+ .bg { position:fixed; inset:0; z-index:0; pointer-events:none; background:
+   radial-gradient(58rem 40rem at 78% -8%, rgba(184,124,255,.16), transparent 60%),
+   radial-gradient(46rem 34rem at 8% 4%, rgba(211,219,226,.07), transparent 62%),
+   radial-gradient(60rem 46rem at 50% 108%, rgba(184,124,255,.09), transparent 60%); }
+ .grid { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.45;
+   background-image:linear-gradient(#474e55 1px,transparent 1px),linear-gradient(90deg,#474e55 1px,transparent 1px);
+   background-size:64px 64px;
+   -webkit-mask-image:radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+   mask-image:radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%); }
+ main { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:0 24px 96px; }
+ header { padding:88px 0 40px; }
+ .eyebrow { font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.16em;
+   text-transform:uppercase; color:#b87cff; margin:0 0 18px; }
+ h1 { font-size:clamp(34px,5.2vw,54px); line-height:1.06; letter-spacing:-.025em; margin:0 0 22px; font-weight:600; }
+ h1 .g { background:linear-gradient(96deg,#f0f2f4 30%,#b87cff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+ .lede { font-size:19px; color:#d3dbe2; max-width:74ch; margin:0 0 14px; }
+ .by { font-size:13px; color:#6a757f; margin-top:26px; } .by a { color:#8d9ca9; }
+ .framing { background:#16181a; border:1px solid #b87cff; border-radius:10px; padding:12px 16px;
+   font-size:13.5px; color:#d3dbe2; line-height:1.55; margin:0 0 34px; }
+ .framing b { color:#f0f2f4; } .framing a { color:#b87cff; }
+ h2 { font-size:26px; letter-spacing:-.02em; margin:0 0 6px; font-weight:600; }
+ h3 { font-size:16px; margin:28px 0 8px; font-weight:600; }
+ p { color:#d3dbe2; max-width:76ch; } a { color:#b87cff; }
+ code { font-family:ui-monospace,Menlo,monospace; }
+ section { padding:38px 0; border-top:1px solid #474e55; }
+ .step { display:flex; gap:14px; align-items:baseline; margin-bottom:14px; }
+ .num { font-family:ui-monospace,monospace; font-size:12px; color:#b87cff; border:1px solid #b87cff;
+   border-radius:999px; padding:3px 10px; flex:none; }
+ .kicker { font-family:ui-monospace,monospace; font-size:11px; letter-spacing:.14em;
+   text-transform:uppercase; color:#8d9ca9; margin:0 0 4px; }
+ .code { background:#0f1113; border:1px solid #474e55; border-radius:10px; padding:16px 18px;
+   overflow-x:auto; font-size:12.5px; line-height:1.66; color:#cdd6e0; margin:16px 0; }
+ .code code { white-space:pre; }
+ .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(212px,1fr)); gap:14px; margin:22px 0; }
+ .card { background:#16181a; border:1px solid #474e55; border-radius:12px; padding:18px; }
+ .card .lab { font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.13em;
+   text-transform:uppercase; color:#b87cff; }
+ .card .big { font-size:28px; font-weight:600; letter-spacing:-.02em; margin:8px 0 2px; }
+ .card .sub { font-size:12.5px; color:#8d9ca9; line-height:1.5; }
+ figure { margin:22px 0; background:#16181a; border:1px solid #474e55; border-radius:12px; padding:18px 16px 10px; }
+ figcaption { font-size:12.5px; color:#8d9ca9; margin-top:10px; padding:0 4px; }
+ table { width:100%; border-collapse:collapse; font-size:13.5px; margin:16px 0; display:block; overflow-x:auto; }
+ th,td { text-align:left; padding:9px 12px; border-bottom:1px solid #474e55; white-space:nowrap; }
+ th { font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+   color:#8d9ca9; font-weight:500; }
+ td.n { font-family:ui-monospace,monospace; text-align:right; }
+ .warn { border-left:2px solid #b87cff; padding:2px 0 2px 16px; margin:18px 0; color:#d3dbe2; }
+ .warn b { color:#f0f2f4; }
+ footer { border-top:1px solid #474e55; padding:30px 0 0; color:#6a757f; font-size:13px; }
+</style>
+<div class="bg"></div><div class="grid"></div>
+<main>
+<header>
+  <div class="framing">A <b>work sample by Brian Woods</b>, prepared as part of a data-science application to
+  <b>Optimum</b>. Independent analysis — not produced, commissioned, or endorsed by Optimum
+  (<a href="https://getoptimum.xyz">getoptimum.xyz</a>); their product’s claims are the <em>question</em>, and their
+  site’s look is borrowed deliberately, as a courtesy of context.</div>
+  <p class="eyebrow">Ethereum · mainnet · public data</p>
+  <h1>What does block propagation<br><span class="g">latency actually cost a validator?</span></h1>
+  <p class="lede">Every propagation-acceleration pitch rests on one unstated premise: <em>blocks arriving faster
+  makes validators earn more.</em> Vendors benchmark milliseconds on testnets. Nobody converts milliseconds into ETH.</p>
+  <p class="lede">This does — on mainnet, through five tools, across three revenue channels.</p>
+  <p class="by">Brian Woods · data: <a href="https://github.com/ethpandaops/xatu-data">Xatu</a> by ethPandaOps ·
+  7,200 slots from 2025-06-11 · <b>every number below is computed, not quoted</b> — including the ones that came back null.</p>
+</header>
+
+<section>
+  <p class="kicker">The identification</p>
+  <h2>A deadline nobody chose</h2>
+  <p>The consensus spec tells an attester to vote <b>4,000 ms</b> into the slot, for whatever head it can see
+  <em>at that instant</em>. A block landing at 3,950 ms is votable. At 4,050 ms it is not — the attester votes for the
+  previous block and forfeits <code>TIMELY_HEAD</code>. Nobody chose that cutoff, and no proposer can steer gossip to
+  land on one side of it with millisecond precision. That is a textbook <b>sharp regression discontinuity</b>. RANDAO
+  assigns attesters to slots, so exposure to a late block is as-good-as-random.</p>
+  <p>We are <em>not</em> comparing fast operators to slow ones — hopelessly confounded. We compare the same validators
+  across slots that, by lottery, happened to have an early or a late block.</p>
+  <figure><svg viewBox="0 0 720 300" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><line x1="52" y1="266.0" x2="704" y2="266.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="44.0" y="269.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0%</text><line x1="52" y1="204.0" x2="704" y2="204.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="44.0" y="207.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">25%</text><line x1="52" y1="142.0" x2="704" y2="142.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="44.0" y="145.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">50%</text><line x1="52" y1="80.0" x2="704" y2="80.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="44.0" y="83.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">75%</text><line x1="52" y1="18.0" x2="704" y2="18.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="44.0" y="21.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">100%</text><text x="52.0" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0s</text><text x="160.7" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">1s</text><text x="269.3" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">2s</text><text x="378.0" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">3s</text><text x="486.7" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4s</text><text x="595.3" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">5s</text><text x="704.0" y="288.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">6s</text><line x1="486.7" y1="18" x2="486.7" y2="266" stroke="#b87cff" stroke-width="1.5" stroke-dasharray="4 3"/><text x="492.7" y="31.0" fill="#b87cff" font-size="10" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,000 ms deadline</text><polyline fill="none" stroke="#d3dbe2" stroke-width="2" stroke-linejoin="round" points="106.3,18.0 133.5,18.0 160.7,18.1 187.8,18.2 215.0,18.1 242.2,18.2 269.3,18.3 296.5,18.3 323.7,19.2 350.8,19.0 378.0,20.3 405.2,20.3 432.3,23.3 459.5,36.3"/><polyline fill="none" stroke="#b87cff" stroke-width="2" stroke-linejoin="round" points="486.7,58.8 513.8,137.1 541.0,123.8 568.2,157.4 622.5,225.2"/><circle cx="106.3" cy="18.0" r="2.5" fill="#d3dbe2" fill-opacity=".9"/><circle cx="133.5" cy="18.0" r="2.6" fill="#d3dbe2" fill-opacity=".9"/><circle cx="160.7" cy="18.1" r="2.7" fill="#d3dbe2" fill-opacity=".9"/><circle cx="187.8" cy="18.2" r="2.8" fill="#d3dbe2" fill-opacity=".9"/><circle cx="215.0" cy="18.1" r="3.4" fill="#d3dbe2" fill-opacity=".9"/><circle cx="242.2" cy="18.2" r="5.0" fill="#d3dbe2" fill-opacity=".9"/><circle cx="269.3" cy="18.3" r="5.4" fill="#d3dbe2" fill-opacity=".9"/><circle cx="296.5" cy="18.3" r="4.7" fill="#d3dbe2" fill-opacity=".9"/><circle cx="323.7" cy="19.2" r="3.9" fill="#d3dbe2" fill-opacity=".9"/><circle cx="350.8" cy="19.0" r="3.6" fill="#d3dbe2" fill-opacity=".9"/><circle cx="378.0" cy="20.3" r="3.3" fill="#d3dbe2" fill-opacity=".9"/><circle cx="405.2" cy="20.3" r="3.4" fill="#d3dbe2" fill-opacity=".9"/><circle cx="432.3" cy="23.3" r="3.4" fill="#d3dbe2" fill-opacity=".9"/><circle cx="459.5" cy="36.3" r="3.0" fill="#d3dbe2" fill-opacity=".9"/><circle cx="486.7" cy="58.8" r="2.5" fill="#b87cff" fill-opacity=".9"/><circle cx="513.8" cy="137.1" r="2.4" fill="#b87cff" fill-opacity=".9"/><circle cx="541.0" cy="123.8" r="2.5" fill="#b87cff" fill-opacity=".9"/><circle cx="568.2" cy="157.4" r="2.4" fill="#b87cff" fill-opacity=".9"/><circle cx="622.5" cy="225.2" r="2.3" fill="#b87cff" fill-opacity=".9"/><text x="52.0" y="13.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">correct head-vote rate</text></svg>
+    <figcaption>Latency is nearly free right up to the deadline, and then it is a cliff — exactly where the spec says
+    it should be. 7,142 slots, 58 past 4,000 ms; marker size ∝ slots in bin. <b>This
+    non-linearity is the whole story</b>: “average propagation latency” is a misleading KPI, because what costs money
+    is the <em>tail</em>.</figcaption></figure>
+</section>
+
+<section>
+  <p class="kicker">The three channels</p>
+  <h2>Latency doesn’t cost you once. It costs you three ways.</h2>
+  <p>They differ by orders of magnitude, and a propagation product attacks only one part of one of them. Keeping them
+  separate is what makes the commercial argument legible.</p>
+  <div class="cards">
+    <div class="card"><div class="lab">Attestation</div>
+      <div class="big">99.6% → 59.7%</div>
+      <div class="sub">correct head-vote rate, on-time vs late. A wrong head vote forfeits <code>TIMELY_HEAD</code> —
+      14/64 of the base reward (≈25.9% of that epoch’s attestation income).</div></div>
+    <div class="card"><div class="lab">Proposals</div>
+      <div class="big">49 / 7,192</div>
+      <div class="sub">missed proposals (0.68%), plus 13 orphaned blocks. A
+      reorged block pays its proposer <b>nothing</b> — reward, tips and MEV all evaporate.</div></div>
+    <div class="card"><div class="lab">MEV</div>
+      <div class="big">0.1232 ETH</div>
+      <div class="sub">mean block value at the plateau — what a reorg destroys. Measured from
+      7,073 slots of relay bid traces.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="step"><span class="num">01</span><div><p class="kicker">DuckDB · Xatu · pandas</p>
+    <h2>Panel construction</h2></div></div>
+  <p>Xatu is ethPandaOps’ public beacon-chain dataset — plain parquet over HTTPS, no auth. DuckDB reads it in place and
+  prunes columns, so a query touching 3 of 40 columns downloads 3 column chunks. No warehouse, no ETL. The unit is the
+  <b>slot</b>.</p>
+  <pre class="code"><code>from src.xatu  import connect, XatuPaths, ATTESTATION_DEADLINE_MS   # 4000 ms
+from src.panel import build_slot_panel
+
+build_slot_panel(con, XatuPaths(cfg.xatu_base_url), dt.date(2025, 6, 11),
+                 min_sentries=cfg.min_sentries, local_dir=cfg.raw_dir)
+df = con.execute(&quot;SELECT * FROM slot_panel ORDER BY slot&quot;).df()
+
+# Treatment: MEDIAN arrival across &gt;=5 sentries, joined on the CANONICAL block root,
+# so a reorged competitor block cannot pollute the timing.
+df[&quot;late&quot;] = (df.arrival_ms &gt; ATTESTATION_DEADLINE_MS).astype(float)</code></pre>
+  <p>Four things in that SQL are load-bearing: the treatment is the <b>median</b> arrival across ≥5
+  sentries joined on the <b>canonical block root</b> (a reorged competitor must not pollute the timing); attestations are
+  read from day <em>D</em> <b>and</b> <em>D+1</em> (an attestation may land 32 slots later — truncation would masquerade
+  as a missed attestation); attesters are de-duplicated at the (slot, committee, voted-root) grain with list ops, never
+  <code>UNNEST</code> (which explodes one day into ~200M rows); and the panel left-joins from <code>proposer_duty</code>,
+  so a slot with no block survives as a missed proposal instead of vanishing.</p>
+  <div class="warn"><b>The bug that design prevents.</b> A validator attests once, but that attestation can be
+  <em>included</em> in several blocks. Summing <code>len(validators)</code> double-counts attesters — badly enough to
+  produce a <em>negative</em> missed-attestation rate.</div>
+
+  <h3>And a second one, found while building this notebook</h3>
+  <p>A missed proposal has <b>no block</b> — so it has no <code>arrival_ms</code>, and no <code>blob_count</code>,
+  <code>tx_count</code> or <code>payload_bytes</code> either. The covariates vanish exactly when the outcome fires. Any
+  model of the Proposals channel built on own-block features is silently fitted to a sample from which <em>every event
+  has been deleted</em>. Measured on this panel:</p>
+  <table>
+    <tr><th>frame</th><th>rows</th><th>proposal failures</th></tr>
+    <tr><td>all proposer duties</td><td class="n">7,200</td><td class="n">49</td></tr>
+    <tr><td><code>dropna(blob, tx, payload)</code></td><td class="n">7,151</td>
+        <td class="n" style="color:#b87cff"><b>0</b></td></tr>
+  </table>
+  <p>Ninety-nine percent of the rows survive, and <b>100% of the events die</b>. A model fitted there would report a
+  beautiful R² on a question it can no longer see. The fix is <b>lagged</b> network conditions, which come from a slot’s
+  neighbours and therefore exist for every duty, block or no block:</p>
+  <pre class="code"><code># A missed proposal has NO block -- so no arrival_ms, and no blob/tx/payload either.
+# The covariates vanish exactly when the outcome fires. So the Proposals channel must be
+# modelled on LAGGED conditions, which come from a slot&#x27;s NEIGHBOURS and exist for every duty.
+g = df.arrival_ms
+df[&quot;prev_arrival&quot;]  = g.shift(1).ffill()
+df[&quot;roll_arr_mean&quot;] = g.shift(1).rolling(32, min_periods=4).mean().ffill()
+df[&quot;roll_arr_p90&quot;]  = g.shift(1).rolling(64, min_periods=8).quantile(.90).ffill()
+df[&quot;roll_late&quot;]     = df.late.shift(1).rolling(64, min_periods=8).mean().ffill()</code></pre>
+</section>
+
+<section>
+  <div class="step"><span class="num">02</span><div><p class="kicker">statsmodels · linearmodels</p>
+    <h2>Difference-in-differences, clustered</h2></div></div>
+  <p>This repo was <em>originally</em> scoped as a staggered DiD on <b>mump2p adoption</b> by the seven publicly-named
+  Optimum partners. <b>That study cannot be run</b>, and the reasoning is worth more than the study would have been.</p>
+  <p><b>1 · There is no staggering.</b> All seven were named in a single press release on 2025-06-24. Callaway–Sant’Anna
+  exists <em>to exploit adoption-timing variation</em>; with one cohort it degenerates to a 2×2 DiD.<br>
+  <b>2 · The treatment never happened in the data.</b> mump2p has never run on Ethereum <b>mainnet</b> — it is a
+  Hoodi/private-testnet product, and Xatu is mainnet. The treated operators’ mainnet validators were <b>never treated</b>:
+  the treatment indicator is identically zero across the panel.</p>
+  <p>You cannot estimate the effect of a treatment that did not occur. So the honest thing to put in a notebook is not a
+  fabricated effect — it is a <b>null calibration</b>: run the full machinery against a placebo where the truth is
+  <code>τ = 0</code> and confirm it finds nothing. An estimator that finds effects is worthless unless it also fails to
+  find them when they are absent.</p>
+  <pre class="code"><code>import statsmodels.formula.api as smf
+from linearmodels.panel import PanelOLS
+
+# mump2p never shipped to MAINNET, so on Xatu the treatment indicator is IDENTICALLY ZERO.
+# You cannot estimate the effect of a treatment that did not occur. What you CAN do is prove
+# the estimator does not hallucinate one. Placebo: the truth is tau = 0.
+df[&quot;treated&quot;] = (df.proposer_index % 14 &lt; 7).astype(int)     # 7 pseudo-&quot;partners&quot;
+df[&quot;post&quot;]    = (df.slot &gt; df.slot.median()).astype(int)
+df[&quot;did&quot;]     = df.treated * df.post
+
+m = smf.ols(&quot;correct_head_rate ~ treated + post + did&quot;, data=df).fit(
+        cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: df.epoch})
+
+fe = PanelOLS.from_formula(
+        &quot;correct_head_rate ~ did + EntityEffects + TimeEffects&quot;,
+        data=df.set_index([&quot;operator&quot;, &quot;epoch&quot;])
+     ).fit(cov_type=&quot;clustered&quot;, cluster_entity=True)</code></pre>
+  <table>
+    <tr><th>channel</th><th>τ (placebo)</th><th>clustered SE</th><th>p</th><th>95% CI</th><th>verdict</th></tr>
+    <tr><td>Attestation</td><td class="n">-0.00237</td><td class="n">0.00222</td>
+      <td class="n">0.28</td>
+      <td class="n">[-0.0067, +0.0020]</td><td>null, as it must be</td></tr>
+    <tr><td>Proposals</td><td class="n">-0.00527</td><td class="n">0.00404</td>
+      <td class="n">0.19</td>
+      <td class="n">[-0.0132, +0.0027]</td><td>null, as it must be</td></tr>
+  </table>
+  <div class="warn"><b>And a negative result about clustering itself.</b> Clustering on epoch
+  (226 clusters) moved the DiD standard error from <code>0.00233</code> (iid) to
+  <code>0.00222</code> — a factor of <b>0.95×</b>. Essentially nothing. That is the
+  <em>correct</em> behaviour and worth saying out loud: clustering is not a knob that always widens intervals: it corrects
+  for within-cluster correlation, and a randomly-assigned placebo has none to correct. The real study clusters by
+  <em>day</em>, where shared network conditions and blob demand genuinely do correlate the errors.</div>
+</section>
+
+<section>
+  <div class="step"><span class="num">03</span><div><p class="kicker">LightGBM · scikit-learn · CUPAC</p>
+    <h2>Buying precision instead of data</h2></div></div>
+  <p>The channels that matter are <b>rare-event</b> channels: 0.68% of duties miss a proposal;
+  0.83% of blocks cross the deadline. Rare events mean wide intervals, and wide intervals mean you
+  cannot price the product. <b>CUPAC</b> buys precision without buying more data: predict the outcome from pre-treatment
+  covariates, then use the <b>out-of-fold</b> prediction as a control variate. Variance falls by roughly
+  <code>corr(Y, Ŷ)²</code>.</p>
+  <pre class="code"><code>import lightgbm as lgb
+from sklearn.model_selection import TimeSeriesSplit
+
+# CUPAC: predict Y from pre-treatment covariates; use the OUT-OF-FOLD prediction as a control
+# variate. Var falls ~ corr(Y, Y_hat)^2. Out-of-fold is not optional -- predictions fitted on
+# the rows they adjust would absorb the treatment effect itself. Folds must be TIME-ORDERED.
+oof = np.full(len(f), np.nan)
+for tr, te in TimeSeriesSplit(n_splits=5).split(X):
+    g = lgb.LGBMRegressor(n_estimators=400, learning_rate=.05, num_leaves=31,
+                          min_child_samples=40, random_state=SEED)
+    g.fit(X[tr], y[tr]);  oof[te] = g.predict(X[te])
+
+base  = smf.ols(&quot;_y ~ _d&quot;,         data=f).fit(cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: f.epoch})
+cupac = smf.ols(&quot;_y ~ _d + cupac&quot;, data=f).fit(cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: f.epoch})</code></pre>
+
+  <h3>First: prove the implementation works</h3>
+  <p>A variance-reduction method that cannot shrink an interval when the signal <em>is</em> there is broken. So plant one:
+  a known effect <code>τ = -0.25</code> on a randomised treatment, with outcome noise the covariates can
+  actually see. Theory says the SE should fall by <code>1 − √(1 − R²)</code>.</p>
+  <figure><svg viewBox="0 0 720 284" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><line x1="603.5" y1="18" x2="603.5" y2="268" stroke="#6a757f" stroke-dasharray="3 3"/><text x="154.0" y="46.0" fill="#f0f2f4" font-size="12" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Validation</text><text x="154.0" y="62.0" fill="#8d9ca9" font-size="9.5" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">planted τ, randomised D</text><text x="154.0" y="77.0" fill="#b87cff" font-size="10" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">+14.2% CI</text><line x1="342.4" y1="44" x2="444.6" y2="44" stroke="#8d9ca9" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="393.5" cy="44" r="3.4" fill="#f0f2f4"/><text x="452.6" y="47.5" fill="#8d9ca9" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">before</text><line x1="363.4" y1="66" x2="451.1" y2="66" stroke="#b87cff" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="407.2" cy="66" r="3.4" fill="#f0f2f4"/><text x="459.1" y="69.5" fill="#b87cff" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">CUPAC</text><text x="154.0" y="124.0" fill="#f0f2f4" font-size="12" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Attestation</text><text x="154.0" y="140.0" fill="#8d9ca9" font-size="9.5" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">real Xatu outcome</text><text x="154.0" y="155.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">+0.1% CI</text><line x1="207.8" y1="122" x2="355.4" y2="122" stroke="#8d9ca9" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="281.6" cy="122" r="3.4" fill="#f0f2f4"/><text x="363.4" y="125.5" fill="#8d9ca9" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">before</text><line x1="208.1" y1="144" x2="355.4" y2="144" stroke="#b87cff" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="281.8" cy="144" r="3.4" fill="#f0f2f4"/><text x="363.4" y="147.5" fill="#b87cff" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">CUPAC</text><text x="154.0" y="202.0" fill="#f0f2f4" font-size="12" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Proposals</text><text x="154.0" y="218.0" fill="#8d9ca9" font-size="9.5" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">real Xatu outcome</text><text x="154.0" y="233.0" fill="#8d9ca9" font-size="10" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">-0.6% CI</text><line x1="599.7" y1="200" x2="606.2" y2="200" stroke="#8d9ca9" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="602.9" cy="200" r="3.4" fill="#f0f2f4"/><text x="614.2" y="203.5" fill="#8d9ca9" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">before</text><line x1="599.7" y1="222" x2="606.2" y2="222" stroke="#b87cff" stroke-width="5" stroke-linecap="round" opacity=".92"/><circle cx="602.9" cy="222" r="3.4" fill="#f0f2f4"/><text x="614.2" y="225.5" fill="#b87cff" font-size="9" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">CUPAC</text></svg>
+    <figcaption>95% epoch-clustered CIs, before and after the CUPAC control variate. On the planted signal the interval
+    shrinks and the point estimate does not move. On the real outcomes it does nothing at all — because there is nothing
+    there.</figcaption></figure>
+  <table>
+    <tr><th>run</th><th>τ</th><th>out-of-fold R²</th><th>corr(Y, Ŷ)</th><th>CI before</th><th>CI after</th><th>shrinkage</th></tr>
+    <tr><td>Validation (planted -0.25)</td><td class="n">-0.2457</td>
+      <td class="n">+0.250</td><td class="n">0.516</td>
+      <td class="n">0.1279</td><td class="n">0.1098</td>
+      <td class="n" style="color:#b87cff"><b>+14.2%</b></td></tr>
+    <tr><td>Attestation (real)</td><td class="n">-0.4030</td>
+      <td class="n">-0.137</td><td class="n">+0.035</td>
+      <td class="n">0.1847</td><td class="n">0.1844</td>
+      <td class="n">+0.1%</td></tr>
+    <tr><td>Proposals (real)</td><td class="n">-0.0007</td>
+      <td class="n">-0.290</td><td class="n">-0.003</td>
+      <td class="n">0.0081</td><td class="n">0.0081</td>
+      <td class="n">-0.6%</td></tr>
+  </table>
+  <p>The validation lands where theory says it should: at R² = 0.250, <code>1 − √(1 − R²)</code> predicts a
+  13.4% SE reduction; we measured <b>14.2%</b>. The estimator is
+  sound. It simply has nothing to work with on the real panel.</p>
+
+  <div class="warn"><b>The null, reported rather than buried.</b> On the real outcomes,
+  <code>corr(Y, Ŷ) = 0.035</code> and out-of-fold R² is <em>negative</em> — LightGBM predicts
+  worse than the mean. At slot grain, one day of Xatu contains no covariate that forecasts a slot’s fate: block arrival is
+  close to i.i.d. across slots, because idiosyncratic proposer timing games dominate, not persistent network state. CUPAC’s
+  native habitat is an experiment where each <em>unit</em> has a <em>pre-period</em> — and a slot has no pre-period. The
+  right unit here is operator × day, which needs the multi-day panel, not one day of slots. Hunting for a specification that
+  flattered the method would have been the easy path; this is what the data actually returned.</div>
+
+  <div class="warn"><b>A trap worth the whole exercise.</b> Run the same planted signal against the
+  <em>non-randomised</em> treatment (<code>late</code>) and CUPAC still shrinks the interval —
+  <b>+13.2%</b> — while the point estimate drifts to
+  <code>-0.1136</code> against a truth of <code>-0.25</code>. CUPAC’s variance guarantee
+  assumes <b>D ⟂ X</b>. Given a treatment correlated with the covariates, it will hand you a tighter interval around a
+  <em>more wrong</em> number. Precision is not accuracy, and a variance-reduction method will never tell you which one it
+  just gave you.</div>
+</section>
+
+<section>
+  <div class="step"><span class="num">04</span><div><p class="kicker">PyMC · ArviZ</p>
+    <h2>The tail is the product</h2></div></div>
+  <p><b>Mean latency is the wrong KPI.</b> Mean arrival is 2.35 s — comfortably safe. Yet
+  0.83% of blocks still cross 4,000 ms, and <em>only those cost anything</em>. A product that shaves
+  200 ms off the mean and nothing off the p99 is worth approximately zero. So model the arrival <b>distribution</b>.</p>
+  <pre class="code"><code>import pymc as pm, arviz as az
+
+with pm.Model():
+    mu    = pm.Normal(&quot;mu&quot;, 2.3, 1.0)            # grand mean arrival (seconds)
+    tau   = pm.HalfNormal(&quot;tau&quot;, 0.5)            # between-hour sd
+    z     = pm.Normal(&quot;z&quot;, 0, 1, shape=n_hours)  # NON-CENTRED: the centred form funnels
+    theta = pm.Deterministic(&quot;theta&quot;, mu + tau * z)
+    sigma = pm.HalfNormal(&quot;sigma&quot;, 1.0)
+    nu    = pm.Gamma(&quot;nu&quot;, 2.0, 0.1)             # HEAVY TAIL: gossip arrival is not Gaussian
+    pm.StudentT(&quot;obs&quot;, nu=nu, mu=theta[hour_idx], sigma=sigma, observed=y)
+
+    idata = pm.sample(1000, tune=1000, chains=2, target_accept=.9)
+    ppc   = pm.sample_posterior_predictive(idata)
+
+p99 = np.percentile(ppc.posterior_predictive[&quot;obs&quot;], 99, axis=-1) * 1000   # decision variable</code></pre>
+  <p><b>Non-centred</b> because the centred parameterisation funnels and the sampler jams against small <code>τ</code>.
+  <b>Student-t</b> because gossip arrival has fat tails, and a Gaussian would be dragged by them and <em>under</em>-predict
+  the p99 — understating exactly the risk being priced. Sampling was clean: max R̂ = <code>1.000</code>,
+  <b>0 divergences</b>.</p>
+  <figure><svg viewBox="0 0 720 255" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><rect x="50.3" y="217.2" width="18.7" height="1.8" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="72.5" y="218.1" width="18.7" height="0.9" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="94.7" y="216.3" width="18.7" height="2.7" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="116.9" y="213.6" width="18.7" height="5.4" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="139.2" y="208.3" width="18.7" height="10.7" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="161.4" y="194.0" width="18.7" height="25.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="183.6" y="165.5" width="18.7" height="53.5" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="205.8" y="149.4" width="18.7" height="69.6" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="228.0" y="106.6" width="18.7" height="112.4" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="250.3" y="111.0" width="18.7" height="108.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="272.5" y="63.7" width="18.7" height="155.3" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="294.7" y="59.3" width="18.7" height="159.7" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="316.9" y="20.0" width="18.7" height="199.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="339.1" y="37.0" width="18.7" height="182.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="361.4" y="53.9" width="18.7" height="165.1" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="383.6" y="92.3" width="18.7" height="126.7" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="405.8" y="109.2" width="18.7" height="109.8" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="428.0" y="141.4" width="18.7" height="77.6" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="450.2" y="156.5" width="18.7" height="62.5" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="472.5" y="164.6" width="18.7" height="54.4" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="494.7" y="194.0" width="18.7" height="25.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="516.9" y="189.6" width="18.7" height="29.4" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="539.1" y="198.5" width="18.7" height="20.5" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="561.3" y="208.3" width="18.7" height="10.7" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="583.6" y="214.5" width="18.7" height="4.5" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="605.8" y="211.9" width="18.7" height="7.1" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="628.0" y="217.2" width="18.7" height="1.8" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="650.2" y="217.2" width="18.7" height="1.8" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="672.4" y="219.0" width="18.7" height="0.0" fill="#b87cff" fill-opacity=".8" rx="1"/><rect x="694.7" y="217.2" width="18.7" height="1.8" fill="#b87cff" fill-opacity=".8" rx="1"/><line x1="137.1" y1="20" x2="137.1" y2="219" stroke="#f0f2f4" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="105.4" y1="20" x2="105.4" y2="219" stroke="#d3dbe2" stroke-width="1.5" stroke-dasharray="4 3"/><text x="143.1" y="32.0" fill="#f0f2f4" font-size="10" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,000 ms deadline</text><text x="99.4" y="46.0" fill="#d3dbe2" font-size="10" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">observed p99</text><text x="137.1" y="241.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,000</text><text x="258.8" y="241.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,200</text><text x="380.4" y="241.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,400</text><text x="502.0" y="241.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,600</text><text x="623.6" y="241.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,800</text><text x="52.0" y="15.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">posterior draws</text></svg>
+    <figcaption>Posterior-predictive p99 of block arrival over 7,143 slots, pooled across 24 hourly
+    groups. Posterior mean p99 = <b>4,354 ms</b> (95% CrI 4,090–4,684 ms).</figcaption></figure>
+  <div class="warn"><b>A posterior-predictive check that fails, reported as such.</b> The model’s p99
+  (4,354 ms) sits <b>406 ms above</b> the observed p99 (3,948 ms): at
+  <code>ν ≈ 2.1</code> the Student-t tail is <em>heavier than the data’s</em>. The model
+  overstates the tail. That makes it conservative for risk-pricing, but it is a misfit, not a triumph — and the fix is a
+  censored or mixture likelihood, not a heavier <code>ν</code>. Publishing the failed check is the entire point of running
+  one.</div>
+</section>
+
+<section>
+  <div class="step"><span class="num">05</span><div><p class="kicker">scikit-learn</p>
+    <h2>TimeSeriesSplit, and why the alternative lies</h2></div></div>
+  <p>Slots are a <b>time series</b>. A shuffled <code>KFold</code> trains on slot 9,000 to predict slot 100 — leaking the
+  future into the past. And because the CUPAC covariate in Step 03 is <em>built from</em> those out-of-fold predictions, the
+  leak would not merely inflate an R²; it would silently bias the very treatment effect it exists to de-noise.</p>
+  <pre class="code"><code>from sklearn.model_selection import TimeSeriesSplit, KFold
+
+# Slots are a TIME SERIES. A shuffled KFold trains on slot 9,000 to predict slot 100 -- leaking
+# the future into the past. And because the CUPAC covariate is BUILT from these out-of-fold
+# predictions, the leak would not merely inflate an R2; it would silently bias the very
+# treatment effect it exists to de-noise.
+oof_r2(TimeSeriesSplit(n_splits=5))                      # honest
+oof_r2(KFold(n_splits=5, shuffle=True, random_state=0))  # leaks -- and &quot;looks&quot; better</code></pre>
+  <table>
+    <tr><th>splitter</th><th>out-of-fold R²</th><th>honest?</th></tr>
+    <tr><td><code>TimeSeriesSplit(5)</code></td><td class="n">-0.1369</td><td>yes — only ever trains on the past</td></tr>
+    <tr><td><code>KFold(5, shuffle=True)</code></td><td class="n">-0.1049</td><td>no — trains on the future</td></tr>
+  </table>
+  <p>The leaky splitter reports the better number. Both are negative here, which is its own answer — but note the
+  <em>direction</em>: shuffling buys 0.032 of free R² out of nothing but leakage.
+  That is the danger in miniature: the metric improves, the science degrades, and nothing in the traceback tells you.</p>
+</section>
+
+<section>
+  <div class="step"><span class="num">06</span><div><p class="kicker">MEV channel</p>
+    <h2>Speed doesn’t earn MEV. It buys delay budget.</h2></div></div>
+  <p>Measured from 7,073 slots of relay bid traces: the best bid available to a proposer roughly
+  <b>doubles</b> across the slot, then <b>plateaus right after ~3.5 s</b> — builders stop bidding on a block that cannot beat
+  the deadline, because such a block is worthless.</p>
+  <figure><svg viewBox="0 0 720 275" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><line x1="62" y1="239.0" x2="704" y2="239.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="54.0" y="242.0" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0.000</text><line x1="62" y1="184.2" x2="704" y2="184.2" stroke="#474e55" stroke-dasharray="2 4"/><text x="54.0" y="187.2" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0.034</text><line x1="62" y1="129.5" x2="704" y2="129.5" stroke="#474e55" stroke-dasharray="2 4"/><text x="54.0" y="132.5" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0.069</text><line x1="62" y1="74.8" x2="704" y2="74.8" stroke="#474e55" stroke-dasharray="2 4"/><text x="54.0" y="77.8" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0.103</text><line x1="62" y1="20.0" x2="704" y2="20.0" stroke="#474e55" stroke-dasharray="2 4"/><text x="54.0" y="23.0" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0.138</text><polygon points="62,239 62.0,177.5 82.7,169.7 103.4,165.8 124.1,162.5 144.8,159.2 165.5,156.7 186.3,154.5 207.0,153.2 227.7,83.2 248.4,67.7 269.1,53.6 289.8,50.7 310.5,46.7 331.2,44.3 351.9,43.9 372.6,43.7 393.4,43.6 414.1,43.5 434.8,43.5 455.5,43.5 476.2,43.5 496.9,43.5 517.6,43.5 538.3,43.5 559.0,43.5 579.7,43.5 600.5,43.5 621.2,43.5 641.9,43.5 662.6,43.5 683.3,43.5 704.0,43.5 704.0,239" fill="#b87cff" fill-opacity=".13"/><polyline fill="none" stroke="#b87cff" stroke-width="2.2" stroke-linejoin="round" points="62.0,177.5 82.7,169.7 103.4,165.8 124.1,162.5 144.8,159.2 165.5,156.7 186.3,154.5 207.0,153.2 227.7,83.2 248.4,67.7 269.1,53.6 289.8,50.7 310.5,46.7 331.2,44.3 351.9,43.9 372.6,43.7 393.4,43.6 414.1,43.5 434.8,43.5 455.5,43.5 476.2,43.5 496.9,43.5 517.6,43.5 538.3,43.5 559.0,43.5 579.7,43.5 600.5,43.5 621.2,43.5 641.9,43.5 662.6,43.5 683.3,43.5 704.0,43.5"/><line x1="393.4" y1="20" x2="393.4" y2="239" stroke="#f0f2f4" stroke-width="1.5" stroke-dasharray="4 3"/><text x="399.4" y="32.0" fill="#f0f2f4" font-size="10" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4,000 ms deadline</text><text x="62.0" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0s</text><text x="144.8" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">1s</text><text x="227.7" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">2s</text><text x="310.5" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">3s</text><text x="393.4" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">4s</text><text x="476.2" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">5s</text><text x="559.0" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">6s</text><text x="641.9" y="261.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">7s</text><text x="62.0" y="15.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">best available bid (ETH)</text></svg>
+    <figcaption>V(t): mean best available bid by time into the slot. Slope over the
+    1,000–4,000 ms window — where timing-game proposers
+    actually decide — is <b>0.02932 ETH per second</b> of delay.</figcaption></figure>
+  <p>So the commercial argument inverts. A faster transport does <em>not</em> earn MEV by being fast. It earns MEV by buying
+  <b>delay budget</b>: if transit is Δ ms quicker, the proposer can publish Δ ms <em>later</em> and still land at the same
+  arrival time — identical reorg risk, strictly better bid. That conclusion is visible only because the three channels were
+  kept apart.</p>
+</section>
+
+<section>
+  <p class="kicker">The JD, answered</p>
+  <h2>Every “experience with X?” → “here’s where I used it on your problem”</h2>
+  <table>
+    <tr><th>tool</th><th>step</th><th>what it actually did here</th></tr>
+    <tr><td><code>DuckDB + Xatu</code></td><td class="n">01</td><td>Slot panel straight off public beacon parquet — no warehouse, no ETL.</td></tr><tr><td><code>statsmodels</code></td><td class="n">02</td><td>OLS DiD, cluster-robust covariance, placebo/null calibration.</td></tr><tr><td><code>linearmodels</code></td><td class="n">02</td><td>PanelOLS two-way fixed effects, entity-clustered.</td></tr><tr><td><code>LightGBM</code></td><td class="n">03</td><td>CUPAC control variate — out-of-fold outcome prediction.</td></tr><tr><td><code>scikit-learn</code></td><td class="n">03 · 05</td><td>TimeSeriesSplit CV; leakage demo vs shuffled KFold.</td></tr><tr><td><code>PyMC + ArviZ</code></td><td class="n">04</td><td>Hierarchical non-centred Student-t latency model; posterior-predictive p99.</td></tr><tr><td><code>pandas / NumPy</code></td><td class="n">all</td><td>Panel shaping; lagged network-condition features.</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p><b>Scope.</b> A read-only econometric analysis of Ethereum beacon-chain data. It holds no keys, connects to no wallet,
+  and submits no transactions of any kind. All data from <a href="https://github.com/ethpandaops/xatu-data">Xatu</a> by
+  <a href="https://ethpandaops.io">ethPandaOps</a>, published freely — this study is only possible because they publish it.</p>
+  <p><b>The estimate is a lower bound, and that is fine.</b> We observe the median arrival across Xatu’s sentries, not the
+  arrival at each individual attester — and the attester is what the deadline actually binds on. Classical measurement error
+  in an RD’s running variable smears the discontinuity and attenuates the jump toward zero. The real effect is at least this
+  large. We state that rather than quietly hoping nobody asks.</p>
+  <p><b>Framing, once more.</b> This page is a job-application work sample: an independent study by Brian Woods,
+  written <em>for</em> Optimum's data-science team, not <em>by</em> Optimum. It uses their public site's palette as a
+  visual hat-tip and examines the premise their product rests on. All conclusions, errors and nulls are mine alone.</p>
+  <p style="color:#6a757f;margin-top:22px">Computed on 7,200 slots from 2025-06-11 · Brian Woods ·
+  <a href="/">status</a></p>
+</footer>
+</main>

@@ -187,8 +187,31 @@ export function PaperChart({ data, unit }) {
   )
 }
 
-export function SlotDeltaChart({ data }) {
-  const title = 'Slot Δ per trade (slots to confirm · lower=faster)'
+export function SellTimingChart({ data, title = 'Sell time per trade (ms · dot: green=shred fast-feed, red=grpc landed-feed)' }) {
+  if (!data || data.length < 2) return <Empty title={title} msg="no sell-timing history" />
+  const hi = Math.max(1, ...data.map((p) => p.sell_ms))
+  const dot = (props) => {
+    const { cx, cy, payload } = props
+    if (cx == null || cy == null) return null
+    const c = payload.feed === 'shred' ? GOOD : payload.feed === 'grpc' ? BAD : MUTED
+    return <circle cx={cx} cy={cy} r={2.6} fill={c} stroke="none" />
+  }
+  return (
+    <ChartBox title={title}>
+      <LineChart data={data} margin={{ top: 6, right: 12, bottom: 2, left: 0 }}>
+        <CartesianGrid stroke={GRID} strokeDasharray="2 3" vertical={false} />
+        {xAxis()}
+        <YAxis tick={axisTick} stroke={GRID} width={30} domain={[0, hi]} allowDecimals={false} />
+        <Tooltip contentStyle={tipStyle} labelFormatter={fmtChartTime}
+          formatter={(v, n, p) => [v + ' ms', (p?.payload?.reason || 'sell') + ' via ' + (p?.payload?.feed || '?')]} />
+        <Line type="monotone" dataKey="sell_ms" stroke={MUTED} strokeWidth={1.2}
+          dot={dot} isAnimationActive={false} />
+      </LineChart>
+    </ChartBox>
+  )
+}
+
+export function SlotDeltaChart({ data, title = 'Slot Δ per trade (slots to confirm · lower=faster)' }) {
   if (!data || data.length < 2) return <Empty title={title} msg="no slot-Δ history" />
   const hi = Math.max(1, ...data.map((p) => p.slot_delta))
   return (

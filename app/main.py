@@ -230,6 +230,58 @@ def _grep_log_lines(path: Path, needle: str, max_lines: int = 4000) -> list[str]
         return []
 
 
+def _bc_open_current_run(path: Path) -> int:
+    """Currently-open BC positions = last "open=N" logged SINCE the most recent bot start.
+    The .out log is append-mode across restarts, so a stale "open=N" from a prior run (bot
+    killed while holding, then swept) must NOT carry over. Reset to 0 on each "BC LIVE" start."""
+    if not path.exists() or not path.is_file():
+        return 0
+    try:
+        out = subprocess.run(["grep", "-aE", r"BC LIVE|open=", str(path)],
+                             capture_output=True, text=True, timeout=10, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return 0
+    open_n = 0
+    for ln in out.stdout.splitlines()[-8000:]:
+        if "BC LIVE" in ln:
+            open_n = 0
+        else:
+            m = re.search(r"\bopen=(\d+)", ln)
+            if m:
+                open_n = int(m.group(1))
+    return open_n
+
+
+def _bc_grad_stats(path):
+    """Grad rate = fraction of BOUGHT tokens that graduated (appear in GRADSEEN), since the last BC LIVE
+    start. grad_captured = graduations the bot exited via GRAD_CAP (running tally)."""
+    try:
+        out = subprocess.run(["grep", "-aE", r"BC LIVE|BOUGHT |GRADSEEN ", str(path)],
+                             capture_output=True, text=True, timeout=10, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    lines = out.stdout.splitlines()
+    start = 0
+    for i, ln in enumerate(lines):
+        if "BC LIVE" in ln:
+            start = i
+    bought = set()
+    graduated = set()
+    captured = 0
+    for ln in lines[start:]:
+        mb = re.search(r"\bBOUGHT (\w+)", ln)
+        if mb:
+            bought.add(mb.group(1)); continue
+        mg = re.search(r"\bGRADSEEN (\w+) total_seen=\d+ held=[YN] ride=[YN] captured=(\d+)", ln)
+        if mg:
+            graduated.add(mg.group(1)); captured = max(captured, int(mg.group(2)))
+    n = len(bought)
+    g = len(bought & graduated)
+    return {"bought_count": n, "grad_count": g,
+            "grad_rate": round(g / n, 4) if n else None, "grad_captured": captured}
+
+
+
 def _guess_log(cwd: Path, db_path: Path | None, experiment: str | None) -> Path | None:
     candidates: list[Path] = []
     if db_path is not None:
@@ -1245,8 +1297,8 @@ _SECTION_CONFIGS = [
         "tag": "live",
         "tag_class": "live",
         "wallet_pubkey": "FyXKk2Bs4Du82Lw3nE2g2ifQ2rL7ZoRzJdCBVZddH5si",
-        "timing_log": Path("/home/ubuntu/memeorator/bc_staged.log"),
-        "log_file": Path("/home/ubuntu/memeorator/bc_staged.log"),  # tail shown on the card
+        "timing_log": Path("/home/ubuntu/memeorator/grad_lineage_live.out"),
+        "log_file": Path("/home/ubuntu/memeorator/grad_lineage_live.out"),  # tail shown on the card
         # Per-trade "buy_swap" (swap index at entry) from bc_real_trades.jsonl.
         "buy_swap_file": HOME / "memeorator" / "bc_real_trades.jsonl",
         # Global reset marker shared with the bot cards (see _RESET_FILE).
@@ -1307,6 +1359,16 @@ def _buy_swap_stats(path: Path, reset_ts: float | None = None, max_points: int =
 _BC_TIMING_RE = re.compile(r"\bTIMING\b.*?\|(.*?)\|\s*TOTAL\s+signal->fill=(\d+)\s*ms")
 _BC_KV_RE = re.compile(r"([A-Za-z_>\-]+)=(\d+)")
 _BC_SLOTS_RE = re.compile(r"\bSLOTS\b.*?decide_slot=(\d+)\s+landed_slot=(\d+)\s+diff=(-?\d+)")
+# bc_live.py graduation-sell slot latency, e.g.:
+#   05:53:05 GRADSLOT D5BELpjE grad_slot=431758201 sell_slot=431758202 diff=1
+# diff = slots between the graduation and our sell landing (0 = in-slot; higher = later into the dump).
+_BC_GRADSLOTS_RE = re.compile(r"\bGRADSLOT\b.*?grad_slot=(\d+)\s+sell_slot=(\d+)\s+diff=(-?\d+)")
+# grad_lineage_live.py / bc_live.py per-exit sell timing, e.g.:
+#   22:15:31 EXIT AudEA2mu PSTOP(grpc) ret=-38.4% est_pnl=-0.0016 cum=-0.0016 sell_ms=9 sold=Y shred_hits=3 open=0
+# reason = exit trigger (PSTOP/PTP/RTIME/...), feed = which price feed detected it (grpc landed vs shred fast),
+# sell_ms = decide->sold execution latency. Mirrors the buy TIMING line so the sell side graphs the same way.
+_BC_SELLTIMING_RE = re.compile(
+    r"\bEXIT\b\s+\w+\s+([A-Za-z]+)\(([a-z]+)\)\s+ret=([+-]?[\d.]+)%.*?\bsell_ms=(\d+)")
 
 
 def _bc_live_timings(log_path: Path, now: float, reset_ts: float | None = None,
@@ -1366,6 +1428,31 @@ def _bc_live_timings(log_path: Path, now: float, reset_ts: float | None = None,
             for t, p in _downsample(traw, max_points)
         ]
 
+    # --- EXIT → sell timing (execution latency + which feed detected the exit) ---
+    def _selltiming(ln):
+        m = _BC_SELLTIMING_RE.search(ln)
+        if not m:
+            return None
+        reason, feed, ret, sell_ms = m.group(1), m.group(2), float(m.group(3)), int(m.group(4))
+        if sell_ms < 0 or sell_ms > 60000:
+            return None
+        return (sell_ms, reason, feed, ret)
+
+    straw = _parse(_grep_log_lines(log_path, " EXIT "), _selltiming)
+    if straw:
+        ms = [p[0] for _, p in straw]
+        out["mean_sell_time_ms"] = round(sum(ms) / len(ms), 1)
+        out["median_sell_time_ms"] = _median(ms)
+        # detection-feed split: shred = fast reconstructed feed, grpc = slower landed feed
+        feeds: dict[str, int] = {}
+        for _, p in straw:
+            feeds[p[2]] = feeds.get(p[2], 0) + 1
+        out["sell_detect_feeds"] = feeds
+        out["sell_timing_series"] = [
+            {"t": t, "sell_ms": p[0], "reason": p[1], "feed": p[2], "ret": p[3]}
+            for t, p in _downsample(straw, max_points)
+        ]
+
     # --- SLOTS → slot deltas ---
     def _slots(ln):
         m = _BC_SLOTS_RE.search(ln)
@@ -1387,6 +1474,29 @@ def _bc_live_timings(log_path: Path, now: float, reset_ts: float | None = None,
         out["median_slot_delta"] = _median(deltas)
         out["slot_delta_series"] = [
             {"t": t, "slot_delta": p[2]} for t, p in _downsample(sraw, max_points)
+        ]
+
+    # --- GRADSLOT → graduation-slot vs sell-landed-slot (SELL timing, mirrors buy SLOTS) ---
+    def _gradslots(ln):
+        m = _BC_GRADSLOTS_RE.search(ln)
+        if not m:
+            return None
+        diff = int(m.group(3))
+        if diff < 0 or diff > _SLOT_DELTA_MAX:
+            return None
+        return (int(m.group(1)), int(m.group(2)), diff)
+
+    graw = _parse(_grep_log_lines(log_path, " GRADSLOT "), _gradslots)
+    if graw:
+        gdeltas = [p[2] for _, p in graw]
+        glast = graw[-1][1]
+        out["grad_slot"] = glast[0]
+        out["sell_slot"] = glast[1]
+        out["sell_slot_delta"] = glast[2]
+        out["mean_sell_slot_delta"] = round(sum(gdeltas) / len(gdeltas), 2)
+        out["median_sell_slot_delta"] = _median(gdeltas)
+        out["sell_slot_delta_series"] = [
+            {"t": t, "slot_delta": p[2]} for t, p in _downsample(graw, max_points)
         ]
     return out
 
@@ -1473,11 +1583,8 @@ def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int 
             out.update(_bc_live_timings(tlog, time.time(), reset_ts))
             # Currently-open positions = latest "open=N" the bot logged (live state, not
             # reset-scoped). Closed = post-reset completed trades (each jsonl line is a sell).
-            for ln in reversed(_grep_log_lines(tlog, "open=")):
-                mo = re.search(r"\bopen=(\d+)", ln)
-                if mo:
-                    out["open_trades"] = int(mo.group(1))
-                    break
+            out["open_trades"] = _bc_open_current_run(tlog)
+            out.update(_bc_grad_stats(tlog))
         out["closed_trades"] = n
         return out
     except OSError:
@@ -1491,6 +1598,117 @@ def _paper_sections() -> list[dict[str, Any]]:
         if s is not None:
             out.append(s)
     return out
+
+
+# --- Optimum: Ethereum propagation-latency counterfactual ---------------------
+#
+# Reads the SQLite written by optimum/tracker.py, which polls the beacon head and
+# prices every real mainnet slot as it lands.
+#
+# Everything here is a MODELLED COUNTERFACTUAL, not revenue. mump2p is not live on
+# Ethereum mainnet — nobody is earning this. The payload ships an explicit
+# disclaimer so the front end cannot present it as realised profit by accident.
+
+OPTIMUM_DB = HOME / "optimum" / "data" / "optimum_live.db"
+
+OPTIMUM_DISCLAIMER = (
+    "MODELLED COUNTERFACTUAL — not realised profit. mump2p is not deployed on "
+    "Ethereum mainnet, so no operator is capturing this today. Figures show what "
+    "an operator WOULD gain if a propagation accelerator delivering the stated "
+    "speedup were running, and (for the dominant MEV channel) if they also "
+    "re-tuned their block-publication timing to spend the saved milliseconds."
+)
+
+
+def _optimum_payload() -> dict[str, Any]:
+    if not OPTIMUM_DB.exists():
+        return {
+            "available": False,
+            "is_counterfactual": True,
+            "disclaimer": OPTIMUM_DISCLAIMER,
+            "reason": "tracker has not written a database yet",
+        }
+
+    try:
+        # Read-only + WAL so we never block or corrupt the tracker's writes.
+        con = sqlite3.connect(f"file:{OPTIMUM_DB}?mode=ro", uri=True, timeout=5)
+        con.row_factory = sqlite3.Row
+    except sqlite3.Error as e:
+        return {"available": False, "is_counterfactual": True,
+                "disclaimer": OPTIMUM_DISCLAIMER, "reason": str(e)}
+
+    try:
+        eth_price = 0.0
+        row = con.execute("SELECT v FROM meta WHERE k='eth_price_usd'").fetchone()
+        if row:
+            eth_price = float(row[0])
+
+        slots = con.execute(
+            "SELECT count(*) n, min(seen_unix) t0, max(seen_unix) t1,"
+            " avg(arrival_ms) avg_ms, sum(late) n_late FROM slots"
+        ).fetchone()
+        if not slots or not slots["n"]:
+            return {"available": False, "is_counterfactual": True,
+                    "disclaimer": OPTIMUM_DISCLAIMER,
+                    "reason": "no slots observed yet"}
+
+        n_slots = slots["n"]
+        elapsed_s = max(1.0, (slots["t1"] or 0) - (slots["t0"] or 0))
+
+        # Cumulative uplift by operator x speedup, split by channel.
+        ops: dict[str, Any] = {}
+        for r in con.execute(
+            "SELECT operator, validators, speedup,"
+            " sum(eth_a) a, sum(eth_b) b, sum(eth_c) c, sum(eth_total) tot"
+            " FROM gains GROUP BY operator, validators, speedup"
+        ):
+            key = r["operator"]
+            ops.setdefault(key, {"operator": key, "validators": r["validators"],
+                                 "scenarios": {}})
+            # Run-rate: what the observed accrual implies per year, if the
+            # observed slot mix continues. This is an extrapolation, not a
+            # measurement — the UI must label it as such.
+            per_s = r["tot"] / elapsed_s
+            ops[key]["scenarios"][f"{r['speedup']:.0f}x"] = {
+                "eth_a": r["a"], "eth_b": r["b"], "eth_c": r["c"],
+                "eth_total": r["tot"],
+                "usd_a": r["a"] * eth_price,
+                "usd_b": r["b"] * eth_price,
+                "usd_c": r["c"] * eth_price,
+                "usd_total": r["tot"] * eth_price,
+                # Rate, for the smoothly-incrementing ticker.
+                "eth_per_sec": per_s,
+                "usd_per_sec": per_s * eth_price,
+                "usd_per_year": per_s * 365 * 24 * 3600 * eth_price,
+            }
+
+        # Recent slots, for a sparkline of arrival times.
+        recent = [
+            {"slot": r["slot"], "arrival_ms": round(r["arrival_ms"]),
+             "late": bool(r["late"])}
+            for r in con.execute(
+                "SELECT slot, arrival_ms, late FROM slots"
+                " ORDER BY slot DESC LIMIT 60"
+            )
+        ][::-1]
+
+        return {
+            "available": True,
+            "is_counterfactual": True,
+            "disclaimer": OPTIMUM_DISCLAIMER,
+            "eth_usd_price": eth_price,
+            "slots_observed": n_slots,
+            "elapsed_s": elapsed_s,
+            "late_blocks": slots["n_late"],
+            "late_pct": 100.0 * slots["n_late"] / n_slots,
+            "avg_arrival_ms": slots["avg_ms"],
+            "deadline_ms": 4000,
+            "operators": sorted(ops.values(),
+                                key=lambda o: -o["validators"]),
+            "recent": recent,
+        }
+    finally:
+        con.close()
 
 
 # --- FastAPI -----------------------------------------------------------------
@@ -1510,6 +1728,26 @@ def status() -> dict[str, Any]:
     }
 
 
+@app.get("/api/optimum")
+def optimum() -> dict[str, Any]:
+    """Live Ethereum propagation-latency counterfactual.
+
+    IMPORTANT — what this is NOT. These are not earnings. mump2p is not deployed
+    on Ethereum mainnet, so nobody is capturing any of this. Every figure is a
+    MODELLED COUNTERFACTUAL: what an operator WOULD gain if a propagation
+    accelerator delivering the stated speedup were running, and (for the dominant
+    MEV channel) if they also re-tuned their timing games to spend the saved
+    milliseconds.
+
+    The payload carries `disclaimer` and `is_counterfactual` so the UI cannot
+    render this as revenue by accident. Do not strip them.
+
+    Data comes from optimum/tracker.py, which polls the beacon head and prices
+    each real mainnet slot as it lands.
+    """
+    return _optimum_payload()
+
+
 @app.get("/api/healthz")
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
@@ -1518,6 +1756,17 @@ def healthz() -> dict[str, str]:
 @app.get("/")
 def root() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/optimum")
+def optimum_page() -> FileResponse:
+    """The five-step notebook write-up (latency -> validator revenue).
+
+    A static page, built from real Xatu results by optimum/build_page.py and copied into
+    static/ by the vite build (it lives in frontend/public/, which vite passes through --
+    static/ itself is wiped on every build by emptyOutDir).
+    """
+    return FileResponse(STATIC_DIR / "optimum.html")
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

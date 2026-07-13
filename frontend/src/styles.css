@@ -203,3 +203,44 @@ footer {
 }
 footer a { color: var(--accent); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
+
+/* --- Optimum: Ethereum propagation-latency counterfactual ------------------ */
+/* The warning banner is deliberately loud. A climbing dollar figure on a public
+   page reads as revenue unless you say otherwise — and mump2p is not on mainnet,
+   so nobody is earning any of this. Do not tone this down. */
+.opt-card { grid-column: 1 / -1; }
+.opt-card h2 em { font-style: italic; opacity: .85; }
+.opt-warn {
+  background: #3a2a00; border: 1px solid #8a6d1f; color: #ffd479;
+  padding: .6rem .75rem; border-radius: 6px; font-size: .8rem;
+  line-height: 1.4; margin: .5rem 0 .75rem;
+}
+.opt-controls { display: flex; gap: .4rem; margin-bottom: .6rem; }
+.opt-controls button {
+  background: #1b1f24; border: 1px solid #2f3742; color: #9fb0c0;
+  padding: .25rem .6rem; border-radius: 4px; font-size: .75rem; cursor: pointer;
+}
+.opt-controls button.on { background: #2c7fb8; border-color: #2c7fb8; color: #fff; }
+.opt-live { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.opt-stat { display: flex; flex-direction: column; }
+.opt-stat .k { font-size: .68rem; color: #7b8794; text-transform: uppercase; }
+.opt-stat .v { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.opt-spark { display: block; margin: .25rem 0 .5rem; max-width: 100%; }
+.opt-legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .72rem;
+  color: #9fb0c0; margin-bottom: .5rem; }
+.opt-leg .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+  margin-right: .3rem; }
+.sw.opt-a, .opt-seg.opt-a { background: #2c7fb8; }
+.sw.opt-b, .opt-seg.opt-b { background: #7fcdbb; }
+.sw.opt-c, .opt-seg.opt-c { background: #d95f0e; }
+.opt-rows { display: flex; flex-direction: column; gap: .45rem; }
+.opt-row-head { display: grid; grid-template-columns: 8rem 5.5rem 1fr 9rem;
+  gap: .5rem; align-items: baseline; font-size: .8rem; }
+.opt-op { font-weight: 600; }
+.opt-val, .opt-rate { color: #7b8794; font-size: .72rem; text-align: right; }
+.opt-ticker { font-variant-numeric: tabular-nums; color: #d7e2ec; text-align: right; }
+.opt-bar { display: flex; height: 5px; border-radius: 3px; overflow: hidden;
+  background: #1b1f24; }
+.opt-seg { display: block; height: 100%; }
+.opt-foot { margin-top: .75rem; font-size: .7rem; color: #7b8794; line-height: 1.5; }
+.opt-foot code { background: #1b1f24; padding: 0 .25rem; border-radius: 3px; }

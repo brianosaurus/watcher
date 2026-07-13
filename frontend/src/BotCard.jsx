@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { fmtUptime, fmtPnlSol, fmtSol, fmtMs } from './format.js'
-import { PnlChart, WalletChart, BalanceChart, TradePhaseChart, SlotDeltaChart } from './charts.jsx'
+import { PnlChart, WalletChart, BalanceChart, TradePhaseChart, SlotDeltaChart, SellTimingChart } from './charts.jsx'
 
 function KV({ k, v, cls = '', sub = false }) {
   return (
@@ -60,6 +60,15 @@ export default function BotCard({ bot }) {
     }
   }
 
+  // mean sell time + detection-feed split (parallels the buy trade-time block)
+  if (pos.mean_sell_time_ms != null) {
+    const med = pos.median_sell_time_ms
+    rows.push(<KV key="mst" k="mean sell time" v={fmtMs(pos.mean_sell_time_ms) + (med != null ? ` (med ${fmtMs(med)})` : '')} />)
+    const fe = pos.sell_detect_feeds || {}
+    const fstr = Object.keys(fe).length ? Object.entries(fe).map(([k, v]) => `${k} ${v}`).join(' · ') : null
+    if (fstr) rows.push(<KV key="sdf" k="· detect feed" v={fstr} sub />)
+  }
+
   // slots
   if (pos.build_slot != null || pos.confirm_slot != null) {
     rows.push(<KV key="bslot" k="build slot" v={pos.build_slot != null ? String(pos.build_slot) : '–'} />)
@@ -80,6 +89,7 @@ export default function BotCard({ bot }) {
   if ((bot.wallet_series || []).length >= 2) charts.push(<WalletChart key="wal" data={bot.wallet_series} />)
   if ((bot.trade_phase_series || []).length) charts.push(<TradePhaseChart key="tp" data={bot.trade_phase_series} />)
   if ((bot.slot_delta_series || []).length >= 2) charts.push(<SlotDeltaChart key="sd" data={bot.slot_delta_series} />)
+  if ((bot.sell_timing_series || []).length >= 2) charts.push(<SellTimingChart key="st" data={bot.sell_timing_series} />)
 
   // log tail — auto-scroll to bottom on update
   const logLines = bot.log_tail || []
