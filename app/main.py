@@ -1760,13 +1760,27 @@ def root() -> FileResponse:
 
 @app.get("/optimum")
 def optimum_page() -> FileResponse:
-    """The five-step notebook write-up (latency -> validator revenue).
+    """The Optimum research report (the DiD/event study + counterfactual).
 
-    A static page, built from real Xatu results by optimum/build_page.py and copied into
-    static/ by the vite build (it lives in frontend/public/, which vite passes through --
-    static/ itself is wiped on every build by emptyOutDir).
+    Served from ~/optimum/site, which the research pipeline maintains — the page
+    and its figures deploy with a plain rsync of the optimum repo, no frontend
+    rebuild needed. The earlier five-step notebook write-up is preserved at
+    /optimum/notebook.html and linked from the report.
+
+    Falls back to the legacy static/optimum.html if the site directory hasn't
+    been deployed on this host yet.
     """
+    idx = _OPTIMUM_SITE / "index.html"
+    if idx.exists():
+        return FileResponse(idx)
     return FileResponse(STATIC_DIR / "optimum.html")
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+# Assets for the report (figures, the preserved notebook): /optimum/<file>.
+# Mounted after the exact-path route above, which keeps handling /optimum itself.
+_OPTIMUM_SITE = HOME / "optimum" / "site"
+if _OPTIMUM_SITE.is_dir():
+    app.mount("/optimum", StaticFiles(directory=str(_OPTIMUM_SITE), html=True),
+              name="optimum-report")

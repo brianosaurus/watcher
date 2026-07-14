@@ -25,11 +25,24 @@
  .framing { background:#16181a; border:1px solid #b87cff; border-radius:10px; padding:12px 16px;
    font-size:13.5px; color:#d3dbe2; line-height:1.55; margin:0 0 34px; }
  .framing b { color:#f0f2f4; } .framing a { color:#b87cff; }
+ .headline { display:block; margin:28px 0 0; background:#16181a; border:1px solid #474e55;
+   border-left:3px solid #b87cff; border-radius:10px; padding:14px 18px; text-decoration:none;
+   transition:border-color .15s; }
+ .headline:hover { border-color:#b87cff; }
+ .headline .hl-num { font-size:30px; font-weight:600; letter-spacing:-.02em; color:#f0f2f4; }
+ .headline .hl-txt { font-size:13.5px; color:#8d9ca9; line-height:1.55; margin-top:4px; }
  h2 { font-size:26px; letter-spacing:-.02em; margin:0 0 6px; font-weight:600; }
  h3 { font-size:16px; margin:28px 0 8px; font-weight:600; }
  p { color:#d3dbe2; max-width:76ch; } a { color:#b87cff; }
  code { font-family:ui-monospace,Menlo,monospace; }
- section { padding:38px 0; border-top:1px solid #474e55; }
+ section { padding:38px 0; border-top:1px solid #474e55; scroll-margin-top:20px; }
+ html { scroll-behavior:smooth; }
+ h2 .anchor { margin-left:10px; font-size:16px; font-weight:400; color:#6a757f;
+   text-decoration:none; opacity:0; transition:opacity .15s; }
+ section:hover h2 .anchor, h2 .anchor:focus { opacity:1; }
+ .toc { display:flex; flex-wrap:wrap; gap:7px 16px; margin-top:30px;
+   font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.04em; }
+ .toc a { color:#8d9ca9; text-decoration:none; } .toc a:hover { color:#b87cff; }
  .step { display:flex; gap:14px; align-items:baseline; margin-bottom:14px; }
  .num { font-family:ui-monospace,monospace; font-size:12px; color:#b87cff; border:1px solid #b87cff;
    border-radius:999px; padding:3px 10px; flex:none; }
@@ -66,18 +79,31 @@
   <h1>What does block propagation<br><span class="g">latency actually cost a validator?</span></h1>
   <p class="lede">Every propagation-acceleration pitch rests on one unstated premise: <em>blocks arriving faster
   makes validators earn more.</em> Vendors benchmark milliseconds on testnets. Nobody converts milliseconds into ETH.</p>
-  <p class="lede">This does — on mainnet, through five tools, across three revenue channels.</p>
+  <p class="lede">This does — on mainnet, through five tools, across four channels: three of revenue, one of cost.</p>
+  <a class="headline" href="#operators">
+    <div class="hl-num">≈ $4.8M / year</div>
+    <div class="hl-txt">modelled uplift for the seven named partner operators at the vendor's 6× claim
+    (Kiln alone ≈ $1.55M) — but ~90% of it is MEV delay budget, which pays
+    only if the operator re-tunes its block-publication timing. Per-operator, per-channel pricing in section 07 ↓</div>
+  </a>
   <p class="by">Brian Woods · data: <a href="https://github.com/ethpandaops/xatu-data">Xatu</a> by ethPandaOps ·
   7,200 slots from 2025-06-11 · <b>every number below is computed, not quoted</b> — including the ones that came back null.</p>
+  <nav class="toc">
+    <a href="#deadline">the deadline</a><a href="#channels">three channels</a>
+    <a href="#panel">01 panel</a><a href="#did">02 DiD</a><a href="#hoodi">hoodi</a><a href="#cupac">03 CUPAC</a>
+    <a href="#tail">04 tail</a><a href="#cv">05 CV</a><a href="#mev">06 MEV</a>
+    <a href="#operators">07 operators</a><a href="#adoption">08 adoption</a><a href="#jd">the JD</a>
+  </nav>
 </header>
 
-<section>
+<section id="deadline">
   <p class="kicker">The identification</p>
-  <h2>A deadline nobody chose</h2>
+  <h2>A deadline nobody chose<a class="anchor" href="#deadline">#</a></h2>
   <p>The consensus spec tells an attester to vote <b>4,000 ms</b> into the slot, for whatever head it can see
   <em>at that instant</em>. A block landing at 3,950 ms is votable. At 4,050 ms it is not — the attester votes for the
   previous block and forfeits <code>TIMELY_HEAD</code>. Nobody chose that cutoff, and no proposer can steer gossip to
-  land on one side of it with millisecond precision. That is a textbook <b>sharp regression discontinuity</b>. RANDAO
+  land on one side of it with millisecond precision. That is a textbook
+  <a href="https://en.wikipedia.org/wiki/Regression_discontinuity_design"><b>sharp regression discontinuity</b></a>. RANDAO
   assigns attesters to slots, so exposure to a late block is as-good-as-random.</p>
   <p>We are <em>not</em> comparing fast operators to slow ones — hopelessly confounded. We compare the same validators
   across slots that, by lottery, happened to have an early or a late block.</p>
@@ -88,16 +114,25 @@
     is the <em>tail</em>.</figcaption></figure>
 </section>
 
-<section>
+<section id="channels">
   <p class="kicker">The three channels</p>
-  <h2>Latency doesn’t cost you once. It costs you three ways.</h2>
-  <p>They differ by orders of magnitude, and a propagation product attacks only one part of one of them. Keeping them
-  separate is what makes the commercial argument legible.</p>
+  <h2>Latency doesn’t cost you once. It costs you three ways.<a class="anchor" href="#channels">#</a></h2>
+  <p>The three channels have completely different shapes. <b>Attestation</b> losses are tiny but constant — a slice of
+  one validator's pay, shaved off every time a block runs late. <b>Proposal</b> losses are the mirror image — rare, but
+  when a slow block gets reorged out the proposer loses <em>everything</em> at once. And <b>MEV</b> isn't a loss at all:
+  it is extra income a proposer could capture by waiting longer to publish, if faster propagation bought back the safety
+  margin that waiting spends.</p>
+  <p>Rolling all three into one "cost of latency" number would hide the thing a buyer actually needs to know: faster
+  propagation barely moves the first two, and almost all of its dollar value sits in the third — which only pays if the
+  operator changes how it behaves. That is why every step below prices the channels separately.</p>
+  <p>(There is also a fourth channel, <b>D: bandwidth</b>, priced in <a href="#operators">section 07</a>. It is kept
+  apart because it cuts server costs rather than earning validator revenue.)</p>
   <div class="cards">
     <div class="card"><div class="lab">Attestation</div>
-      <div class="big">99.6% → 59.7%</div>
-      <div class="sub">correct head-vote rate, on-time vs late. A wrong head vote forfeits <code>TIMELY_HEAD</code> —
-      14/64 of the base reward (≈25.9% of that epoch’s attestation income).</div></div>
+      <div class="big">4 in 10 vote wrong</div>
+      <div class="sub">When the block is on time, 99.6% of validators vote for it
+      correctly. When it arrives after the 4-second deadline, only 59.7% do — and each
+      wrong vote costs that validator about a quarter of its attestation pay for the epoch.</div></div>
     <div class="card"><div class="lab">Proposals</div>
       <div class="big">49 / 7,192</div>
       <div class="sub">missed proposals (0.68%), plus 13 orphaned blocks. A
@@ -109,9 +144,9 @@
   </div>
 </section>
 
-<section>
+<section id="panel">
   <div class="step"><span class="num">01</span><div><p class="kicker">DuckDB · Xatu · pandas</p>
-    <h2>Panel construction</h2></div></div>
+    <h2>Panel construction<a class="anchor" href="#panel">#</a></h2></div></div>
   <p>Xatu is ethPandaOps’ public beacon-chain dataset — plain parquet over HTTPS, no auth. DuckDB reads it in place and
   prunes columns, so a query touching 3 of 40 columns downloads 3 column chunks. No warehouse, no ETL. The unit is the
   <b>slot</b>.</p>
@@ -159,9 +194,9 @@ df[&quot;roll_arr_p90&quot;]  = g.shift(1).rolling(64, min_periods=8).quantile(.
 df[&quot;roll_late&quot;]     = df.late.shift(1).rolling(64, min_periods=8).mean().ffill()</code></pre>
 </section>
 
-<section>
+<section id="did">
   <div class="step"><span class="num">02</span><div><p class="kicker">statsmodels · linearmodels</p>
-    <h2>Difference-in-differences, clustered</h2></div></div>
+    <h2>Difference-in-differences, clustered<a class="anchor" href="#did">#</a></h2></div></div>
   <p>This repo was <em>originally</em> scoped as a staggered DiD on <b>mump2p adoption</b> by the seven publicly-named
   Optimum partners. <b>That study cannot be run</b>, and the reasoning is worth more than the study would have been.</p>
   <p><b>1 · There is no staggering.</b> All seven were named in a single press release on 2025-06-24. Callaway–Sant’Anna
@@ -207,9 +242,27 @@ fe = PanelOLS.from_formula(
   <em>day</em>, where shared network conditions and blob demand genuinely do correlate the errors.</div>
 </section>
 
-<section>
+<section id="hoodi">
+  <p class="kicker">Hoodi · the one network where mump2p runs</p>
+  <h2>Why the DiD didn’t just move to the testnet<a class="anchor" href="#hoodi">#</a></h2>
+  <p>The obvious rejoinder to step 02: mump2p <em>is</em> deployed somewhere — Ethereum’s Hoodi testnet, since
+  2025-06-24. So we went there. Two things break the textbook design on arrival. Xatu’s <b>attestation tables are
+  empty for Hoodi</b> until 2026, so the outcomes this study is built on (head votes, inclusion distance) simply don’t
+  exist there — identification has to run on propagation physics instead. And there is <b>still no staggering</b>: the
+  operator clusters all move on the same dates, so “adoption timing” never becomes a usable second difference.</p>
+  <p><b>Why mainnet Xatu carries the study anyway.</b> The money is on mainnet: real MEV, real rewards, the real
+  validator set — none of which exist on a testnet, and Channel C is ~90% of the dollars. Hoodi answers a different
+  and narrower question (“did the overlay visibly carry blocks?” — no, as far as public data can see), and it answers
+  it with only 4 sentries feeding the libp2p layer. So: mainnet for the physics and the pricing, Hoodi for the
+  adoption forensics — and the adoption-detection machinery built for that search is reusable on mainnet the day a
+  real rollout happens. That is the staggered DiD, pre-built and waiting for its treatment.</p>
+  <div class="warn"><b>Stated plainly:</b> the Hoodi nulls are <em>no evidence of effect</em> under a shadow-mode
+  deployment — not proof of none.</div>
+</section>
+
+<section id="cupac">
   <div class="step"><span class="num">03</span><div><p class="kicker">LightGBM · scikit-learn · CUPAC</p>
-    <h2>Buying precision instead of data</h2></div></div>
+    <h2>Buying precision instead of data<a class="anchor" href="#cupac">#</a></h2></div></div>
   <p>The channels that matter are <b>rare-event</b> channels: 0.68% of duties miss a proposal;
   0.83% of blocks cross the deadline. Rare events mean wide intervals, and wide intervals mean you
   cannot price the product. <b>CUPAC</b> buys precision without buying more data: predict the outcome from pre-treatment
@@ -274,9 +327,9 @@ cupac = smf.ols(&quot;_y ~ _d + cupac&quot;, data=f).fit(cov_type=&quot;cluster&
   just gave you.</div>
 </section>
 
-<section>
+<section id="tail">
   <div class="step"><span class="num">04</span><div><p class="kicker">PyMC · ArviZ</p>
-    <h2>The tail is the product</h2></div></div>
+    <h2>The tail is the product<a class="anchor" href="#tail">#</a></h2></div></div>
   <p><b>Mean latency is the wrong KPI.</b> Mean arrival is 2.35 s — comfortably safe. Yet
   0.83% of blocks still cross 4,000 ms, and <em>only those cost anything</em>. A product that shaves
   200 ms off the mean and nothing off the p99 is worth approximately zero. So model the arrival <b>distribution</b>.</p>
@@ -310,9 +363,9 @@ p99 = np.percentile(ppc.posterior_predictive[&quot;obs&quot;], 99, axis=-1) * 10
   one.</div>
 </section>
 
-<section>
+<section id="cv">
   <div class="step"><span class="num">05</span><div><p class="kicker">scikit-learn</p>
-    <h2>TimeSeriesSplit, and why the alternative lies</h2></div></div>
+    <h2>TimeSeriesSplit, and why the alternative lies<a class="anchor" href="#cv">#</a></h2></div></div>
   <p>Slots are a <b>time series</b>. A shuffled <code>KFold</code> trains on slot 9,000 to predict slot 100 — leaking the
   future into the past. And because the CUPAC covariate in Step 03 is <em>built from</em> those out-of-fold predictions, the
   leak would not merely inflate an R²; it would silently bias the very treatment effect it exists to de-noise.</p>
@@ -334,9 +387,9 @@ oof_r2(KFold(n_splits=5, shuffle=True, random_state=0))  # leaks -- and &quot;lo
   That is the danger in miniature: the metric improves, the science degrades, and nothing in the traceback tells you.</p>
 </section>
 
-<section>
+<section id="mev">
   <div class="step"><span class="num">06</span><div><p class="kicker">MEV channel</p>
-    <h2>Speed doesn’t earn MEV. It buys delay budget.</h2></div></div>
+    <h2>Speed doesn’t earn MEV. It buys delay budget.<a class="anchor" href="#mev">#</a></h2></div></div>
   <p>Measured from 7,073 slots of relay bid traces: the best bid available to a proposer roughly
   <b>doubles</b> across the slot, then <b>plateaus right after ~3.5 s</b> — builders stop bidding on a block that cannot beat
   the deadline, because such a block is worthless.</p>
@@ -350,9 +403,115 @@ oof_r2(KFold(n_splits=5, shuffle=True, random_state=0))  # leaks -- and &quot;lo
   kept apart.</p>
 </section>
 
-<section>
+<section id="operators">
+  <div class="step"><span class="num">07</span><div><p class="kicker">By operator · 6× · ETH @ $1,805.50</p>
+    <h2>All four channels, priced per operator<a class="anchor" href="#operators">#</a></h2></div></div>
+  <p>The same model, run for each of the seven named partners at the vendor's headline 6× speedup — plus a fourth
+  channel, <b>D: bandwidth</b>, which is different in kind: it is an <em>opex saving</em>, not revenue. RLNC-coded
+  pub/sub replaces gossipsub's redundant flooding (~4× duplication measured in the literature, ~1.2× residual for the
+  coded scheme), and it scales per <em>node</em>, not per validator. Its dollar value depends almost entirely on where
+  you host: at cloud egress prices ($0.09/GB) it is real money; on a bare-metal box with bundled transit ($0.001/GB)
+  it rounds to nothing. We price both and refuse to pick one.</p>
+  <figure><svg viewBox="0 0 720 356" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><rect x="118" y="12" width="9" height="9" fill="#d3dbe2" rx="2"/><text x="132.0" y="20.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">A attester</text><rect x="224" y="12" width="9" height="9" fill="#f0f2f4" rx="2"/><text x="238.0" y="20.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">B reorgs</text><rect x="316" y="12" width="9" height="9" fill="#b87cff" rx="2"/><text x="330.0" y="20.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">C MEV</text><rect x="387" y="12" width="9" height="9" fill="#8d9ca9" rx="2"/><text x="401.0" y="20.0" fill="#8d9ca9" font-size="10" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">D bandwidth</text><text x="108.0" y="58.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Kiln</text><rect x="118.0" y="42" width="12.4" height="26" fill="#d3dbe2" rx="1.5"/><rect x="130.4" y="42" width="1.0" height="26" fill="#f0f2f4" rx="1.5"/><rect x="131.1" y="42" width="146.9" height="26" fill="#b87cff" rx="1.5"/><rect x="278.0" y="42" width="3.4" height="26" fill="#8d9ca9" rx="1.5"/><text x="289.4" y="58.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$1.55M</text><text x="108.0" y="94.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">P2P.org</text><rect x="118.0" y="78" width="8.3" height="26" fill="#d3dbe2" rx="1.5"/><rect x="126.3" y="78" width="1.0" height="26" fill="#f0f2f4" rx="1.5"/><rect x="126.8" y="78" width="98.5" height="26" fill="#b87cff" rx="1.5"/><rect x="225.3" y="78" width="2.3" height="26" fill="#8d9ca9" rx="1.5"/><text x="235.6" y="94.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$1.04M</text><text x="108.0" y="130.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Everstake</text><rect x="118.0" y="114" width="7.6" height="26" fill="#d3dbe2" rx="1.5"/><rect x="125.6" y="114" width="1.0" height="26" fill="#f0f2f4" rx="1.5"/><rect x="126.1" y="114" width="90.6" height="26" fill="#b87cff" rx="1.5"/><rect x="216.7" y="114" width="2.1" height="26" fill="#8d9ca9" rx="1.5"/><text x="226.8" y="130.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0.96M</text><text x="108.0" y="166.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Ebunker</text><rect x="118.0" y="150" width="3.0" height="26" fill="#d3dbe2" rx="1.5"/><rect x="121.2" y="150" width="35.7" height="26" fill="#b87cff" rx="1.5"/><rect x="156.9" y="150" width="1.0" height="26" fill="#8d9ca9" rx="1.5"/><text x="165.7" y="166.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0.38M</text><text x="108.0" y="202.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">InfStones</text><rect x="118.0" y="186" width="3.0" height="26" fill="#d3dbe2" rx="1.5"/><rect x="121.2" y="186" width="35.6" height="26" fill="#b87cff" rx="1.5"/><rect x="156.7" y="186" width="1.0" height="26" fill="#8d9ca9" rx="1.5"/><text x="165.6" y="202.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0.37M</text><text x="108.0" y="238.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Blockdaemon</text><rect x="118.0" y="222" width="2.8" height="26" fill="#d3dbe2" rx="1.5"/><rect x="121.0" y="222" width="33.4" height="26" fill="#b87cff" rx="1.5"/><rect x="154.3" y="222" width="1.0" height="26" fill="#8d9ca9" rx="1.5"/><text x="163.1" y="238.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0.35M</text><text x="108.0" y="274.5" fill="#f0f2f4" font-size="11" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">Luganodes</text><rect x="118.0" y="258" width="1.4" height="26" fill="#d3dbe2" rx="1.5"/><rect x="119.4" y="258" width="16.2" height="26" fill="#b87cff" rx="1.5"/><text x="144.0" y="274.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0.17M</text><text x="108.0" y="310.5" fill="#b87cff" font-size="11" text-anchor="end" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">ALL SEVEN</text><rect x="118.0" y="294" width="38.5" height="26" fill="#d3dbe2" rx="1.5"/><rect x="156.5" y="294" width="2.1" height="26" fill="#f0f2f4" rx="1.5"/><rect x="158.6" y="294" width="456.9" height="26" fill="#b87cff" rx="1.5"/><rect x="615.5" y="294" width="10.6" height="26" fill="#8d9ca9" rx="1.5"/><text x="634.1" y="310.5" fill="#d3dbe2" font-size="10.5" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$4.82M</text></svg>
+    <figcaption>Annual modelled uplift by channel, 6× speedup, ETH at $1,805.50. The visual is the point: for every
+    operator, <b>~90% of the money is Channel C</b> — the MEV delay budget — which only pays if the operator re-tunes
+    its block-publication timing. D is drawn at cloud egress prices and is still barely visible.</figcaption></figure>
+  <table>
+    <tr><th>operator</th><th>vals</th><th>nodes*</th><th>A: attester</th><th>B: reorgs</th><th>C: MEV</th>
+        <th>D: bandwidth (cloud)</th><th>D (metal)</th><th>TOTAL</th><th>$/day</th></tr>
+    <tr>
+      <td>Kiln</td><td class="n">47,500</td><td class="n">95</td>
+      <td class="n">117,923</td><td class="n">6,402</td><td class="n">1,397,859</td>
+      <td class="n">32,478</td><td class="n">361</td>
+      <td class="n">$1,548,260</td><td class="n">4,242</td></tr><tr>
+      <td>P2P.org</td><td class="n">31,862</td><td class="n">64</td>
+      <td class="n">79,100</td><td class="n">4,294</td><td class="n">937,654</td>
+      <td class="n">21,880</td><td class="n">243</td>
+      <td class="n">$1,038,635</td><td class="n">2,846</td></tr><tr>
+      <td>Everstake</td><td class="n">29,300</td><td class="n">59</td>
+      <td class="n">72,740</td><td class="n">3,949</td><td class="n">862,258</td>
+      <td class="n">20,171</td><td class="n">224</td>
+      <td class="n">$955,169</td><td class="n">2,617</td></tr><tr>
+      <td>Ebunker</td><td class="n">11,537</td><td class="n">23</td>
+      <td class="n">28,642</td><td class="n">1,555</td><td class="n">339,518</td>
+      <td class="n">7,863</td><td class="n">87</td>
+      <td class="n">$376,023</td><td class="n">1,030</td></tr><tr>
+      <td>InfStones</td><td class="n">11,500</td><td class="n">23</td>
+      <td class="n">28,550</td><td class="n">1,550</td><td class="n">338,429</td>
+      <td class="n">7,863</td><td class="n">87</td>
+      <td class="n">$374,842</td><td class="n">1,027</td></tr><tr>
+      <td>Blockdaemon</td><td class="n">10,788</td><td class="n">22</td>
+      <td class="n">26,782</td><td class="n">1,454</td><td class="n">317,476</td>
+      <td class="n">7,521</td><td class="n">84</td>
+      <td class="n">$351,779</td><td class="n">964</td></tr><tr>
+      <td>Luganodes</td><td class="n">5,250</td><td class="n">10</td>
+      <td class="n">13,034</td><td class="n">708</td><td class="n">154,500</td>
+      <td class="n">3,419</td><td class="n">38</td>
+      <td class="n">$170,953</td><td class="n">468</td></tr><tr style="color:#f0f2f4;font-weight:600">
+      <td>ALL SEVEN</td><td class="n">147,737</td><td class="n">295</td>
+      <td class="n">366,770</td><td class="n">19,911</td><td class="n">4,347,694</td>
+      <td class="n">100,854</td><td class="n">1,121</td>
+      <td class="n">$4,815,318</td><td class="n">13,193</td></tr>
+  </table>
+  <p style="font-size:12.5px;color:#8d9ca9">* nodes ≈ validators / 500 keys per beacon node. Channel D assumes gossip
+  duplication 4.0× → 1.2× under RLNC on ~542 KB/slot of measured wire payload (block + 3.81 blobs), and should be
+  re-measured after PeerDAS ships. TOTAL = A + max(B, C) + D<sub>cloud</sub>; B and C are mutually exclusive uses of
+  the same saved milliseconds, D is additive because it spends none of them.</p>
+</section>
+
+<section id="adoption">
+  <div class="step"><span class="num">08</span><div><p class="kicker">Adoption sweep · 6× · $/validator/yr</p>
+    <h2>The edge is zero-sum — adoption has a sweet spot<a class="anchor" href="#adoption">#</a></h2></div></div>
+  <p>Channel C is not new money; it is <b>repriced auction share</b>. An adopter wins timing-game value partly
+  <em>from</em> proposers who didn't adopt. Sweep the adoption share and the structure falls out: per-adopter value
+  peaks at <b>40% adoption</b> ($20.82/validator/yr), total captured value peaks at <b>55%</b> (~$7.95M/yr), and at
+  <b>100% adoption the MEV edge is exactly zero</b> — everyone waits longer, nobody gains relative position, and all
+  that survives is the non-rivalrous A + B + D (~$3.30/validator/yr).</p>
+  <figure><svg viewBox="0 0 720 320" width="100%" preserveAspectRatio="xMidYMid meet" role="img"><line x1="56" y1="272.9" x2="704" y2="272.9" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="275.9" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$-30</text><line x1="56" y1="237.6" x2="704" y2="237.6" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="240.6" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$-20</text><line x1="56" y1="202.4" x2="704" y2="202.4" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="205.4" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$-10</text><line x1="56" y1="167.1" x2="704" y2="167.1" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="170.1" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$0</text><line x1="56" y1="131.8" x2="704" y2="131.8" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="134.8" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$10</text><line x1="56" y1="96.5" x2="704" y2="96.5" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="99.5" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$20</text><line x1="56" y1="61.2" x2="704" y2="61.2" stroke="#474e55" stroke-dasharray="2 4"/><text x="48.0" y="64.2" fill="#8d9ca9" font-size="9" text-anchor="end" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">$30</text><line x1="56" y1="167.1" x2="704" y2="167.1" stroke="#6a757f" stroke-width="1.2"/><text x="56.0" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">0%</text><text x="185.6" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">20%</text><text x="315.2" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">40%</text><text x="444.8" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">60%</text><text x="574.4" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">80%</text><text x="704.0" y="300.0" fill="#8d9ca9" font-size="9.5" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">100%</text><text x="380.0" y="314.0" fill="#8d9ca9" font-size="10" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">share of stake adopting the accelerator</text><line x1="164.9" y1="36" x2="164.9" y2="280" stroke="#6a757f" stroke-dasharray="3 4"/><text x="164.9" y="30.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">the 7 partners</text><line x1="315.2" y1="36" x2="315.2" y2="280" stroke="#6a757f" stroke-dasharray="3 4"/><text x="315.2" y="30.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">per-adopter peak</text><line x1="412.4" y1="36" x2="412.4" y2="280" stroke="#6a757f" stroke-dasharray="3 4"/><text x="412.4" y="30.0" fill="#8d9ca9" font-size="9" text-anchor="middle" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">total-value peak</text><polyline fill="none" stroke="#b87cff" stroke-width="2.4" stroke-linejoin="round" points="88.4,143.6 120.8,132.5 164.9,122.8 250.4,101.4 315.2,93.6 380.0,104.0 412.4,109.1 542.0,129.9 704.0,155.4"/><polyline fill="none" stroke="#d3dbe2" stroke-width="1.6" stroke-dasharray="5 4" stroke-linejoin="round" points="88.4,154.7 120.8,143.7 164.9,134.0 250.4,112.5 315.2,104.7 380.0,115.1 412.4,120.3 542.0,141.1 704.0,167.1"/><polyline fill="none" stroke="#8d9ca9" stroke-width="1.6" stroke-linejoin="round" points="88.4,167.7 120.8,169.7 164.9,172.9 250.4,190.4 315.2,208.6 380.0,219.0 412.4,224.2 542.0,245.0 704.0,270.9"/><circle cx="88.4" cy="143.6" r="2.6" fill="#b87cff"/><circle cx="120.8" cy="132.5" r="2.6" fill="#b87cff"/><circle cx="164.9" cy="122.8" r="2.6" fill="#b87cff"/><circle cx="250.4" cy="101.4" r="2.6" fill="#b87cff"/><circle cx="315.2" cy="93.6" r="2.6" fill="#b87cff"/><circle cx="380.0" cy="104.0" r="2.6" fill="#b87cff"/><circle cx="412.4" cy="109.1" r="2.6" fill="#b87cff"/><circle cx="542.0" cy="129.9" r="2.6" fill="#b87cff"/><circle cx="704.0" cy="155.4" r="2.6" fill="#b87cff"/><text x="323.2" y="85.6" fill="#b87cff" font-size="10" text-anchor="start" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">adopter total $/val/yr</text><text x="258.4" y="126.5" fill="#d3dbe2" font-size="9.5" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">C (MEV) only</text><text x="550.0" y="237.0" fill="#8d9ca9" font-size="9.5" text-anchor="start" font-weight="400" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">non-adopter P&amp;L</text></svg>
+    <figcaption>Modelled $/validator/yr at 6× as adoption scales. The purple line is an adopter's total; the dashed
+    silver line is the zero-sum MEV component driving its shape; the grey line is what a <em>non-adopter</em> loses as
+    others adopt. The seven named partners sit at ~17% — left of both peaks.</figcaption></figure>
+  <table>
+    <tr><th>adoption</th><th>validators</th><th>C (MEV)</th><th>TOTAL/adopter</th><th>non-adopter P&L</th>
+        <th>adopt-vs-not spread</th><th>all adopters $M/yr</th></tr>
+    <tr>
+      <td>5%</td><td class="n">44,027</td>
+      <td class="n">3.49</td><td class="n">$6.66</td><td class="n">-0.18</td>
+      <td class="n">6.16</td><td class="n">0.3</td></tr><tr>
+      <td>10%</td><td class="n">88,055</td>
+      <td class="n">6.62</td><td class="n">$9.79</td><td class="n">-0.74</td>
+      <td class="n">9.84</td><td class="n">0.9</td></tr><tr style="color:#f0f2f4;font-weight:600">
+      <td>16.8% — the 7 partners</td><td class="n">147,737</td>
+      <td class="n">9.38</td><td class="n">$12.54</td><td class="n">-1.66</td>
+      <td class="n">13.52</td><td class="n">1.7</td></tr><tr>
+      <td>30%</td><td class="n">264,165</td>
+      <td class="n">15.45</td><td class="n">$18.61</td><td class="n">-6.62</td>
+      <td class="n">24.55</td><td class="n">4.9</td></tr><tr style="color:#f0f2f4;font-weight:600">
+      <td>40% — per-adopter peak</td><td class="n">352,220</td>
+      <td class="n">17.66</td><td class="n">$20.82</td><td class="n">-11.77</td>
+      <td class="n">31.91</td><td class="n">7.3</td></tr><tr>
+      <td>50%</td><td class="n">440,275</td>
+      <td class="n">14.71</td><td class="n">$17.88</td><td class="n">-14.71</td>
+      <td class="n">31.91</td><td class="n">7.9</td></tr><tr style="color:#f0f2f4;font-weight:600">
+      <td>55% — total-value peak</td><td class="n">484,302</td>
+      <td class="n">13.24</td><td class="n">$16.41</td><td class="n">-16.19</td>
+      <td class="n">31.91</td><td class="n">7.95</td></tr><tr>
+      <td>75%</td><td class="n">660,412</td>
+      <td class="n">7.36</td><td class="n">$10.52</td><td class="n">-22.07</td>
+      <td class="n">31.91</td><td class="n">7</td></tr><tr>
+      <td>100%</td><td class="n">880,550</td>
+      <td class="n">0.00</td><td class="n">$3.30</td><td class="n">-29.43</td>
+      <td class="n">32.05</td><td class="n">2.9</td></tr>
+  </table>
+  <p>Two commercial readings, both honest: the <b>seller's</b> — early adopters capture the most per seat, and the
+  spread between adopting and not ($31.91/validator/yr at the plateau) is the real product, since past ~40% you buy it
+  to avoid losing rather than to win; and the <b>buyer's</b> — the pitch deck number assumes your competitors haven't
+  bought it yet.</p>
+</section>
+
+<section id="jd">
   <p class="kicker">The JD, answered</p>
-  <h2>Every “experience with X?” → “here’s where I used it on your problem”</h2>
+  <h2>Every “experience with X?” → “here’s where I used it on your problem”<a class="anchor" href="#jd">#</a></h2>
   <table>
     <tr><th>tool</th><th>step</th><th>what it actually did here</th></tr>
     <tr><td><code>DuckDB + Xatu</code></td><td class="n">01</td><td>Slot panel straight off public beacon parquet — no warehouse, no ETL.</td></tr><tr><td><code>statsmodels</code></td><td class="n">02</td><td>OLS DiD, cluster-robust covariance, placebo/null calibration.</td></tr><tr><td><code>linearmodels</code></td><td class="n">02</td><td>PanelOLS two-way fixed effects, entity-clustered.</td></tr><tr><td><code>LightGBM</code></td><td class="n">03</td><td>CUPAC control variate — out-of-fold outcome prediction.</td></tr><tr><td><code>scikit-learn</code></td><td class="n">03 · 05</td><td>TimeSeriesSplit CV; leakage demo vs shuffled KFold.</td></tr><tr><td><code>PyMC + ArviZ</code></td><td class="n">04</td><td>Hierarchical non-centred Student-t latency model; posterior-predictive p99.</td></tr><tr><td><code>pandas / NumPy</code></td><td class="n">all</td><td>Panel shaping; lagged network-condition features.</td></tr>
