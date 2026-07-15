@@ -1776,6 +1776,18 @@ def optimum_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "optimum.html")
 
 
+@app.get("/optimum/solana")
+def optimum_solana_page() -> FileResponse:
+    """The Solana propagation-economics page: validator revenue by source and the
+    modeled per-operator value of 6x faster block propagation.
+
+    Registered BEFORE the `/optimum` StaticFiles mount below so this exact path
+    wins over the mount's directory lookup. Served from the watcher's own static/
+    (regenerated from the solana-optimum revenue graph).
+    """
+    return FileResponse(STATIC_DIR / "solana.html")
+
+
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Assets for the report (figures, the preserved notebook): /optimum/<file>.
