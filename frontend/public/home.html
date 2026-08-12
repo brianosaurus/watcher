@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brian Woods</title>
+<style>
+  :root {
+    --paper: #faf8f4;
+    --card: #ffffff;
+    --ink: #22201c;
+    --soft: #5f5a52;
+    --faint: #8d877c;
+    --line: #e6e1d8;
+    --accent: #7d5bc6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 16px/1.65 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 72px 24px 96px; }
+  header { margin-bottom: 56px; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 44px; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 6px;
+  }
+  .role { font-size: 16px; color: var(--ink); margin: 0 0 4px; font-weight: 500; }
+  .edu { font-size: 14.5px; color: var(--soft); margin: 0 0 14px; }
+  .tagline { font-size: 17px; color: var(--soft); margin: 0 0 20px; max-width: 62ch; }
+  .contact { font-size: 14.5px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  .contact a { color: var(--soft); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+  .contact a:hover { color: var(--accent); border-color: var(--accent); }
+  h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px; font-weight: 400; margin: 52px 0 8px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  .section-note { font-size: 14.5px; color: var(--faint); margin: 0 0 22px; }
+  .project {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 10px; padding: 22px 24px; margin: 16px 0;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .project:hover { border-color: var(--accent); box-shadow: 0 2px 14px rgba(125, 91, 198, .08); }
+  .project h3 { margin: 0 0 2px; font-size: 17.5px; font-weight: 600; }
+  .project h3 a { color: inherit; text-decoration: none; }
+  .project h3 a:hover { color: var(--accent); }
+  .project h3 .url { font-weight: 400; font-size: 13px; color: var(--faint); margin-left: 10px; font-family: ui-monospace, Menlo, monospace; }
+  .project p { margin: 8px 0 0; font-size: 14.5px; color: var(--soft); }
+  .links { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+  .links a {
+    font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;
+  }
+  .links a:hover { text-decoration: underline; }
+  .links .status { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--faint); margin-left: auto; }
+  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--faint); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Brian Woods</h1>
+    <p class="role">Applied Data Scientist · Causal Inference &amp; Production ML</p>
+    <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
+    <p class="tagline">Causal inference on messy observational data, and the production systems
+    that serve what I model: live trading infrastructure, drift monitoring, and published research
+    with the negative results left in.</p>
+    <p class="contact">
+      <a href="mailto:me@brian.biz">me@brian.biz</a>
+      <a href="https://www.linkedin.com/in/brian-r-woods/">LinkedIn</a>
+      <a href="https://github.com/brianosaurus">GitHub</a>
+      <a href="/resume.pdf">Resume (PDF)</a>
+    </p>
+  </header>
+
+  <h2>Machine learning research</h2>
+  <p class="section-note">Independent studies, each built on public or self-collected data with the
+  full pipeline, tests, and negative results published.</p>
+
+  <div class="project">
+    <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span></h3>
+    <p>A causal study of block propagation latency and validator revenue, built from 216,000 mainnet
+    slots of public Xatu and MEV relay data. Identification comes from the protocol's 4-second
+    attestation deadline (a sharp regression discontinuity: correct head votes fall from 95.9% to
+    67.4% across it), and the value of a faster transport is priced through three channels, with
+    roughly 90% arriving via MEV timing rather than attestation rescue. Includes a 245-day analysis
+    of the vendor's only real deployment, which finds no adoption-shaped change in propagation:
+    a negative result reported as such.</p>
+    <div class="links">
+      <a href="/optimum">Read the study</a>
+      <a href="https://github.com/LeeroyChainkins/optimum">Code</a>
+      <span class="status">Ethereum · causal inference · econometrics</span>
+    </div>
+  </div>
+
+  <div class="project">
+    <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span></h3>
+    <p>Quantifies how block completion timing relates to Solana validator earnings, using two days
+    of on-chain data collected from my own Frankfurt node. Within-leader-window fixed effects
+    separate timing from leader quality; leader fees turn out to be the larger channel, at
+    +0.00372 SOL per 100 ms of earlier completion. A modeled 6x transport projects to roughly
+    $794k per year for the largest operators, with the confounds (single vantage, skip risk,
+    demand simultaneity) stated up front rather than discovered by the reader.</p>
+    <div class="links">
+      <a href="/optimum/solana">Read the study</a>
+      <a href="https://github.com/brianosaurus/solana-optimum">Code</a>
+      <span class="status">Solana · fixed effects · revenue modeling</span>
+    </div>
+  </div>
+
+  <div class="project">
+    <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span></h3>
+    <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
+    quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
+    Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
+    is an exchange rate between noisy and clean training hours. The experimental pipeline is
+    complete and verified by 213 tests; the fine-tunes await GPU compute, and the page says
+    exactly that instead of presenting placeholder results.</p>
+    <div class="links">
+      <a href="/david.ai">Read the study</a>
+      <a href="https://github.com/brianosaurus/audio-analysis">Code</a>
+      <span class="status">Speech recognition · experimental design</span>
+    </div>
+  </div>
+
+  <div class="project">
+    <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span></h3>
+    <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
+    prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
+    order, across 156 episodes on three procedurally generated task families. Every one of the six
+    supposedly neutral axes shifted scores, and detecting even a 3-point gap between models turns
+    out to require hundreds to thousands of instances. The conclusion is a cost estimate: faithful
+    comparisons cost one to two orders of magnitude more than they are typically given.</p>
+    <div class="links">
+      <a href="/deccan">Read the study</a>
+      <a href="https://github.com/brianosaurus/model-analysis">Code</a>
+      <span class="status">LLM agents · measurement · statistics</span>
+    </div>
+  </div>
+
+  <h2>Agent tooling</h2>
+
+  <div class="project">
+    <h3><a href="https://github.com/brianosaurus/agentic-workflow">Agentic Workflow</a><span class="url">github.com/brianosaurus/agentic-workflow</span></h3>
+    <p>A human-gated build pipeline for coding agents: Claude plans, implements, and verifies;
+    Codex reviews and audits adversarially in a read-only sandbox; a human approves at every gate.
+    The driver is a resumable Bash state machine with eight stages from requirements to final
+    audit. Each approval records the SHA-256 of the exact bytes reviewed, downstream stages refuse
+    to run if an approved document changes, and the next stage executes speculatively while you
+    read, adopted only if the document is byte-identical when you approve. Reviewer-owned
+    artifacts can never be edited by the implementing agent.</p>
+    <div class="links">
+      <a href="https://github.com/brianosaurus/agentic-workflow">Code</a>
+      <span class="status">LLM agents · pipeline tooling · open source</span>
+    </div>
+  </div>
+
+  <h2>Live systems</h2>
+
+  <div class="project">
+    <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
+    <p>The real-time operations dashboard for my automated Solana trading systems: running bots and
+    their positions, on-chain wallet balances, per-trade execution timing (build, submit, and
+    on-chain fill), slot-level latency, and live logs. This is the monitoring surface for the
+    infrastructure that the research above grew out of.</p>
+    <div class="links">
+      <a href="/leeroy">Open the dashboard</a>
+      <span class="status">Live dashboard · Solana · FastAPI + React</span>
+    </div>
+  </div>
+
+  <footer>Brian Woods · <a href="mailto:me@brian.biz">me@brian.biz</a> ·
+    <a href="https://www.linkedin.com/in/brian-r-woods/">LinkedIn</a> ·
+    <a href="https://github.com/brianosaurus">GitHub</a> ·
+    <a href="/resume.pdf">Resume</a></footer>
+</main>
+</body>
+</html>

@@ -16,7 +16,7 @@ from typing import Any
 
 import psutil
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 log = logging.getLogger("watcher")
@@ -1303,6 +1303,8 @@ _SECTION_CONFIGS = [
         "buy_swap_file": HOME / "memeorator" / "bc_real_trades.jsonl",
         # Global reset marker shared with the bot cards (see _RESET_FILE).
         "reset_file": _RESET_FILE,
+        # Scope counts/series to the bot's current run: entered/closed clear on restart.
+        "run_proc": "grad_lineage_live.py",
     },
 ]
 
@@ -1501,6 +1503,25 @@ def _bc_live_timings(log_path: Path, now: float, reset_ts: float | None = None,
     return out
 
 
+def _proc_start_time(pattern: str) -> float | None:
+    """Create-time of the newest running python process whose cmdline contains `pattern`.
+
+    Used to scope a trade section to the bot's CURRENT run: the trades .jsonl is
+    append-only and survives restarts, so without this the card's entered/closed
+    counts accumulate forever instead of clearing when the bot restarts.
+    """
+    newest: float | None = None
+    for proc in psutil.process_iter(["pid"]):
+        try:
+            cmd = proc.cmdline()
+            if cmd and "python" in cmd[0] and pattern in " ".join(cmd):
+                t = proc.create_time()
+                newest = t if newest is None else max(newest, t)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    return newest
+
+
 def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int = 40) -> dict[str, Any] | None:
     path: Path = cfg["path"]
     if not path.exists() or not path.is_file():
@@ -1528,10 +1549,15 @@ def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int 
         if cfg.get("dedupe_mint"):
             recs = list(by_mint.values())
         reset_ts = _read_reset_ts(cfg.get("reset_file"))
+        # Scope to the bot's CURRENT run: counts clear when the bot restarts, in
+        # addition to any manual reset marker. Falls back gracefully if the bot
+        # process isn't found (then only the reset marker applies).
+        run_ts = _proc_start_time(cfg["run_proc"]) if cfg.get("run_proc") else None
+        since_ts = max((t for t in (reset_ts, run_ts) if t is not None), default=None)
         trades = [
             x for x in recs
             if (entered_key is None or x.get(entered_key)) and x.get(pnl_key) is not None
-            and (reset_ts is None or (x.get("ts") or 0) >= reset_ts)
+            and (since_ts is None or (x.get("ts") or 0) >= since_ts)
         ]
         trades.sort(key=lambda x: x.get("ts") or 0)
         n = len(trades)
@@ -1553,8 +1579,8 @@ def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int 
         if wp:
             _chain_sol_balance(wp)  # take/refresh a sample this request
             wallet_series = _chain_balance_series(wp)
-            if reset_ts is not None:
-                wallet_series = [p for p in wallet_series if p["t"] >= reset_ts]
+            if since_ts is not None:
+                wallet_series = [p for p in wallet_series if p["t"] >= since_ts]
         out = {
             "kind": "trades",
             "title": cfg["title"],
@@ -1577,12 +1603,13 @@ def _trades_section(cfg: dict[str, Any], max_points: int = 200, tail_lines: int 
         # Per-trade timing (build/submit/confirm) + slot deltas from the bot's log.
         bsf = cfg.get("buy_swap_file")
         if bsf is not None:
-            out.update(_buy_swap_stats(bsf, reset_ts))
+            out.update(_buy_swap_stats(bsf, since_ts))
         tlog = cfg.get("timing_log")
         if tlog is not None:
-            out.update(_bc_live_timings(tlog, time.time(), reset_ts))
+            out.update(_bc_live_timings(tlog, time.time(), since_ts))
             # Currently-open positions = latest "open=N" the bot logged (live state, not
-            # reset-scoped). Closed = post-reset completed trades (each jsonl line is a sell).
+            # reset-scoped). Closed = completed trades since the current run started
+            # (each jsonl line is a sell) — cleared on bot restart via `run_proc`.
             out["open_trades"] = _bc_open_current_run(tlog)
             out.update(_bc_grad_stats(tlog))
         out["closed_trades"] = n
@@ -1755,11 +1782,30 @@ def healthz() -> dict[str, str]:
 
 @app.get("/")
 def root() -> FileResponse:
+    """Brian Woods' portfolio page (static, lives in frontend/public/home.html)."""
+    return FileResponse(STATIC_DIR / "home.html")
+
+
+@app.get("/resume.pdf")
+def resume_pdf() -> FileResponse:
+    """Brian's resume, one click from the portfolio hero (source: frontend/public/resume.pdf)."""
+    return FileResponse(STATIC_DIR / "resume.pdf", media_type="application/pdf",
+                        filename="Brian_Woods_Resume.pdf",
+                        content_disposition_type="inline")
+
+
+@app.get("/leeroy")
+def leeroy_dashboard() -> FileResponse:
+    """The Leeroy Chainkins bot dashboard (the React app), moved off the root.
+
+    The app's assets load absolutely from /static/ (vite base) and it fetches
+    /api/status by absolute path, so serving its index.html at any route works.
+    """
     return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/optimum")
-def optimum_page() -> FileResponse:
+def optimum_page():
     """The Optimum research report (the DiD/event study + counterfactual).
 
     Served from ~/optimum/site, which the research pipeline maintains — the page
@@ -1770,9 +1816,13 @@ def optimum_page() -> FileResponse:
     Falls back to the legacy static/optimum.html if the site directory hasn't
     been deployed on this host yet.
     """
+    # Redirect to the trailing-slash form: the report uses relative asset URLs,
+    # and a page served at /optimum (no slash) resolves them against the site
+    # ROOT (/dose_response.png -> 404, broken images). At /optimum/ they resolve
+    # under the mount. The StaticFiles mount below (html=True) serves index.html.
     idx = _OPTIMUM_SITE / "index.html"
     if idx.exists():
-        return FileResponse(idx)
+        return RedirectResponse(url="/optimum/", status_code=308)
     return FileResponse(STATIC_DIR / "optimum.html")
 
 

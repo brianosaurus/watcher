@@ -24,7 +24,7 @@ const SPEEDUPS = ['6x', '3x', '2x']
 const CHANNELS = [
   { key: 'a', label: 'Attester head votes', hint: 'receive-side: my nodes see blocks sooner' },
   { key: 'b', label: 'Proposer reorgs avoided', hint: 'my late blocks not orphaned' },
-  { key: 'c', label: 'MEV — delay budget', hint: 'publish later, catch a better bid' },
+  { key: 'c', label: 'MEV: delay budget', hint: 'publish later, catch a better bid' },
 ]
 
 function usd(n, dp = 2) {
@@ -144,7 +144,7 @@ export default function OptimumCard() {
   if (!data.available) {
     return (
       <div className="card opt-card">
-        <h2>Optimum — Ethereum propagation latency</h2>
+        <h2>Optimum: Ethereum propagation latency</h2>
         <div className="opt-warn">{data.disclaimer}</div>
         <div className="muted">tracker not running yet ({data.reason})</div>
       </div>
@@ -153,12 +153,12 @@ export default function OptimumCard() {
 
   return (
     <div className="card opt-card">
-      <h2>Optimum — what faster block propagation <em>would</em> be worth</h2>
+      <h2>Optimum: what faster block propagation would be worth</h2>
 
       {/* Not dismissible, not collapsible, not small print. A climbing number on a
           public page is read as revenue unless you say otherwise, loudly. */}
       <div className="opt-warn">
-        <strong>Modelled counterfactual — nobody is earning this.</strong>{' '}
+        <strong>Modelled counterfactual: nobody is earning this.</strong>{' '}
         {data.disclaimer}
       </div>
 
@@ -197,7 +197,7 @@ export default function OptimumCard() {
         {CHANNELS.map((c) => (
           <span key={c.key} className="opt-leg" title={c.hint}>
             <i className={`sw opt-${c.key}`} /> {c.label}
-            {totals ? ` — ${usd(totals[`usd_${c.key}`], 4)}` : ''}
+            {totals ? `: ${usd(totals[`usd_${c.key}`], 4)}` : ''}
           </span>
         ))}
       </div>
@@ -213,10 +213,10 @@ export default function OptimumCard() {
 
       <div className="opt-foot">
         Priced per real mainnet slot off the beacon head. Total ={' '}
-        <code>A + max(B, C)</code> — B and C are mutually exclusive uses of the same
+        <code>A + max(B, C)</code>; B and C are mutually exclusive uses of the same
         saved milliseconds, so they are never summed. ~93% of the value is channel C,
-        which pays <em>only</em> if the operator re-tunes its publication timing.
-        Late blocks are mostly late because they were <em>published</em> late, which
+        which pays only if the operator re-tunes its publication timing.
+        Late blocks are mostly late because they were published late, which
         no transport can fix: even an infinitely fast network rescues only ~80% of them.
       </div>
     </div>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import BotCard from './BotCard.jsx'
 import SectionCard from './SectionCard.jsx'
-import OptimumCard from './OptimumCard.jsx'
 import { fmtUsd, fmtPnlSol, fmtClock } from './format.js'
 
 const REFRESH_MS = 10_000
@@ -95,7 +94,6 @@ export default function App() {
 
       <main>
         <SummaryBar bots={bots} sections={sections} />
-        <OptimumCard />
         <section className="bots">
           {bots.length === 0 && sections.length === 0
             ? <div className="empty-state">no bots running</div>

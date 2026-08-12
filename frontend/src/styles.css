@@ -209,7 +209,6 @@ footer a:hover { text-decoration: underline; }
    page reads as revenue unless you say otherwise — and mump2p is not on mainnet,
    so nobody is earning any of this. Do not tone this down. */
 .opt-card { grid-column: 1 / -1; }
-.opt-card h2 em { font-style: italic; opacity: .85; }
 .opt-warn {
   background: #3a2a00; border: 1px solid #8a6d1f; color: #ffd479;
   padding: .6rem .75rem; border-radius: 6px; font-size: .8rem;

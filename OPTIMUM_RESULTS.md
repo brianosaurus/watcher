@@ -71,8 +71,10 @@ the network) sit **below** the sweet spot. The adopt-vs-not spread saturates at
 ## Hoodi: five designs, no treatment found
 
 mump2p's only deployment (announced 2025-06-24; first vendor results
-2025-09-23). Attestation tables are empty there until 2026, so designs use
-propagation physics.
+2025-09-23). Xatu's Hoodi attestation coverage only begins ~2025-10-26, after
+the deployment window, so there is no pre-adoption baseline for attestation
+outcomes and the designs use propagation physics instead. (Attestation data
+from Nov 2025 onward exists and is usable, but it post-dates the treatment.)
 
 | # | design | second difference | verdict |
 |---|---|---|---|
