@@ -65,7 +65,7 @@
 <main>
   <header>
     <h1>Brian Woods</h1>
-    <p class="role">Applied Data Scientist · Causal Inference &amp; Production ML</p>
+    <p class="role">Staff / Principal ML &amp; Systems Engineer</p>
     <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
     <p class="tagline">Causal inference on messy observational data, and the production systems
     that serve what I model: live trading infrastructure, drift monitoring, and published research
@@ -77,6 +77,65 @@
       <a href="/resume.pdf">Resume (PDF)</a>
     </p>
   </header>
+
+  <h2>Open source</h2>
+
+  <div class="project">
+    <h3><a href="https://github.com/vllm-project/vllm/pulls?q=is%3Apr+author%3Abrianosaurus">vLLM</a><span class="url">github.com/vllm-project/vllm</span></h3>
+    <p>Contributions to the LLM inference engine's correctness around configuration that silently
+    does nothing: authored fixes warning that speculative max_model_len and
+    use_prefill_decode_attention have no effect in code paths where users assume they do. Review
+    contributor on a KV-cache correctness fix, where the review surfaced a decode-path livelock
+    that became the fix's second commit.</p>
+    <div class="links">
+      <a href="https://github.com/vllm-project/vllm/pull/52557">PR #52557</a>
+      <a href="https://github.com/vllm-project/vllm/pull/52546">PR #52546</a>
+      <a href="https://github.com/vllm-project/vllm/pull/52530">Review: #52530</a>
+      <span class="status">LLM inference internals</span>
+    </div>
+  </div>
+
+  <div class="project">
+    <h3><a href="https://github.com/pydantic/pydantic-ai/issues?q=author%3Abrianosaurus">Pydantic AI</a><span class="url">github.com/pydantic/pydantic-ai</span></h3>
+    <p>Filed and fixed correctness issues in the agent framework's embeddings and AG-UI streaming
+    surfaces: EmbeddingSettings.dimensions claimed Bedrock support that the underlying Titan
+    models do not provide, and AGUIEventStream failed to emit agent-generated FileParts.</p>
+    <div class="links">
+      <a href="https://github.com/pydantic/pydantic-ai/issues/7508">Issue #7508</a>
+      <a href="https://github.com/pydantic/pydantic-ai/issues/7520">Issue #7520</a>
+      <a href="https://github.com/pydantic/pydantic-ai/pull/7521">PR #7521</a>
+      <span class="status">Agent frameworks</span>
+    </div>
+  </div>
+
+  <div class="project">
+    <h3><a href="https://github.com/brianosaurus/agentic-workflow">Agentic Workflow</a><span class="url">github.com/brianosaurus/agentic-workflow</span></h3>
+    <p>A human-gated build pipeline for coding agents: Claude plans, implements, and verifies;
+    Codex reviews and audits adversarially in a read-only sandbox; a human approves at every gate.
+    The driver is a resumable Bash state machine with eight stages from requirements to final
+    audit. Each approval records the SHA-256 of the exact bytes reviewed, downstream stages refuse
+    to run if an approved document changes, and the next stage executes speculatively while you
+    read, adopted only if the document is byte-identical when you approve. Reviewer-owned
+    artifacts can never be edited by the implementing agent.</p>
+    <div class="links">
+      <a href="https://github.com/brianosaurus/agentic-workflow">Code</a>
+      <span class="status">LLM agents · pipeline tooling · open source</span>
+    </div>
+  </div>
+
+  <h2>Live systems</h2>
+
+  <div class="project">
+    <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
+    <p>The real-time operations dashboard for my automated Solana trading systems: running bots and
+    their positions, on-chain wallet balances, per-trade execution timing (build, submit, and
+    on-chain fill), slot-level latency, and live logs. This is the monitoring surface for the
+    infrastructure that the research above grew out of.</p>
+    <div class="links">
+      <a href="/leeroy">Open the dashboard</a>
+      <span class="status">Live dashboard · Solana · FastAPI + React</span>
+    </div>
+  </div>
 
   <h2>Machine learning research</h2>
   <p class="section-note">Independent studies, each built on public or self-collected data with the
@@ -140,37 +199,6 @@
       <a href="/deccan">Read the study</a>
       <a href="https://github.com/brianosaurus/model-analysis">Code</a>
       <span class="status">LLM agents · measurement · statistics</span>
-    </div>
-  </div>
-
-  <h2>Agent tooling</h2>
-
-  <div class="project">
-    <h3><a href="https://github.com/brianosaurus/agentic-workflow">Agentic Workflow</a><span class="url">github.com/brianosaurus/agentic-workflow</span></h3>
-    <p>A human-gated build pipeline for coding agents: Claude plans, implements, and verifies;
-    Codex reviews and audits adversarially in a read-only sandbox; a human approves at every gate.
-    The driver is a resumable Bash state machine with eight stages from requirements to final
-    audit. Each approval records the SHA-256 of the exact bytes reviewed, downstream stages refuse
-    to run if an approved document changes, and the next stage executes speculatively while you
-    read, adopted only if the document is byte-identical when you approve. Reviewer-owned
-    artifacts can never be edited by the implementing agent.</p>
-    <div class="links">
-      <a href="https://github.com/brianosaurus/agentic-workflow">Code</a>
-      <span class="status">LLM agents · pipeline tooling · open source</span>
-    </div>
-  </div>
-
-  <h2>Live systems</h2>
-
-  <div class="project">
-    <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
-    <p>The real-time operations dashboard for my automated Solana trading systems: running bots and
-    their positions, on-chain wallet balances, per-trade execution timing (build, submit, and
-    on-chain fill), slot-level latency, and live logs. This is the monitoring surface for the
-    infrastructure that the research above grew out of.</p>
-    <div class="links">
-      <a href="/leeroy">Open the dashboard</a>
-      <span class="status">Live dashboard · Solana · FastAPI + React</span>
     </div>
   </div>
 
