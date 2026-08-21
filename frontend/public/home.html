@@ -1,211 +1,599 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brian Woods</title>
-<style>
-  :root {
-    --paper: #faf8f4;
-    --card: #ffffff;
-    --ink: #22201c;
-    --soft: #5f5a52;
-    --faint: #8d877c;
-    --line: #e6e1d8;
-    --accent: #7d5bc6;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brian Woods · Staff / Principal ML & Systems Engineer</title>
+  <meta name="description" content="Brian Woods: ML systems engineer working on causal inference, live trading infrastructure, drift monitoring, and published research with the negative results left in.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Brian Woods · Staff / Principal ML & Systems Engineer">
+  <meta property="og:description" content="Causal inference on messy observational data, and the production systems that serve what I model.">
+  <meta property="og:url" content="https://brian.biz/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="profile:first_name" content="Brian">
+  <meta property="profile:last_name" content="Woods">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Brian Woods · Staff / Principal ML & Systems Engineer">
+  <meta name="twitter:description" content="Causal inference on messy observational data, and the production systems that serve what I model.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Brian Woods",
+    "givenName": "Brian",
+    "familyName": "Woods",
+    "jobTitle": "Staff / Principal ML & Systems Engineer",
+    "description": "Causal inference on messy observational data, and the production systems that serve what I model.",
+    "url": "https://brian.biz/",
+    "email": "mailto:me@brian.biz",
+    "sameAs": [
+      "https://www.linkedin.com/in/brian-r-woods/",
+      "https://github.com/brianosaurus"
+    ],
+    "alumniOf": {
+      "@type": "EducationalOrganization",
+      "name": "UC Berkeley",
+      "sameAs": "https://www.berkeley.edu/"
+    },
+    "knowsAbout": [
+      "Machine Learning",
+      "Causal Inference",
+      "Distributed Systems",
+      "LLM Inference",
+      "Blockchain Systems",
+      "MEV"
+    ]
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font: 16px/1.65 "Helvetica Neue", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-  main { max-width: 760px; margin: 0 auto; padding: 72px 24px 96px; }
-  header { margin-bottom: 56px; }
-  h1 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 44px; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 6px;
-  }
-  .role { font-size: 16px; color: var(--ink); margin: 0 0 4px; font-weight: 500; }
-  .edu { font-size: 14.5px; color: var(--soft); margin: 0 0 14px; }
-  .tagline { font-size: 17px; color: var(--soft); margin: 0 0 20px; max-width: 62ch; }
-  .contact { font-size: 14.5px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 8px 22px; }
-  .contact a { color: var(--soft); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
-  .contact a:hover { color: var(--accent); border-color: var(--accent); }
-  h2 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 24px; font-weight: 400; margin: 52px 0 8px;
-    padding-bottom: 10px; border-bottom: 1px solid var(--line);
-  }
-  .section-note { font-size: 14.5px; color: var(--faint); margin: 0 0 22px; }
-  .project {
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: 10px; padding: 22px 24px; margin: 16px 0;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .project:hover { border-color: var(--accent); box-shadow: 0 2px 14px rgba(125, 91, 198, .08); }
-  .project h3 { margin: 0 0 2px; font-size: 17.5px; font-weight: 600; }
-  .project h3 a { color: inherit; text-decoration: none; }
-  .project h3 a:hover { color: var(--accent); }
-  .project h3 .url { font-weight: 400; font-size: 13px; color: var(--faint); margin-left: 10px; font-family: ui-monospace, Menlo, monospace; }
-  .project p { margin: 8px 0 0; font-size: 14.5px; color: var(--soft); }
-  .links { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
-  .links a {
-    font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none;
-  }
-  .links a:hover { text-decoration: underline; }
-  .links .status { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--faint); margin-left: auto; }
-  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line);
-    font-size: 13px; color: var(--faint); }
-  footer a { color: inherit; }
-</style>
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.92);
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --accent-dim: rgba(123, 44, 191, 0.09);
+      --good: #2a8f38;
+      --link: #0c7c9e;
+      --max-w: 980px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.65 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Background ambience */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.10), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.06), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(123, 44, 191, 0.06), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--accent);
+      color: #000;
+      padding: 8px 16px;
+      font-weight: 600;
+      text-decoration: none;
+      z-index: 100;
+      border-radius: 0 0 6px 0;
+    }
+    .skip-link:focus { top: 0; }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px 96px;
+    }
+
+    /* Header / hero */
+    header {
+      padding: 88px 0 48px;
+    }
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 16px;
+    }
+    h1 {
+      font-size: clamp(40px, 6vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    h1 .accent {
+      background: linear-gradient(96deg, #111111 30%, var(--accent) 110%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .role {
+      font-size: 18px;
+      color: var(--text-bright);
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+    .edu {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 22px;
+    }
+    .tagline {
+      font-size: clamp(17px, 2.2vw, 20px);
+      color: var(--text);
+      margin: 0 0 28px;
+      max-width: 76ch;
+      line-height: 1.6;
+    }
+
+    /* CTA buttons */
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .btn:hover { text-decoration: none; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      background: var(--accent);
+      color: #fafaf7;
+      box-shadow: 0 4px 20px rgba(123, 44, 191, 0.20);
+    }
+    .btn-primary:hover {
+      background: #b07ce6;
+      box-shadow: 0 6px 26px rgba(123, 44, 191, 0.25);
+    }
+    .btn-primary:focus-visible {
+      outline: 2px solid var(--text-bright);
+      outline-offset: 2px;
+    }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #f0f0ec;
+      border-color: #c0c0bc;
+    }
+
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      font-size: 14px;
+      color: var(--muted);
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+    .contact-row a { color: var(--muted); }
+    .contact-row a:hover { color: var(--link); }
+
+    /* Hero: featured study */
+    .featured {
+      display: block;
+      margin-top: 26px;
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      max-width: 76ch;
+      transition: border-color 0.15s ease;
+    }
+    .featured:hover {
+      text-decoration: none;
+      border-color: rgba(123, 44, 191, 0.45);
+    }
+    .featured .lab {
+      display: block;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .featured .title {
+      display: block;
+      color: var(--text-bright);
+      font-weight: 600;
+      font-size: 17px;
+    }
+    .featured .sub {
+      display: block;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.55;
+      margin-top: 3px;
+    }
+
+    /* Section headings */
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 64px 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-note {
+      font-size: 15px;
+      color: var(--muted);
+      margin: -8px 0 22px;
+      max-width: 76ch;
+    }
+
+    /* Project cards */
+    .projects {
+      display: grid;
+      gap: 16px;
+    }
+    article.card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    }
+    article.card:hover,
+    article.card:focus-within {
+      border-color: rgba(123, 44, 191, 0.45);
+      box-shadow: 0 4px 24px rgba(123, 44, 191, 0.07);
+      transform: translateY(-1px);
+    }
+    article.card h3 {
+      margin: 0 0 2px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    article.card h3 a { color: var(--text-bright); }
+    article.card h3 a:hover { color: var(--accent); text-decoration: none; }
+    article.card h3 .url {
+      font-weight: 400;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-left: 10px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+    article.card p {
+      margin: 10px 0 0;
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .links {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      align-items: baseline;
+    }
+    .links a {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--link);
+    }
+    .links a:hover { text-decoration: underline; }
+    .links .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-left: auto;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      header { padding: 56px 0 32px; }
+      main { padding: 0 18px 64px; }
+      article.card { padding: 18px; }
+      .btn { width: 100%; justify-content: center; }
+      .links .tag { margin-left: 0; }
+      footer { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Brian Woods</h1>
-    <p class="role">Staff / Principal ML &amp; Systems Engineer</p>
-    <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
-    <p class="tagline">Causal inference on messy observational data, and the production systems
-    that serve what I model: live trading infrastructure, drift monitoring, and published research
-    with the negative results left in.</p>
-    <p class="contact">
-      <a href="mailto:me@brian.biz">me@brian.biz</a>
-      <a href="https://www.linkedin.com/in/brian-r-woods/">LinkedIn</a>
-      <a href="https://github.com/brianosaurus">GitHub</a>
-      <a href="/resume.pdf">Resume (PDF)</a>
-    </p>
-  </header>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
 
-  <h2>Open source</h2>
+  <main id="main">
+    <header>
+      <p class="eyebrow">Portfolio</p>
+      <h1>Brian <span class="accent">Woods</span></h1>
+      <p class="role">Staff / Principal ML &amp; Systems Engineer</p>
+      <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
+      <p class="tagline">
+        I work on causal inference from messy observational data and the production systems
+        that serve what I model: live trading infrastructure, drift monitoring, and published
+        research with the negative results left in.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="mailto:me@brian.biz" aria-label="Email Brian Woods">me@brian.biz</a>
+        <a class="btn btn-secondary" href="/resume.pdf" aria-label="Download Brian Woods resume PDF">Resume (PDF)</a>
+      </div>
+      <p class="contact-row">
+        <a href="https://www.linkedin.com/in/brian-r-woods/" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://github.com/brianosaurus" rel="noopener noreferrer">GitHub</a>
+        <a href="/blog">Blog</a>
+      </p>
 
-  <div class="project">
-    <h3><a href="https://github.com/vllm-project/vllm/pulls?q=is%3Apr+author%3Abrianosaurus">vLLM</a><span class="url">github.com/vllm-project/vllm</span></h3>
-    <p>Contributions to the LLM inference engine's correctness around configuration that silently
-    does nothing: authored fixes warning that speculative max_model_len and
-    use_prefill_decode_attention have no effect in code paths where users assume they do. Review
-    contributor on a KV-cache correctness fix, where the review surfaced a decode-path livelock
-    that became the fix's second commit.</p>
-    <div class="links">
-      <a href="https://github.com/vllm-project/vllm/pull/52557">PR #52557</a>
-      <a href="https://github.com/vllm-project/vllm/pull/52546">PR #52546</a>
-      <a href="https://github.com/vllm-project/vllm/pull/52530">Review: #52530</a>
-      <span class="status">LLM inference internals</span>
-    </div>
-  </div>
+      <a class="featured" href="/h100">
+        <span class="lab">Latest study</span>
+        <span class="title">What is an H100 actually doing?</span>
+        <span class="sub">Five open models on one rented H100: measure the card's
+        real ceilings, predict each model against them, report the gap.</span>
+      </a>
+    </header>
 
-  <div class="project">
-    <h3><a href="https://github.com/pydantic/pydantic-ai/issues?q=author%3Abrianosaurus">Pydantic AI</a><span class="url">github.com/pydantic/pydantic-ai</span></h3>
-    <p>Filed and fixed correctness issues in the agent framework's embeddings and AG-UI streaming
-    surfaces: EmbeddingSettings.dimensions claimed Bedrock support that the underlying Titan
-    models do not provide, and AGUIEventStream failed to emit agent-generated FileParts.</p>
-    <div class="links">
-      <a href="https://github.com/pydantic/pydantic-ai/issues/7508">Issue #7508</a>
-      <a href="https://github.com/pydantic/pydantic-ai/issues/7520">Issue #7520</a>
-      <a href="https://github.com/pydantic/pydantic-ai/pull/7521">PR #7521</a>
-      <span class="status">Agent frameworks</span>
-    </div>
-  </div>
+    <section aria-labelledby="open-source-heading">
+      <h2 id="open-source-heading">Open source</h2>
+      <div class="projects">
+        <article class="card">
+          <h3><a href="https://github.com/vllm-project/vllm/pulls?q=is%3Apr+author%3Abrianosaurus" rel="noopener noreferrer">vLLM</a><span class="url">github.com/vllm-project/vllm</span></h3>
+          <p>Correctness work across the engine, scheduler, and KV-cache paths. Found and fixed a
+          prefix-cache bug in the V1 scheduler: when a session truncates tokens, a hash covering a
+          discarded token stays in <code>block_hashes</code>, so a later request whose prefix matches
+          the old tokens can be served KV computed from the new ones. The fix is one line in
+          <code>_update_request_as_session</code> with a regression test that fails without it
+          (#49377, #52806). Review contributor on a KV-cache capacity fix, where the review surfaced a
+          decode-path livelock that became the fix's second commit (#52530,
+          <a href="/blog/one-block-short/">writeup</a>), and on a stop-string leak traced through the
+          detokenizer and reasoning parser (#52599).</p>
+          <div class="links">
+            <a href="https://github.com/vllm-project/vllm/pull/52806" rel="noopener noreferrer">PR #52806</a>
+            <a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">Review: #52599</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">Review: #52530</a>
+            <a href="https://github.com/vllm-project/vllm/issues/49377" rel="noopener noreferrer">Issue #49377</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">PR #52557</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52546" rel="noopener noreferrer">PR #52546</a>
+            <span class="tag">LLM inference internals</span>
+          </div>
+        </article>
 
-  <div class="project">
-    <h3><a href="https://github.com/brianosaurus/agentic-workflow">Agentic Workflow</a><span class="url">github.com/brianosaurus/agentic-workflow</span></h3>
-    <p>A human-gated build pipeline for coding agents: Claude plans, implements, and verifies;
-    Codex reviews and audits adversarially in a read-only sandbox; a human approves at every gate.
-    The driver is a resumable Bash state machine with eight stages from requirements to final
-    audit. Each approval records the SHA-256 of the exact bytes reviewed, downstream stages refuse
-    to run if an approved document changes, and the next stage executes speculatively while you
-    read, adopted only if the document is byte-identical when you approve. Reviewer-owned
-    artifacts can never be edited by the implementing agent.</p>
-    <div class="links">
-      <a href="https://github.com/brianosaurus/agentic-workflow">Code</a>
-      <span class="status">LLM agents · pipeline tooling · open source</span>
-    </div>
-  </div>
+        <article class="card">
+          <h3><a href="/h100">H100 Roofline Study</a><span class="url">brian.biz/h100</span></h3>
+          <p>
+          Roofline study of five open models on an H100: measure the card's real ceilings,
+          predict each model's decode rate from its weights, report the gap. Qwen3-8B holds 81% of
+          measured bandwidth. A concurrency sweep against one server turned out to be running at a 98%
+          prefix cache hit rate, overstating throughput by 86%, filed upstream as vllm#52884.
+          </p>
+          <div class="links">
+            <a href="/h100">Study</a>
+            <a href="https://github.com/vllm-project/vllm/issues/52884" rel="noopener noreferrer">Issue #52884</a>
+            <span class="tag">GPU performance · roofline analysis · vLLM</span>
+          </div>
+        </article>
 
-  <h2>Live systems</h2>
+        <article class="card">
+          <h3><a href="https://github.com/pydantic/pydantic-ai/issues?q=author%3Abrianosaurus" rel="noopener noreferrer">Pydantic AI</a><span class="url">github.com/pydantic/pydantic-ai</span></h3>
+          <p>Filed and fixed correctness issues in the agent framework's embeddings and AG-UI streaming
+          surfaces: <code>EmbeddingSettings.dimensions</code> claimed Bedrock support that the underlying Titan
+          models do not provide, and <code>AGUIEventStream</code> failed to emit agent-generated <code>FilePart</code>s.</p>
+          <div class="links">
+            <a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">Issue #7508</a>
+            <a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">Issue #7520</a>
+            <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">PR #7521</a>
+            <span class="tag">Agent frameworks</span>
+          </div>
+        </article>
 
-  <div class="project">
-    <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
-    <p>The real-time operations dashboard for my automated Solana trading systems: running bots and
-    their positions, on-chain wallet balances, per-trade execution timing (build, submit, and
-    on-chain fill), slot-level latency, and live logs. This is the monitoring surface for the
-    infrastructure that the research above grew out of.</p>
-    <div class="links">
-      <a href="/leeroy">Open the dashboard</a>
-      <span class="status">Live dashboard · Solana · FastAPI + React</span>
-    </div>
-  </div>
+        <article class="card">
+          <h3><a href="https://github.com/brianosaurus/agentic-workflow" rel="noopener noreferrer">Agentic Workflow</a><span class="url">github.com/brianosaurus/agentic-workflow</span></h3>
+          <p>A human-gated coding-agent pipeline: Claude builds, Codex audits in a read-only
+          sandbox, and a human approves at every gate. Approvals are SHA-256-pinned to the artifact
+          that was reviewed, and reviewer output is immutable, so an approval cannot be quietly
+          reused for different work.</p>
+          <div class="links">
+            <a href="https://github.com/brianosaurus/agentic-workflow" rel="noopener noreferrer">Code</a>
+            <span class="tag">LLM agents · pipeline tooling · open source</span>
+          </div>
+        </article>
+      </div>
+    </section>
 
-  <h2>Machine learning research</h2>
-  <p class="section-note">Independent studies, each built on public or self-collected data with the
-  full pipeline, tests, and negative results published.</p>
+    <section aria-labelledby="live-systems-heading">
+      <h2 id="live-systems-heading">Live systems</h2>
+      <div class="projects">
+        <article class="card">
+          <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
+          <p>The operations dashboard for my automated Solana trading systems: running bots and their
+          positions, on-chain wallet balances, per-trade execution timing (build, submit, and on-chain
+          fill), slot-level latency, and live logs. It monitors the infrastructure the Solana research
+          below grew out of.</p>
+          <div class="links">
+            <a href="/leeroy">Open the dashboard</a>
+            <span class="tag">Live dashboard · Solana · FastAPI + React</span>
+          </div>
+        </article>
+      </div>
+    </section>
 
-  <div class="project">
-    <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span></h3>
-    <p>A causal study of block propagation latency and validator revenue, built from 216,000 mainnet
-    slots of public Xatu and MEV relay data. Identification comes from the protocol's 4-second
-    attestation deadline (a sharp regression discontinuity: correct head votes fall from 95.9% to
-    67.4% across it), and the value of a faster transport is priced through three channels, with
-    roughly 90% arriving via MEV timing rather than attestation rescue. Includes a 245-day analysis
-    of the vendor's only real deployment, which finds no adoption-shaped change in propagation:
-    a negative result reported as such.</p>
-    <div class="links">
-      <a href="/optimum">Read the study</a>
-      <a href="https://github.com/LeeroyChainkins/optimum">Code</a>
-      <span class="status">Ethereum · causal inference · econometrics</span>
-    </div>
-  </div>
+    <section aria-labelledby="research-heading">
+      <h2 id="research-heading">Machine learning research</h2>
+      <p class="section-note">Independent studies, each built on public or self-collected data with the
+      full pipeline, tests, and negative results published.</p>
+      <div class="projects">
+        <article class="card">
+          <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span></h3>
+          <p>A causal study of block propagation latency and validator revenue, built from 216,000 mainnet
+          slots of public Xatu and MEV relay data. Identification comes from the protocol's 4-second
+          attestation deadline (a sharp regression discontinuity: correct head votes fall from 95.9% to
+          67.4% across it), and the value of a faster transport is priced through three channels, with
+          roughly 90% arriving via MEV timing rather than attestation rescue. Includes a 245-day analysis
+          of the vendor's only real deployment, which finds no adoption-shaped change in
+          propagation.</p>
+          <div class="links">
+            <a href="/optimum">Read the study</a>
+            <a href="https://github.com/LeeroyChainkins/optimum" rel="noopener noreferrer">Code</a>
+            <span class="tag">Ethereum · causal inference · econometrics</span>
+          </div>
+        </article>
 
-  <div class="project">
-    <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span></h3>
-    <p>Quantifies how block completion timing relates to Solana validator earnings, using two days
-    of on-chain data collected from my own Frankfurt node. Within-leader-window fixed effects
-    separate timing from leader quality; leader fees turn out to be the larger channel, at
-    +0.00372 SOL per 100 ms of earlier completion. A modeled 6x transport projects to roughly
-    $794k per year for the largest operators, with the confounds (single vantage, skip risk,
-    demand simultaneity) stated up front rather than discovered by the reader.</p>
-    <div class="links">
-      <a href="/optimum/solana">Read the study</a>
-      <a href="https://github.com/brianosaurus/solana-optimum">Code</a>
-      <span class="status">Solana · fixed effects · revenue modeling</span>
-    </div>
-  </div>
+        <article class="card">
+          <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span></h3>
+          <p>Quantifies how block completion timing relates to Solana validator earnings, using two days
+          of on-chain data collected from my own Frankfurt node. Within-leader-window fixed effects
+          separate timing from leader quality; leader fees turn out to be the larger channel, at
+          +0.00372 SOL per 100 ms of earlier completion. A modeled 6x transport projects to roughly
+          $794k per year for the largest operators. The confounds are stated up front: a single
+          vantage point, skip risk, and simultaneity between timing and demand.</p>
+          <div class="links">
+            <a href="/optimum/solana">Read the study</a>
+            <a href="https://github.com/brianosaurus/solana-optimum" rel="noopener noreferrer">Code</a>
+            <span class="tag">Solana · fixed effects · revenue modeling</span>
+          </div>
+        </article>
 
-  <div class="project">
-    <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span></h3>
-    <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
-    quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
-    Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
-    is an exchange rate between noisy and clean training hours. The experimental pipeline is
-    complete and verified by 213 tests; the fine-tunes await GPU compute, and the page says
-    exactly that instead of presenting placeholder results.</p>
-    <div class="links">
-      <a href="/david.ai">Read the study</a>
-      <a href="https://github.com/brianosaurus/audio-analysis">Code</a>
-      <span class="status">Speech recognition · experimental design</span>
-    </div>
-  </div>
+        <article class="card">
+          <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span></h3>
+          <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
+          quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
+          Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
+          is an exchange rate between noisy and clean training hours. The experimental pipeline is
+          complete and verified by 213 tests. The fine-tunes await GPU compute, so the page reports
+          no results yet.</p>
+          <div class="links">
+            <a href="/david.ai">Read the study</a>
+            <a href="https://github.com/brianosaurus/audio-analysis" rel="noopener noreferrer">Code</a>
+            <span class="tag">Speech recognition · experimental design</span>
+          </div>
+        </article>
 
-  <div class="project">
-    <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span></h3>
-    <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
-    prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
-    order, across 156 episodes on three procedurally generated task families. Every one of the six
-    supposedly neutral axes shifted scores, and detecting even a 3-point gap between models turns
-    out to require hundreds to thousands of instances. The conclusion is a cost estimate: faithful
-    comparisons cost one to two orders of magnitude more than they are typically given.</p>
-    <div class="links">
-      <a href="/deccan">Read the study</a>
-      <a href="https://github.com/brianosaurus/model-analysis">Code</a>
-      <span class="status">LLM agents · measurement · statistics</span>
-    </div>
-  </div>
+        <article class="card">
+          <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span></h3>
+          <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
+          prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
+          order, across 156 episodes on three procedurally generated task families. All six axes shifted
+          scores, and detecting a 3-point gap between models turns out to require hundreds to thousands
+          of instances. The conclusion is a cost estimate: a comparison you can defend costs one to two
+          orders of magnitude more than these are usually given.</p>
+          <div class="links">
+            <a href="/deccan">Read the study</a>
+            <a href="https://github.com/brianosaurus/model-analysis" rel="noopener noreferrer">Code</a>
+            <span class="tag">LLM agents · measurement · statistics</span>
+          </div>
+        </article>
+      </div>
+    </section>
 
-  <footer>Brian Woods · <a href="mailto:me@brian.biz">me@brian.biz</a> ·
-    <a href="https://www.linkedin.com/in/brian-r-woods/">LinkedIn</a> ·
-    <a href="https://github.com/brianosaurus">GitHub</a> ·
-    <a href="/resume.pdf">Resume</a></footer>
-</main>
+    <footer>
+      <span>Brian Woods · <a href="mailto:me@brian.biz">me@brian.biz</a></span>
+      <span>
+        <a href="https://www.linkedin.com/in/brian-r-woods/" rel="noopener noreferrer">LinkedIn</a> ·
+        <a href="https://github.com/brianosaurus" rel="noopener noreferrer">GitHub</a> ·
+        <a href="/resume.pdf">Resume</a>
+      </span>
+    </footer>
+  </main>
 </body>
 </html>

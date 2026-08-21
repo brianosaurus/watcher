@@ -5,15 +5,15 @@ import {
 } from 'recharts'
 import { fmtChartTime } from './format.js'
 
-const GOOD = '#3fb950'
-const BAD = '#f85149'
-const BLUE = '#58a6ff'
-const MUTED = '#8b949e'
-const GRID = '#21262d'
-const PHASE = { confirm: '#e3633a', submit: '#d6a01e', build: '#3fb950', dispatch: '#8957e5' }
+const GOOD = '#2a8f38'
+const BAD = '#c92a2a'
+const BLUE = '#0c7c9e'
+const MUTED = '#5a5a55'
+const GRID = '#e0e0dc'
+const PHASE = { confirm: '#0c7c9e', submit: '#9e6b00', build: '#2a8f38', dispatch: '#7b2cbf' }
 
 const axisTick = { fontSize: 9, fill: MUTED }
-const tipStyle = { background: '#161b22', border: '1px solid #30363d', fontSize: 11, borderRadius: 4 }
+const tipStyle = { background: '#ffffff', border: '1px solid #d0d0cc', color: '#111111', fontSize: 11, borderRadius: 4 }
 
 function xAxis() {
   return (

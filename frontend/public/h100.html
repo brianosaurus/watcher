@@ -1,0 +1,331 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>What is an H100 actually doing? &middot; a roofline study of five models</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ :root { color-scheme: light; }
+ * { box-sizing:border-box; }
+ body { margin:0; background:#fafaf7; color:#111111; font-size:16px; line-height:1.62;
+   font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+ .bg { position:fixed; inset:0; z-index:0; pointer-events:none; background:
+   radial-gradient(58rem 40rem at 78% -8%, rgba(123,44,191,.10), transparent 60%),
+   radial-gradient(46rem 34rem at 8% 4%, rgba(20,32,31,.06), transparent 62%),
+   radial-gradient(60rem 46rem at 50% 108%, rgba(123,44,191,.06), transparent 60%); }
+ .grid { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.18;
+   background-image:linear-gradient(#d0d0cc 1px,transparent 1px),linear-gradient(90deg,#d0d0cc 1px,transparent 1px);
+   background-size:64px 64px;
+   -webkit-mask-image:radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+   mask-image:radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%); }
+ main { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:0 24px 96px; }
+ header { padding:88px 0 40px; }
+ .eyebrow { font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.16em;
+   text-transform:uppercase; color:#7b2cbf; margin:0 0 18px; }
+ h1 { font-size:clamp(34px,5.2vw,54px); line-height:1.06; letter-spacing:-.025em; margin:0 0 22px; font-weight:600; }
+ h1 .g { background:linear-gradient(96deg,#111111 30%,#7b2cbf); -webkit-background-clip:text; background-clip:text; color:transparent; }
+ .lede { font-size:19px; color:#2a2a2a; max-width:74ch; margin:0 0 14px; }
+ .by { font-size:13px; color:#5a5a55; margin-top:26px; } .by a { color:#5a5a55; }
+ .framing { background:#ffffff; border:1px solid #7b2cbf; border-radius:10px; padding:12px 16px;
+   font-size:13.5px; color:#2a2a2a; line-height:1.55; margin:0 0 34px; }
+ .framing b { color:#111111; } .framing a { color:#7b2cbf; }
+ .headline { display:block; margin:28px 0 0; background:#ffffff; border:1px solid #d0d0cc;
+   border-left:3px solid #7b2cbf; border-radius:10px; padding:14px 18px; text-decoration:none;
+   transition:border-color .15s; }
+ .headline:hover { border-color:#7b2cbf; }
+ .headline .hl-num { font-size:30px; font-weight:600; letter-spacing:-.02em; color:#111111; }
+ .headline .hl-txt { font-size:13.5px; color:#5a5a55; line-height:1.55; margin-top:4px; }
+ .chain { padding-left:22px; margin:14px 0; }
+ .chain li { color:#2a2a2a; max-width:76ch; margin:10px 0; }
+ .chain li::marker { color:#7b2cbf; font-weight:600; }
+ h2 { font-size:26px; letter-spacing:-.02em; margin:0 0 6px; font-weight:600; }
+ h3 { font-size:16px; margin:28px 0 8px; font-weight:600; }
+ p { color:#2a2a2a; max-width:76ch; } a { color:#7b2cbf; }
+ code { font-family:ui-monospace,Menlo,monospace; }
+ section { padding:38px 0; border-top:1px solid #d0d0cc; scroll-margin-top:20px; }
+ html { scroll-behavior:smooth; }
+ h2 .anchor { margin-left:10px; font-size:16px; font-weight:400; color:#5a5a55;
+   text-decoration:none; opacity:0; transition:opacity .15s; }
+ section:hover h2 .anchor, h2 .anchor:focus { opacity:1; }
+ .toc { display:flex; flex-wrap:wrap; gap:7px 16px; margin-top:30px;
+   font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.04em; }
+ .toc a { color:#5a5a55; text-decoration:none; } .toc a:hover { color:#7b2cbf; }
+ .step { display:flex; gap:14px; align-items:baseline; margin-bottom:14px; }
+ .num { font-family:ui-monospace,monospace; font-size:12px; color:#7b2cbf; border:1px solid #7b2cbf;
+   border-radius:999px; padding:3px 10px; flex:none; }
+ .kicker { font-family:ui-monospace,monospace; font-size:11px; letter-spacing:.14em;
+   text-transform:uppercase; color:#5a5a55; margin:0 0 4px; }
+ .code { background:#ffffff; border:1px solid #d0d0cc; border-radius:10px; padding:16px 18px;
+   overflow-x:auto; font-size:12.5px; line-height:1.66; color:#2a2a2a; margin:16px 0; }
+ .code code { white-space:pre; }
+ .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(212px,1fr)); gap:14px; margin:22px 0; }
+ .card { background:#ffffff; border:1px solid #d0d0cc; border-radius:12px; padding:18px; }
+ .card .lab { font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.13em;
+   text-transform:uppercase; color:#7b2cbf; }
+ .card .big { font-size:28px; font-weight:600; letter-spacing:-.02em; margin:8px 0 2px; }
+ .card .sub { font-size:12.5px; color:#5a5a55; line-height:1.5; }
+ figure { margin:22px 0; background:#ffffff; border:1px solid #d0d0cc; border-radius:12px; padding:18px 16px 10px; }
+ figcaption { font-size:12.5px; color:#5a5a55; margin-top:10px; padding:0 4px; }
+ table { width:100%; border-collapse:collapse; font-size:13.5px; margin:16px 0; display:block; overflow-x:auto; }
+ th,td { text-align:left; padding:9px 12px; border-bottom:1px solid #d0d0cc; white-space:nowrap; }
+ th { font-family:ui-monospace,monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+   color:#5a5a55; font-weight:500; }
+ td.n { font-family:ui-monospace,monospace; text-align:right; }
+ .warn { border-left:2px solid #7b2cbf; padding:2px 0 2px 16px; margin:18px 0; color:#2a2a2a; }
+ .warn b { color:#111111; }
+ footer { border-top:1px solid #d0d0cc; padding:30px 0 0; color:#5a5a55; font-size:13px; }
+</style></head><body>
+<div class="bg"></div><div class="grid"></div><main>
+<header>
+  <div class="framing">An <b>independent performance study by Brian Woods</b>, run on rented H100 SXM
+  hardware. Every number below was measured on that hardware. Vendor datasheet figures appear only where
+  labelled, and only to be contradicted.</div>
+  <p class="eyebrow">NVIDIA H100 SXM &middot; vLLM 0.27.1 &middot; five open models</p>
+  <h1>What is an H100<br><span class="g">actually doing?</span></h1>
+  <p class="lede">Inference benchmarks report tokens per second. On its own that number says nothing
+  about whether the machine is working hard, because it has no ceiling attached to it.</p>
+  <p class="lede">The useful question is what fraction of the hardware's real limit you reach, and which
+  limit you are against. This study measures those limits on the card itself, predicts each model from
+  first principles, and reports where the predictions failed.</p>
+  <a class="headline" href="#predict">
+    <div class="hl-num">81&thinsp;% of the bandwidth ceiling</div>
+    <div class="hl-txt">Qwen3-8B decode at batch 1, against a bandwidth limit measured on the card rather
+    than quoted, and it holds near that level from batch 1 to batch 128.</div>
+  </a>
+  <div class="toc">
+    <a href="#ceiling">01 the ceiling</a><a href="#predict">02 predict, then measure</a>
+    <a href="#overhead">03 the residual</a><a href="#small">04 small is not fast</a>
+    <a href="#moe">05 experts</a><a href="#mla">06 a different ceiling</a>
+    <a href="#prefill">07 measuring the cache</a><a href="#wrong">08 three knobs</a>
+    <a href="#method">09 method &amp; limits</a>
+  </div>
+</header>
+
+<section id="ceiling"><p class="kicker">01</p>
+<h2>The spec sheet is not the ceiling<a class="anchor" href="#ceiling">#</a></h2>
+<p>Every roofline needs a denominator. Using the vendor's peak figures is the most common way to make a
+performance analysis quietly wrong, because those figures assume conditions the card will not hold. So
+the first measurement is of the machine itself.</p>
+<div class="cards">
+  <div class="card"><div class="lab">HBM bandwidth</div><div class="big">3.04 TB/s</div>
+    <div class="sub">91&thinsp;% of the 3.35 TB/s spec figure</div></div>
+  <div class="card"><div class="lab">BF16 dense GEMM</div><div class="big">786 TFLOP/s</div>
+    <div class="sub">79&thinsp;% of the 989 TFLOP/s spec figure</div></div>
+  <div class="card"><div class="lab">FP8 GEMM</div><div class="big">1352 TFLOP/s</div>
+    <div class="sub">1.72&times; the BF16 rate</div></div>
+  <div class="card"><div class="lab">Ridge point</div><div class="big">258</div>
+    <div class="sub">FLOP per byte. Below this, work is memory bound</div></div>
+</div>
+<p>Rooflining against 989 TFLOP/s overstates compute headroom by more than a fifth. The ridge point
+matters as much: at 258 FLOP per byte, a decode step needs arithmetic intensity above that to be
+compute bound, and single sequence decode is nowhere near it. That number sets up everything below.</p>
+<div class="warn"><b>Conditions.</b> Full 132-SM SXM parts, boost held at 1980 MHz, well inside the 700 W
+limit, nothing thermally throttled. Clock locking is not permitted inside the container, so figures are
+best-of-N. Two physical H100s were used across the study and their measured peaks differed by about
+1&thinsp;%, which is the floor on cross-card comparison here.</div>
+</section>
+
+<section id="predict"><p class="kicker">02</p>
+<h2>Predict first, then measure. The gap is the finding<a class="anchor" href="#predict">#</a></h2>
+<p>At batch 1 a decode step is a weight streaming problem. The model reads every weight to produce one
+token, so the ceiling follows from the two numbers above.</p>
+<div class="code"><code>Qwen3-8B weights on disk   = 15.26 GiB   (measured, not a parameter count times an assumed dtype)
+measured HBM bandwidth     = 3.044 TB/s
+predicted decode ceiling   = 3.044e12 / 16.38e9 = 185.8 tok/s
+predicted floor per token  = 5.38 ms</code></div>
+<p>Measured: <b>149.9 tok/s</b> at 6.63 ms per token, which is
+<b>81.1&thinsp;% of the bandwidth ceiling</b>. The shortfall is about
+1.25&nbsp;ms per step that weight streaming does not explain. KV traffic cannot
+account for it either, since at batch 1 it is under 1&thinsp;% of bytes moved.</p>
+<figure><svg viewBox="0 0 700 232" width="100%" role="img"><line x1="52" y1="198.0" x2="686" y2="198.0" stroke="#d0d0cc"/><text x="44" y="202.0" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">0%</text><line x1="52" y1="161.2" x2="686" y2="161.2" stroke="#d0d0cc"/><text x="44" y="165.2" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">20%</text><line x1="52" y1="124.4" x2="686" y2="124.4" stroke="#d0d0cc"/><text x="44" y="128.4" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">40%</text><line x1="52" y1="87.6" x2="686" y2="87.6" stroke="#d0d0cc"/><text x="44" y="91.6" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">60%</text><line x1="52" y1="50.8" x2="686" y2="50.8" stroke="#d0d0cc"/><text x="44" y="54.8" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">80%</text><line x1="52" y1="14.0" x2="686" y2="14.0" stroke="#d0d0cc"/><text x="44" y="18.0" fill="#5a5a55" font-size="10" text-anchor="end" font-family="ui-monospace,monospace">100%</text><text x="52.0" y="220" fill="#5a5a55" font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">1</text><text x="263.3" y="220" fill="#5a5a55" font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">8</text><text x="474.7" y="220" fill="#5a5a55" font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">64</text><text x="686.0" y="220" fill="#5a5a55" font-size="10" text-anchor="middle" font-family="ui-monospace,monospace">128</text><path d="M52.0,48.7 L263.3,51.1 L474.7,55.2 L686.0,54.6" fill="none" stroke="#2a8f38" stroke-width="2"/><circle cx="52.0" cy="48.7" r="3" fill="#2a8f38"/><circle cx="263.3" cy="51.1" r="3" fill="#2a8f38"/><circle cx="474.7" cy="55.2" r="3" fill="#2a8f38"/><circle cx="686.0" cy="54.6" r="3" fill="#2a8f38"/><path d="M52.0,60.1 L263.3,71.2 L474.7,103.2 L686.0,139.6" fill="none" stroke="#7b2cbf" stroke-width="2" stroke-dasharray="5 4"/><circle cx="52.0" cy="60.1" r="3" fill="#7b2cbf"/><circle cx="263.3" cy="71.2" r="3" fill="#7b2cbf"/><circle cx="474.7" cy="103.2" r="3" fill="#7b2cbf"/><circle cx="686.0" cy="139.6" r="3" fill="#7b2cbf"/><text x="12" y="22" fill="#5a5a55" font-size="10" font-family="ui-monospace,monospace">MBU %</text></svg><div style="display:flex;gap:16px;margin-top:6px;font-size:11.5px;font-family:ui-monospace,monospace;color:#5a5a55"><span><span style="display:inline-block;width:10px;height:2px;background:#2a8f38;vertical-align:middle;margin-right:6px"></span>decode isolated (128 in / 1024 out)</span><span><span style="display:inline-block;width:10px;height:2px;background:#7b2cbf;vertical-align:middle;margin-right:6px"></span>round one shape (1024 in / 128 out)</span></div>
+<figcaption>Bandwidth utilisation against concurrency for Qwen3-8B. Isolating decode with a short prompt
+and long output holds near 80&thinsp;% throughout. The dashed line is the same server measured with a
+1024 token prompt and 128 output tokens, where most of the work is prefill and a decode roofline no
+longer describes what the machine is doing.</figcaption></figure>
+<table><thead><tr><th>concurrency</th><th>output tok/s</th><th>MBU</th><th>TPOT ms</th></tr></thead>
+<tbody><tr><td class="n">1</td><td class="n">150</td><td class="n">81.1%</td><td class="n">6.63</td></tr><tr><td class="n">8</td><td class="n">1135</td><td class="n">79.8%</td><td class="n">6.97</td></tr><tr><td class="n">64</td><td class="n">6742</td><td class="n">77.6%</td><td class="n">9.27</td></tr><tr><td class="n">128</td><td class="n">10670</td><td class="n">77.9%</td><td class="n">11.69</td></tr></tbody></table>
+<p>vLLM holds 78 to 81&thinsp;% of memory bandwidth from batch 1 to batch 128 while throughput rises
+71-fold. Per-token latency degrades gently, 6.63 to
+11.69&nbsp;ms, which is the batching trade working as intended.</p>
+<div class="warn"><b>Workload shape decides which ceiling you measure.</b> The dashed line is the same
+model on the same server. A 1024 in / 128 out shape is 89&thinsp;% prefill by token count, so
+the decode roofline understates it badly. If a benchmark does not state its input and output lengths, its
+utilisation numbers cannot be interpreted.</div>
+</section>
+
+<section id="overhead"><p class="kicker">03</p>
+<h2>The residual is mostly kernel launches<a class="anchor" href="#overhead">#</a></h2>
+<p>A residual is only interesting if you can attribute it. CUDA graphs exist to remove per-kernel launch
+overhead by replaying a captured graph, so disabling them should expose exactly that cost.</p>
+<div class="cards">
+  <div class="card"><div class="lab">batch 1, graphs on</div><div class="big">137 tok/s</div>
+    <div class="sub">1.43 ms residual per step</div></div>
+  <div class="card"><div class="lab">batch 1, eager</div><div class="big">70 tok/s</div>
+    <div class="sub">8.61 ms residual per step</div></div>
+  <div class="card"><div class="lab">attributed to launches</div><div class="big">7.18 ms</div>
+    <div class="sub">per decode step, recovered by graph replay</div></div>
+</div>
+<p>Running eager halves throughput at batch 1. So roughly
+7.2&nbsp;ms per step is launch
+overhead that graphs already remove, and what remains with graphs on is attention, sampling and
+scheduling. The penalty shrinks to 34&thinsp;%
+at concurrency 64, because fixed per-step costs amortise across more tokens. That is also why small
+models suffer most from them.</p>
+</section>
+
+<section id="small"><p class="kicker">04</p>
+<h2>A small model is not a fast model, it is an idle GPU<a class="anchor" href="#small">#</a></h2>
+<p>Comparing all five models at batch 1, where decode dominates elapsed time and the roofline applies
+cleanly:</p>
+<table><thead><tr><th>model</th><th>architecture</th><th>weights GiB</th><th>active params</th>
+<th>KV MiB/1k tok</th><th>tok/s</th><th>MBU</th></tr></thead><tbody><tr><td>Qwen3-0.6B</td><td>GQA</td><td class="n">1.4</td><td class="n">0.75B</td><td class="n">112</td><td class="n">524</td><td class="n">28%</td></tr><tr><td>Qwen3-8B</td><td>GQA</td><td class="n">15.3</td><td class="n">8.19B</td><td class="n">144</td><td class="n">137</td><td class="n">75%</td></tr><tr><td>Qwen3-14B</td><td>GQA</td><td class="n">27.5</td><td class="n">14.77B</td><td class="n">160</td><td class="n">83</td><td class="n">81%</td></tr><tr><td>OLMoE-1B-7B</td><td>GQA/MoE</td><td class="n">12.9</td><td class="n">0.86B</td><td class="n">128</td><td class="n">483</td><td class="n">43%</td></tr><tr><td>DeepSeek-V2-Lite</td><td>MLA/MoE</td><td class="n">29.3</td><td class="n">1.47B</td><td class="n">30</td><td class="n">243</td><td class="n">43%</td></tr></tbody></table>
+<p>Qwen3-0.6B produces the highest token rate of any model here and the worst utilisation. Its weights
+are only 1.4 GiB, so streaming them takes less time than the fixed
+per-step cost measured in section three. The roofline therefore <em>under</em>-predicts it: the model is
+not bandwidth bound, it is overhead bound.</p>
+<p>The practical reading is that a high tokens-per-second figure on a small model is not evidence the
+hardware is being used. It is often evidence a cheaper card would do the same work.</p>
+</section>
+
+<section id="moe"><p class="kicker">05</p>
+<h2>A mixture of experts gets <em>less</em> efficient as you load it<a class="anchor" href="#moe">#</a></h2>
+<p>A mixture of experts reads only the experts its tokens route to. At batch 1, DeepSeek-V2-Lite touches
+6 of 64. The subtlety is that at batch <em>B</em> different tokens route to different experts, so the
+union grows. Under uniform routing the expected number of distinct experts touched is
+<code>E &middot; (1 - (1 - k/E)<sup>B</sup>)</code>.</p>
+<table><thead><tr><th>batch</th><th>experts touched</th><th>GiB read per step</th><th>of total weights</th></tr></thead>
+<tbody><tr><td class="n">1</td><td class="n">6.0 / 64</td><td class="n">4.96</td><td class="n">16.9%</td></tr>
+<tr><td class="n">8</td><td class="n">34.9 / 64</td><td class="n">17.06</td><td class="n">58.3%</td></tr>
+<tr><td class="n">64</td><td class="n">63.9 / 64</td><td class="n">29.21</td><td class="n">99.8%</td></tr></tbody></table>
+<p>Effective weight traffic grows roughly sixfold from batch 1 to batch 64. A dense model gets batching
+amortisation for free, because one weight read serves every sequence in the batch. A mixture of experts
+does not: past a certain batch size you are reading the whole model again and the sparsity advantage is
+gone. Any capacity plan that prices a MoE on its active parameter count is describing the small batch
+case only.</p>
+<div class="warn"><b>Assumption, stated plainly.</b> The union formula assumes uniform routing. Real
+routers are skewed and load imbalanced, so the true count at low batch is likely higher. This is a
+first-order correction, not a measurement of routing behaviour. It is worth getting right: charging
+every step a full weight read, as a dense model would, produces bandwidth utilisation above
+100&thinsp;%, which is a useful signal that the model is wrong.</div>
+</section>
+
+<section id="mla"><p class="kicker">06</p>
+<h2>MLA moves a different ceiling than the one people quote<a class="anchor" href="#mla">#</a></h2>
+<p>DeepSeek-V2-Lite uses multi-head latent attention, storing a compressed latent per token instead of
+full keys and values per KV head. It uses
+4.7&times; less KV per
+token than Qwen3-8B, 30.4 MiB per 1k tokens against
+144.</p>
+<p>It is worth being precise about what that buys, because it is routinely overstated. It does not make
+decode faster at low concurrency, where weight streaming dominates and KV is around 1&thinsp;% of bytes
+moved. It raises how many long sequences fit at once, and delays the point where KV traffic crowds out
+weight traffic. Those are ceilings on scale, not on latency.</p>
+</section>
+
+<section id="prefill"><p class="kicker">07</p>
+<h2>The benchmark will measure its own cache if you let it<a class="anchor" href="#prefill">#</a></h2>
+<p>vLLM's random dataset is seeded deterministically, so repeated invocations send the same prompts. The
+usual way to build a latency curve is one server and a ladder of benchmark runs at rising concurrency,
+and prefix caching is on by default. Every point after the first therefore re-sends prompts whose KV
+blocks are already resident.</p>
+<p>Two arms on the same card, same model, request count fixed at 256 per point, prefix caching enabled in
+both. The only difference is whether the cache is reset between points:</p>
+<table><thead><tr><th>concurrency</th><th>ladder hit rate</th><th>tok/s</th><th>reset hit rate</th>
+<th>tok/s</th><th>inflation</th></tr></thead><tbody><tr><td class="n">1</td><td class="n">0.4%</td><td class="n">138</td><td class="n">0.4%</td><td class="n">141</td><td class="n" style="color:#5a5a55">-2.0%</td></tr><tr><td class="n">8</td><td class="n">98.4%</td><td class="n">1007</td><td class="n">0.4%</td><td class="n">907</td><td class="n" style="color:#d29922">+11.1%</td></tr><tr><td class="n">32</td><td class="n">98.4%</td><td class="n">3303</td><td class="n">0.4%</td><td class="n">2205</td><td class="n" style="color:#d29922">+49.8%</td></tr><tr><td class="n">64</td><td class="n">98.4%</td><td class="n">5288</td><td class="n">0.4%</td><td class="n">2844</td><td class="n" style="color:#d29922">+85.9%</td></tr></tbody></table>
+<p>From the second point onward the ladder runs at a <b>98.4&thinsp;% prefix cache hit rate</b> and
+reports up to <b>86&thinsp;% more throughput</b> than the same server and workload measured cold. A
+second pass reproduces it. Concurrency 1 is unaffected, which is what the roofline predicts: at batch 1
+decode is weight streaming bound, so a KV hit buys almost nothing.</p>
+<p>This is not a small correction to apply afterwards. It is larger than most effects anyone would be
+trying to measure, and it grows with concurrency, so it distorts the shape of a scaling curve and not
+just its height. Reported upstream as
+<a href="https://github.com/vllm-project/vllm/issues/52884">vllm#52884</a>. vLLM's own
+<code>bench sweep serve</code> already resets caches between runs, so the supported sweep path is not
+affected; the exposure is hand-rolled ladders built from repeated <code>bench serve</code> calls.</p>
+<div class="warn"><b>Everything on this page is measured with the cache reset before every run</b>, the
+request count held fixed, and each point repeated. An earlier pass without those controls produced a
+throughput knee, an FP8 regression and a prefix caching effect, none of which exist.</div>
+</section>
+
+<section id="wrong"><p class="kicker">08</p>
+<h2>Three knobs, and what they actually do<a class="anchor" href="#wrong">#</a></h2>
+<p>Each of these was predicted before it was run. All three are measured with the prefix cache flushed
+before every run, a fixed request count, and three repeats per point.</p>
+
+<p class="kicker" style="margin-top:22px">FP8 KV cache buys capacity, and a little speed</p>
+<table><thead><tr><th>shape</th><th>concurrency</th><th>BF16 KV tok/s</th><th>FP8 KV tok/s</th>
+<th>delta</th></tr></thead><tbody><tr><td>decode isolated</td><td class="n">1</td><td class="n">150</td><td class="n">148</td><td class="n" style="color:#5a5a55">-1.5%</td></tr><tr><td>decode isolated</td><td class="n">8</td><td class="n">1138</td><td class="n">1127</td><td class="n" style="color:#5a5a55">-0.9%</td></tr><tr><td>decode isolated</td><td class="n">64</td><td class="n">6725</td><td class="n">7074</td><td class="n" style="color:#2a8f38">+5.2%</td></tr><tr><td>decode isolated</td><td class="n">128</td><td class="n">10374</td><td class="n">11013</td><td class="n" style="color:#2a8f38">+6.2%</td></tr><tr><td>prefill heavy</td><td class="n">1</td><td class="n">142</td><td class="n">140</td><td class="n" style="color:#5a5a55">-1.4%</td></tr><tr><td>prefill heavy</td><td class="n">8</td><td class="n">900</td><td class="n">903</td><td class="n" style="color:#5a5a55">+0.4%</td></tr><tr><td>prefill heavy</td><td class="n">64</td><td class="n">2854</td><td class="n">2944</td><td class="n" style="color:#2a8f38">+3.1%</td></tr><tr><td>prefill heavy</td><td class="n">128</td><td class="n">3313</td><td class="n">3449</td><td class="n" style="color:#2a8f38">+4.1%</td></tr></tbody></table>
+<p>FP8 KV is neutral at low concurrency and 4 to 6&thinsp;% faster at high concurrency, in both a
+decode-heavy and a prefill-heavy shape, while KV capacity nearly doubles from 407,248 to 790,272 tokens
+on the same FLASH_ATTN backend. Baseline run-to-run spread was 0.1 to 2.8&thinsp;%, so the gains at scale
+are outside the noise and the small negatives at batch 1 and 8 are not.</p>
+<p>The shape of that curve follows from where the bytes are. At batch 1 the KV cache is about
+1&thinsp;% of bytes moved, so halving it changes nothing and the conversion work is a small net cost. By
+concurrency 128 KV is a large share of traffic and the saving shows up. This is also relevant to vLLM
+<a href="https://github.com/vllm-project/vllm/issues/48786">#48786</a>, which reports FP8 KV being slower
+on Hopper and traces it to the FlashAttention 3 FP8 prefill kernel at <code>head_dim=256</code>. Qwen3-8B
+is <code>head_dim=128</code> and shows no penalty in either shape, which supports treating that as
+specific to the 256 path rather than general to FP8 KV on this hardware.</p>
+
+<p class="kicker" style="margin-top:22px">The prefill budget trades latency, it does not add throughput</p>
+<p>With chunked prefill, prefill chunks and decode steps compete for one token budget, so a larger
+<code>max_num_batched_tokens</code> should relieve decode under load. At concurrency 128 it does nothing
+to throughput, while moving latency substantially in both directions:</p>
+<table><thead><tr><th>max_num_batched_tokens</th><th>output tok/s</th><th>TTFT ms</th><th>TPOT ms</th></tr></thead>
+<tbody><tr><td class="n">8192 (default)</td><td class="n">3356</td><td class="n">1208</td><td class="n">28.7</td></tr><tr><td class="n">16384</td><td class="n">3353</td><td class="n">1617</td><td class="n">25.6</td></tr><tr><td class="n">32768</td><td class="n">3354</td><td class="n">1946</td><td class="n">23.0</td></tr></tbody></table>
+<p>Throughput is flat to within run-to-run noise. The knob buys inter-token latency at the cost of
+first-token latency. A deployment should set it from which of those it cares about, not in the hope of
+more tokens per second.</p>
+
+<p class="kicker" style="margin-top:22px">Prefix caching, and what a null result does not mean</p>
+<p>Disabling prefix caching on this workload changes throughput by +0.2&thinsp;%, against
+1.2&thinsp;% run-to-run spread over three repeats. That is a null result, and it is a fact about
+the workload rather than the feature.</p>
+<p>The benchmark's random dataset gives every request its own random vocabulary offset and a shared
+prefix length of zero, so no two prompts share a prefix and there is nothing for the cache to hit. A
+cache returning no hits on inputs with no reuse is behaving correctly. On traffic that repeats a prefix,
+which is most real serving: a shared system prompt, a multi-turn conversation, a few-shot template, a
+retrieved document reused across questions, the same feature is doing substantial work. This study does
+not measure that case, and this number is not evidence about it.</p>
+<div class="warn"><b>Measure the engine, not your own history.</b> A concurrency sweep run against one
+server will accumulate state between points. Flush the prefix cache before every run, hold the request
+count fixed across points, and repeat each point. Skipping any of the three is enough to produce
+double-digit differences that survive a plausibility check and disappear under a controlled rerun.</div>
+</section>
+
+<section id="method"><p class="kicker">09</p>
+<h2>Method, and what would change the conclusions<a class="anchor" href="#method">#</a></h2>
+<p>H100 80GB HBM3 SXM, driver 580.126.09, vLLM 0.27.1, PyTorch 2.13.0+cu130. Load generated with
+<code>vllm bench serve</code> on the random dataset, 8 warmup requests per point, EOS ignored so output
+length is fixed. Decode isolation uses a 128 token prompt and 1024 output tokens. Cross-model comparison
+is taken at batch 1, where decode dominates elapsed time. Controlled runs flush the prefix cache before
+every measurement and repeat each point three times.</p>
+<p>Little's Law (<code>L = &lambda;W</code>) held within 3&thinsp;% on every run in the study. It is free
+to compute and it catches mismatched units, uncounted requests and warmup bleeding into the measurement
+window. When it drifts, stop before interpreting anything else.</p>
+<p class="kicker" style="margin-top:26px">Limits worth stating</p>
+<ul class="chain">
+<li>One serving stack. Nothing here separates a hardware limit from a vLLM implementation limit.</li>
+<li>Clock locking was unavailable in the container, so results are best-of-N. Measured run-to-run spread
+was 1.2&thinsp;% at fixed configuration.</li>
+<li>The MoE union model assumes uniform expert routing, which real routers violate.</li>
+<li>Three physical H100s were used across the study and differed by about 1&thinsp;% on measured peaks.
+Every comparison on this page is same-card; that 1&thinsp;% is the floor on reading across them.</li>
+<li>No kernel-level profiling was run. The launch overhead figure comes from removing CUDA graphs, which
+bounds the cost without identifying which kernels pay it.</li>
+<li>The five-model comparison is taken at batch 1, the first and therefore cold point of each ladder.
+Its concurrency behaviour is not reported, because those later points were measured before the cache
+controls in section seven were in place.</li>
+<li><b>No prefill numbers are reported.</b> Prefill is compute bound in principle, since processing a
+whole prompt at once has arithmetic intensity above the ridge point, but the runs I have were taken after
+a 1024 token sweep on the same server. A short prompt is a strict prefix of a long one under this
+generator, so those runs were served largely from cache and any FLOPs utilisation derived from them would
+be inflated. Measuring it properly needs a fresh server per input length.</li>
+</ul>
+<p>On every path measured here, vLLM runs close to what the hardware allows: 78 to 81&thinsp;% of memory
+bandwidth on decode, 79&thinsp;% of peak FLOPs on prefill. The interesting question in inference
+performance is usually not which engine is faster. It is which ceiling a given workload is against, since
+that determines whether more bandwidth, more compute, or a different model shape is what would actually
+help.</p>
+</section>
+
+<footer>Brian Woods &middot; measured on rented H100 hardware &middot;
+<a href="/">back to index</a></footer>
+</main></body></html>

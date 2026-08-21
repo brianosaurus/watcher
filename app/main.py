@@ -1838,7 +1838,41 @@ def optimum_solana_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "solana.html")
 
 
+@app.get("/h100")
+def h100_page() -> FileResponse:
+    """The H100 roofline study: measured bandwidth and FLOP ceilings for one card,
+    predicted vs measured decode rates for five open models, and the MoE expert-union
+    correction. Source lives in frontend/public/h100.html.
+
+    Registered BEFORE the `/static` mount so the exact path wins.
+    """
+    return FileResponse(STATIC_DIR / "h100.html")
+
+
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+# --- Blog routes -------------------------------------------------------------
+# Exact paths first, so /blog/one-block-short serves directly without the
+# trailing-slash redirect that StaticFiles would otherwise issue. The mount
+# below still handles /blog/, /blog/one-block-short/, and any static assets.
+
+@app.get("/blog")
+def blog_index_no_slash() -> FileResponse:
+    return FileResponse(STATIC_DIR / "blog" / "index.html")
+
+
+@app.get("/blog/one-block-short")
+def blog_one_block_short_no_slash() -> FileResponse:
+    return FileResponse(STATIC_DIR / "blog" / "one-block-short" / "index.html")
+
+
+# Blog posts: /blog serves static/blog/index.html, and each post lives at
+# /blog/<slug>/index.html. html=True lets StaticFiles serve index.html for
+# directory-like paths.
+_BLOG_DIR = STATIC_DIR / "blog"
+if _BLOG_DIR.is_dir():
+    app.mount("/blog", StaticFiles(directory=str(_BLOG_DIR), html=True), name="blog")
 
 # Assets for the report (figures, the preserved notebook): /optimum/<file>.
 # Mounted after the exact-path route above, which keeps handling /optimum itself.
