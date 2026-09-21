@@ -1,31 +1,23 @@
-## AR-001: Verification command undercounts occurrences on shared lines
+## AR-001: Stale AC-numbered artifacts collide with current spec
 - Severity: High
-- References: CHANGE_PLAN.md:78 (section 10), CHANGE_SPEC.md AC-1; frontend/public/home.html:491,499
-- Failure: `grep -c "unclehq/uncle"` counts matching *lines*, not occurrences; line 491 contains the string twice (href + url span), so a fully compliant file returns 2, not the expected 3 — verified by running the command (`grep -c` → 2, `grep -o | wc -l` → 3). The check fails correct code.
-- Fix: replace with `grep -o "unclehq/uncle" frontend/public/home.html | wc -l` (expect 3), or restate the check per-line.
-- Verify: run both grep forms against the current file and confirm the corrected form is used before treating the check as passing evidence.
+- References: CHANGE_TEST_REPORT.md, VERIFICATION_REPORT.md, MANUAL_CHECKLIST.md, DEFECTS.md, IMPLEMENTATION_NOTES.md (repo root); CHANGE_SPEC.md AC-1..AC-8.
+- Failure: these files test AC-1..AC-9 of the prior "rewrite Uncle card" change (checks for "unclehq/uncle" count, "Claude builds, Codex audits" phrase) — not this plan's AC-1..AC-8 (card move + em-dash removal). Live file state confirms this plan is unimplemented: `grep -n "<h3>" frontend/public/home.html` still shows order vLLM/H100/Pydantic/Uncle and line 493 still contains `—`. A later verification/audit stage reading PASS claims under matching AC-1..AC-3 IDs could wrongly treat this plan as already satisfied.
+- Fix: plan's implementation sequence (section 12) must add a step to remove or clearly supersede the stale CHANGE_TEST_REPORT.md/VERIFICATION_REPORT.md/MANUAL_CHECKLIST.md/DEFECTS.md/IMPLEMENTATION_NOTES.md before or alongside producing new ones for this change, so AC IDs are unambiguous.
+- Verify: after implementation, confirm CHANGE_TEST_REPORT.md's targeted-test list contains an em-dash grep and a card-order grep tied to *this* spec's AC-1/AC-3, not the prior spec's checks.
 
-## AR-002: Rollback plan is broader than "this plan's edit" and has no pre-adoption snapshot
-- Severity: High
-- References: CHANGE_PLAN.md:70-74 (section 9), CHANGE_PLAN.md:9-13 (D-1)
-- Failure: D-1 states the working-tree draft predates and is not authored by this plan, yet the only rollback (`git checkout -- home.html AGENTIC_WORKFLOW_STRATEGY.md`) restores HEAD, discarding the pre-existing draft along with any plan edits. If steps 2/3 are no-ops (fetch unavailable), invoking rollback destroys uncommitted prior work with no saved copy.
-- Fix: snapshot the pre-plan working tree (e.g. `git stash` to a tagged ref or `cp` backups) before step 1, and define rollback as restoring that snapshot, not `HEAD`.
-- Verify: confirm a backup of the D-1 draft exists and that rollback restores draft state, not committed state, when no plan edits were made.
-
-## AR-003: AC-7 gate is undefined on fetch failure, and network capability is understated
+## AR-002: Move-detection verification method is ambiguous
 - Severity: Medium
-- References: CHANGE_PLAN.md:103-110 (section 13), CHANGE_PLAN.md:125-136 (R-2)
-- Failure: plan says a failed fetch must be "reported, not silently passed," but never states whether the change can still be merged with AC-7 unmet — leaving the human approval gate undefined. R-2 also claims network/fetch capability is "not probed," but this runner exposes a `WebFetch` tool, so the uncertainty is avoidable, not an inherent constraint.
-- Fix: probe/use `WebFetch` for step 1; if genuinely unavailable, state explicitly that AC-7 failure blocks merge pending manual fetch, not that steps 2/3 silently become no-ops.
-- Verify: confirm WebFetch (or equivalent) is invoked and succeeds before accepting the draft; absent that, the PR must be marked blocked, not "confirmed."
+- References: CHANGE_PLAN.md §10 ("no hunks inside the vLLM, H100... blocks"); CHANGE_SPEC.md AC-5, AC-8.
+- Failure: `git diff` on a block relocated across other unchanged blocks produces one large hunk spanning the deletion/insertion region, with the intervening cards appearing only as unchanged context lines inside that same hunk — "no hunks inside X" is not a well-defined pass/fail signal from raw `git diff` output and could hide a stray edit to context lines that a reviewer skims past.
+- Fix: specify `git diff --color-moved` or a line-by-line diff of each of the three untouched `<article>` blocks against baseline (e.g. `diff <(sed -n '463,475p' baseline) <(sed -n 'new-range p' current)`), not hunk-counting.
+- Verify: byte-for-byte diff of vLLM/H100/Pydantic AI block line ranges pre- and post-edit returns empty.
 
-## AR-004: Draft provenance accepted as ground truth without evidence it derives from the real repo
-- Severity: Medium
-- References: CHANGE_PLAN.md:9-13,26-27 (D-1, section 3); CR AC-7
-- Failure: the plan treats the pre-existing uncommitted draft as authoritative "current ground truth" even though no citation exists yet that it was derived from `github.com/unclehq/uncle` — the exact failure mode (invented project description) the CR exists to fix. Steps 2/3 only revise on "inaccuracy found," biasing toward accepting unverified prose.
-- Fix: require step 1's fetch to produce an explicit point-by-point comparison against draft text before any "confirmed accurate" conclusion is recorded, not just a pass/fail gut check.
-- Verify: PR description must quote/cite specific README lines matched against each of AC-2's six required points.
+## AR-003: AC-4 has no objective verification
+- Severity: Low
+- References: CHANGE_SPEC.md AC-4; CHANGE_PLAN.md §1 (example rewrite "...others, not a fixed pairing...").
+- Failure: AC-4's only check is "manual read," so any rephrasing — including the plan's own comma-spliced example — passes regardless of grammaticality; a defective rewrite could ship unnoticed.
+- Fix: plan should commit to a specific rewrite text (e.g. "...others; not a fixed pairing...") rather than an illustrative example, removing wording discretion from implementation.
+- Verify: reviewer reads the exact committed sentence in the plan, not a placeholder, before approval.
 
 ## Overall assessment
-
-Blocking: AR-001 (broken verification command), AR-002 (destructive rollback with no backup). AR-003 and AR-004 must be resolved before execution to avoid silently accepting unverified copy. Plan's scope, invariants, and behavior classification (D-1, CI-1/CI-2) are otherwise sound.
+Plan is executable and narrowly scoped; no incorrect-behavior or invariant defects found in CHANGE_SPEC.md/CHANGE_PLAN.md themselves. AR-001 is blocking: stale same-numbered AC artifacts in the repo create a real risk of false PASS attribution and must be resolved before/alongside implementation. AR-002/AR-003 are non-blocking hardening items.

@@ -1,17 +1,9 @@
 # Defects
 
 ## D-1
-- Severity: Major
-- Reproduction/evidence: IMPLEMENTATION_NOTES.md:7,37 cite the AC-7 README fetch by section heading name only ("intro tagline", "Why Uncle?" bullet list, "The change is the unit of trust") and quote no fetched text. MC-13 (this stage) found this insufficient to verify the citation independent of a fresh fetch.
-- Affected requirement/check: AC-7, MC-7, MC-13, MC-12
-- Current status: OPEN. Note: MC-7's own fresh fetch (`gh api repos/unclehq/uncle`, `.../readme`) independently confirms home.html:492-497 body copy matches uncle's actual README/description — the underlying card content satisfies AC-7. The defect is the implementer's documentation trail, not the delivered copy.
-- Owner/next action: implementer — revise IMPLEMENTATION_NOTES.md to quote the actual fetched README/description text used to derive the copy.
-- Disposition: does not block accepting the home.html change itself (content independently verified); blocks accepting IMPLEMENTATION_NOTES.md's evidentiary trail as sufficient on its own.
-
-## D-2
-- Severity: Minor
-- Reproduction/evidence: CHANGE_TEST_REPORT.md:27-29 §Full test suite reads "DRIVER PENDING" rather than a resolved statement (e.g. "N/A, no test suite exists").
-- Affected requirement/check: MC-14
-- Current status: OPEN
-- Owner/next action: implementer — replace the placeholder with a resolved statement consistent with the confirmed absence of any test runner in the repo.
-- Disposition: documentation-only; does not affect delivered behavior or any acceptance criterion.
+- Severity: P1
+- Reproduction/evidence: `git diff --stat` (worker MC-10.md) lists ADVERSARIAL_REVIEW.md, CHANGE_PLAN.md, CHANGE_REQUEST.md, CHANGE_SPEC.md, CHANGE_TEST_REPORT.md, IMPLEMENTATION_NOTES.md, MANUAL_CHECKLIST.md as changed in addition to frontend/public/home.html
+- Affected requirement/check: MC-10, CHANGE_SPEC.md §4 (change scoped to home.html only)
+- Current status: OPEN. The 7 additional files are the workflow's own generated documentation artifacts, not application source or product files, and are unrelated to any of the AC-1..AC-8 acceptance criteria, which all PASS.
+- Owner/next action: reconcile CHANGE_SPEC.md/MANUAL_CHECKLIST.md scope wording (whether workflow-artifact updates count as in-scope) — a plan/spec decision, not resolvable by re-running the check.
+- Disposition: does not block AC-1..AC-8; MC-10 remains FAIL as literally worded.

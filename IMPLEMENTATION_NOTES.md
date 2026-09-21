@@ -1,43 +1,40 @@
 # Implementation notes
 
-## Completed changes by file
+## Completed changes
 
-| File | Change |
-|---|---|
-| `frontend/public/home.html:490-500` | Agentic Workflow card rewritten: heading/URL/Code link now `https://github.com/unclehq/uncle`; body copy (2 sentences) covers terminal-native, issue/requirements-in verified-PR-out, works with existing coding agents (not a fixed pairing), independent review, human approval gates, cryptographic pinning; `tag` line changed to `agentic coding · independent review · human approval gates`. Copy derived from `gh api repos/unclehq/uncle` description/homepage and `gh api repos/unclehq/uncle/readme` (README sections: intro tagline, "Why Uncle?" bullet list, "The change is the unit of trust") — satisfies AC-7. |
-| `AGENTIC_WORKFLOW_STRATEGY.md:14` | Replaced "Adversarial review by a second model (Claude builds, Codex audits)" with agent-agnostic wording naming Claude/Codex only as examples of swappable implementing agents, decoupled from the independent reviewer. |
+| File | Change | Plan step |
+|---|---|---|
+| frontend/public/home.html | Moved Uncle `article.card` (formerly lines 490-502) to directly after vLLM (before H100 Roofline Study); rephrased line 493's em dash clause to "...and others, not a fixed pairing)..." | CHANGE_PLAN.md §1, §4 |
 
-## Requirement/plan-step traceability
+No other files changed.
 
-- CHANGE_PLAN.md §4 (exact components to modify) → both files above, no others touched.
-- CHANGE_SPEC.md AC-1, AC-2, AC-3, AC-5, AC-7, AC-8, AC-9 → `frontend/public/home.html` card edit.
-- CHANGE_SPEC.md AC-3, AC-6 → `AGENTIC_WORKFLOW_STRATEGY.md` line 14 edit.
-- CHANGE_SPEC.md AC-4 → no edit required; verified still zero in source (see CHANGE_TEST_REPORT.md).
+## Traceability
 
-## Intentional deviations
+- AC-1: Card order now vLLM, Uncle, H100 Roofline Study, Pydantic AI.
+- AC-2: Uncle card h3/p/div.links text unchanged except the AC-3 rephrase (diff shows only the em-dash clause differs; see `git diff`).
+- AC-3/AC-6: Em dash removed via comma substitution; `grep -c "—" frontend/public/home.html` = 0 (was 1 in baseline, differs by exactly 1, matches AC-6).
+- AC-4: "coordinates the coding agents you already use (Claude, Codex, and others, not a fixed pairing)" preserves the original meaning (coordination of already-in-use agents, not a fixed pairing).
+- AC-5: `git diff` shows vLLM/H100/Pydantic AI blocks appear only as unchanged context lines, no `+`/`-` inside them.
+- AC-7: HTML parses cleanly (`html.parser`, exit 0, `parsed ok`).
+- AC-8: Both diff hunks (`@@ -459,6 +459,20 @@`, `@@ -486,20 +500,6 @@`) fall entirely within the "Open source" section (old lines ≤506); nothing below `live-systems-heading` touched.
 
-None. Change surface matches CHANGE_PLAN.md's frozen file list (`AGENTIC_WORKFLOW_STRATEGY.md`, `frontend/public/home.html`) exactly.
+## Deviations
 
-Left `AGENTIC_WORKFLOW_STRATEGY.md:3` ("Saved from Claude Code session...") and the "Name alternatives" / "Immediate next steps" backlog sections unchanged — CHANGE_SPEC.md §15 (non-goals) explicitly excludes acting on the rename decision and backlog items; line 3 is session metadata, not a fixed-pairing positioning claim, and does not match the AC-3 grep pattern.
+None from CHANGE_PLAN.md scope.
 
-## Unresolved blockers
+## Unresolved concerns
 
-None. All nine acceptance criteria have passing targeted checks (CHANGE_TEST_REPORT.md).
+None.
 
 ## Acceptance delivery
 
 | ID | Status | Changed code | Observed targeted verification |
 |---|---|---|---|
-| AC-1 | IMPLEMENTED | frontend/public/home.html:491,497 links → `unclehq/uncle` | `grep -o "unclehq/uncle" frontend/public/home.html \| wc -l` → 3; `grep -c "brianosaurus/agentic-workflow\|unclehq/stagegate" frontend/public/home.html` → 0 |
-| AC-2 | IMPLEMENTED | frontend/public/home.html:492-497 body `<p>` | Manual read: covers terminal-native, issue/requirements-in verified-PR-out, existing agents not fixed pairing, independent review, human approval gates, crypto pinning |
-| AC-3 | IMPLEMENTED | home.html card + AGENTIC_WORKFLOW_STRATEGY.md:14 | `grep -ic "claude builds\|codex audits\|claude/codex" AGENTIC_WORKFLOW_STRATEGY.md frontend/public/home.html` → 0,0 |
-| AC-4 | IMPLEMENTED | No code change required; card link rewrite (AC-1) removed the only prior `brianosaurus/agentic-workflow` references and no `stagegate` reference was ever present in home.html or AGENTIC_WORKFLOW_STRATEGY.md | `grep -rl "stagegate" --exclude-dir=.git --exclude-dir=.uncle -- app frontend AGENTIC_WORKFLOW_STRATEGY.md \| wc -l` → 0 |
-| AC-5 | IMPLEMENTED | frontend/public/home.html:498 `tag` line | `grep -n "LLM agents · pipeline tooling · open source" frontend/public/home.html` → no match |
-| AC-6 | IMPLEMENTED | AGENTIC_WORKFLOW_STRATEGY.md:14 | AC-3 grep (above) covers banned phrase; manual read confirms agent-agnostic framing |
-| AC-7 | IMPLEMENTED | frontend/public/home.html:492-497 | Copy cites `gh api repos/unclehq/uncle` description/homepage and README sections (intro tagline, "Why Uncle?", "The change is the unit of trust") |
-| AC-8 | IMPLEMENTED | n/a (preserve) | `git diff frontend/public/home.html \| grep -E '^@@'` → single hunk `@@ -488,14 +488,16 @@`, contained within card block (490-500) |
-| AC-9 | IMPLEMENTED | frontend/public/home.html | `python3 -c "import html.parser,pathlib; ...feed(...)"` → exit 0, `parsed ok` |
-
-## Handoff notes
-
-`static/home.html` is a Vite build artifact (BASELINE_REPORT.md §2) and does not exist in this worktree; no rebuild was run or required to verify the source change.
+| AC-1 | IMPLEMENTED | frontend/public/home.html:463 (Uncle h3 moved after vLLM) | `grep -n '<h3><a' frontend/public/home.html` → order vLLM, Uncle, H100 Roofline Study, Pydantic AI |
+| AC-2 | IMPLEMENTED | frontend/public/home.html:463-473 (Uncle card block) | `git diff` shows only em-dash clause differs between old/new Uncle card text |
+| AC-3 | IMPLEMENTED | frontend/public/home.html:466 (rephrased clause) | `sed -n '462,475p' frontend/public/home.html \| grep -c "—"` → 0 |
+| AC-4 | IMPLEMENTED | frontend/public/home.html:466 | Manual read: "...coordinates the coding agents you already use (Claude, Codex, and others, not a fixed pairing)..." preserves original meaning |
+| AC-5 | IMPLEMENTED | n/a (no change to these cards) | `git diff frontend/public/home.html \| grep -E '^[+-]'` shows no +/- lines inside vLLM, H100, or Pydantic AI blocks |
+| AC-6 | IMPLEMENTED | frontend/public/home.html (whole file) | `grep -c "—" frontend/public/home.html` → 0 (baseline was 1; differs by exactly 1) |
+| AC-7 | IMPLEMENTED | frontend/public/home.html | `python3 -c "import html.parser, pathlib; ...feed(...)"` → exit 0, `parsed ok` |
+| AC-8 | IMPLEMENTED | n/a (no change below line 504) | `git diff frontend/public/home.html \| grep -E '^@@'` → hunks `@@ -459,6 +459,20 @@` and `@@ -486,20 +500,6 @@`, both entirely within old lines ≤506 (Open source section) |
