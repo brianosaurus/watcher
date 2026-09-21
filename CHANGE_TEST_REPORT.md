@@ -2,76 +2,76 @@
 
 ## Changed requirement/behavior IDs
 
-BX-1..BX-4 (CHANGE_SPEC.md §6), AC-1..AC-9 (CHANGE_SPEC.md §5).
+BX-1, BX-2 (CHANGE_SPEC.md §6); AC-1..AC-8 (CHANGE_SPEC.md §5).
 
 ## Baseline result
 
-`python3 -m py_compile app/main.py` — exit 0 (BASELINE_REPORT.md §9, re-run post-change, unchanged: app/main.py not touched).
+`python3 -m py_compile app/main.py` — exit 0 (unaffected, not re-run; no code changed).
+`python3 -c "import html.parser,pathlib; ...feed(...)"` on pre-edit tree — exit 0 (BASELINE_REPORT.md §9).
 
 ## Targeted tests
 
-- `grep -o "unclehq/uncle" frontend/public/home.html | wc -l` → 3 (AC-1).
-- `grep -c "brianosaurus/agentic-workflow\|unclehq/stagegate" frontend/public/home.html` → 0 (AC-1).
-- Manual read of `<p>` block (home.html:492-497) against AC-2's six points → all present (AC-2).
-- `grep -ic "claude builds\|codex audits\|claude/codex" AGENTIC_WORKFLOW_STRATEGY.md frontend/public/home.html` → 0, 0 (AC-3, AC-6).
-- `grep -rl "stagegate" --exclude-dir=.git --exclude-dir=.uncle -- app frontend AGENTIC_WORKFLOW_STRATEGY.md | wc -l` → 0 (AC-4; repo-wide count including `.uncle/` workflow logs is 99, all in generated reports/logs, not source — pre-existing per BASELINE_REPORT.md §15).
-- `grep -n "LLM agents · pipeline tooling · open source" frontend/public/home.html` → no match (AC-5).
-- `gh api repos/unclehq/uncle` + `gh api repos/unclehq/uncle/readme` read before writing copy, cited in IMPLEMENTATION_NOTES.md (AC-7).
-- `git diff frontend/public/home.html | grep -E '^@@'` → one hunk `@@ -488,14 +488,16 @@`, no hunks outside the 490-500 card block; adjacent cards (463-489, 507+) untouched (AC-8).
-- `python3 -c "import html.parser, pathlib; p = html.parser.HTMLParser(); p.feed(pathlib.Path('frontend/public/home.html').read_text()); print('parsed ok')"` → exit 0, `parsed ok` (AC-9).
+- `grep -n '<h3><a' frontend/public/home.html` → order vLLM, Uncle, H100 Roofline Study, Pydantic AI, ... (AC-1).
+- `git diff frontend/public/home.html | grep -E '^[+-]'` → only the moved Uncle `<article>` block's add/remove lines; em-dash clause is the only textual difference between old/new copies (AC-2).
+- `sed -n '462,475p' frontend/public/home.html | grep -c "—"` → 0 (AC-3).
+- Manual read of frontend/public/home.html:466: "...coordinates the coding agents you already use (Claude, Codex, and others, not a fixed pairing)..." — meaning preserved (AC-4).
+- `git diff frontend/public/home.html | grep -E '^[+-]'` → no +/- lines inside vLLM (440-460), H100 (477-490 new), Pydantic AI (492-503 new) blocks (AC-5).
+- `grep -c "—" frontend/public/home.html` → 0, baseline was 1 (BASELINE_REPORT.md did not count this char directly but CHANGE_SPEC.md §3 confirms exactly one em dash existed); differs by exactly 1 (AC-6).
+- `python3 -c "import html.parser, pathlib; p = html.parser.HTMLParser(); p.feed(pathlib.Path('frontend/public/home.html').read_text()); print('parsed ok')"` → exit 0, `parsed ok` (AC-7).
+- `git diff frontend/public/home.html | grep -E '^@@'` → hunks `@@ -459,6 +459,20 @@`, `@@ -486,20 +500,6 @@`, both within old lines ≤506; nothing at/below live-systems-heading (old line 507+) touched (AC-8).
 
 ## Regression tests
 
-None exist (BASELINE_REPORT.md §7). `git diff --stat` — only `AGENTIC_WORKFLOW_STRATEGY.md` and `frontend/public/home.html` changed, matching the frozen scope; adjacent cards confirmed byte-identical by AC-8 hunk check above.
+None exist (BASELINE_REPORT.md §7). `git diff --stat` — only `frontend/public/home.html` changed (14 insertions, 14 deletions), matching frozen scope.
 
 ## Full test suite
 
-DRIVER PENDING.
+DRIVER PENDING
 
 ## Formatting
 
-N/A (no formatter configured for this repo; plain HTML/Markdown edit).
+N/A (no formatter configured for static HTML — BASELINE_REPORT.md §7)
 
 ## Compiler or type checker
 
-`python3 -m py_compile app/main.py` — exit 0, no output.
+N/A (no code changed; app/main.py untouched)
 
 ## Linting
 
-N/A (no linter configured — BASELINE_REPORT.md §7 found no lint/test tooling).
+N/A (no linter configured — BASELINE_REPORT.md §7)
 
 ## Integration tests
 
-N/A (no API/schema surface touched — CHANGE_SPEC.md §6 BX-6 preserved untested per spec).
+N/A (none exist)
 
 ## Frontend build
 
-NOT RUN (`frontend/node_modules` absent, requires network `npm install` — BASELINE_REPORT.md §9; not needed to verify a static-HTML source edit, per baseline's own conclusion). Source-level HTML-parse check (AC-9) substitutes.
+NOT RUN (frontend/node_modules absent per BASELINE_REPORT.md §9; not needed to verify static-HTML edit, same as baseline)
 
 ## Migration tests
 
-N/A (no schema/data change).
+N/A (no schema/data change)
 
 ## Rollback test
 
-NOT RUN. Rollback expectation (CHANGE_SPEC.md §13) is a plain `git checkout` of the two files; not exercised since no commit was made this stage.
+N/A (CHANGE_SPEC.md §10: revert via git; not exercised)
 
 ## Performance checks
 
-N/A (static text/link edit, no performance-sensitive path — CHANGE_SPEC.md omits performance requirements).
+N/A (static markup only)
 
 ## Security checks
 
-`rel="noopener noreferrer"` preserved on both rewritten `unclehq/uncle` links (home.html:491,497), matching sibling-card convention (CHANGE_SPEC.md §11).
+N/A (no new links/attributes; only existing github.com/unclehq/uncle links repositioned)
 
 ## Newly introduced warnings
 
-None observed in any command above.
+None observed.
 
 ## Pre-existing failures
 
-None (BASELINE_REPORT.md §10: none observed at baseline).
+None (BASELINE_REPORT.md §10: no pre-existing failures).
 
 ## Untested areas
 
-AC-2 and AC-7 verified by manual read/citation only, not by an automated assertion (CHANGE_SPEC.md specifies manual verification for both). Frontend build (Vite) not exercised — see Frontend build row.
+Rendered visual layout of the reordered card grid (CSS grid reflow) not checked in a browser.

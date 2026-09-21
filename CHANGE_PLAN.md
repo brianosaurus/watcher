@@ -1,265 +1,133 @@
 # Change plan
 
-Issue 1
+Issue 3
 
 | Finding | Disposition | Reason | Exact plan change |
 |---|---|---|---|
-| AR-001 | Accepted | `grep -c` counts matching lines, not occurrences; line 491 holds `unclehq/uncle` twice, so a compliant file returns 2, not 3 | Section 10, AC-1 check |
-| AR-002 | Accepted | Rollback restoring `HEAD` would discard the pre-existing D-1 draft even when this plan made no edits | Section 9, new step 0 |
-| AR-003 | Accepted | Fetch-failure outcome for AC-7 was stated as "reported" without saying whether merge is blocked | Section 13, step 1 |
+| AR-001 | Accepted | Stale AC-1..AC-9 artifacts (CHANGE_TEST_REPORT.md, VERIFICATION_REPORT.md, MANUAL_CHECKLIST.md, DEFECTS.md, IMPLEMENTATION_NOTES.md) describe the prior "rewrite Uncle card" change, not this move+em-dash change | Section 9 (test-report scoping rule added) |
+| AR-002 | Accepted | `git diff` hunk boundaries on a relocated block can absorb unchanged intervening cards as context, making "no hunks inside X" unreliable | Section 10 (content-hash regression check replaces hunk-location check) |
+| AR-003 | Partially accepted | AC-4 keeps a manual grammaticality read (irreducibly subjective) but gains an objective substring check | Section 11 step 2 (added grep assertions) |
 
-Omitted sections: Data-flow changes (static markup, no data flow); State-transition changes (none); Schema or persistence changes (none); Concurrency implications (none); Migration plan (none); Feature-flag or containment strategy (single static file, no flag needed); Automated-test strategy (no test framework exists per BASELINE_REPORT.md section 7; not introduced — non-goal in CHANGE_SPEC.md section 15); Observability changes (none)
+Omitted sections: Data-flow changes (none — static markup); State-transition changes (none); Interface and API changes (none); Schema or persistence changes (none); Concurrency implications (none); Migration plan (none); Feature-flag or containment strategy (single static-file edit, no runtime toggle); Observability changes (none)
 
 ## 1. Selected technical approach
 
-Working-tree state already contains most of the required edit (see D-1 below, discovered
-during planning, not applied by this plan). Plan verifies that draft against CHANGE_SPEC.md
-acceptance criteria, fetches uncle's actual README/source to confirm accuracy (CR checklist
-item 1, AC-7), corrects any divergence in `frontend/public/home.html:490-500` and
-`AGENTIC_WORKFLOW_STRATEGY.md:14`, then reconciles.
+Single in-place edit to `frontend/public/home.html`: cut the Uncle `<article class="card">` block
+(lines 490-502) and reinsert it immediately after the vLLM card (after line 460, before line 462's
+H100 card open tag). Within the moved block, rewrite the em-dash clause at former line 493 to drop
+`—` while preserving meaning (AC-4), e.g. "...coding agents you already use (Claude, Codex, and
+others, not a fixed pairing)...".
 
 ## 2. Alternative approaches considered
 
-- Rewrite the card from scratch, discarding the current working-tree draft. Rejected: the
-  draft already satisfies AC-1, AC-3, AC-4, AC-5, AC-8 (git diff below); discarding it is pure
-  rework with no requirement gain.
-- Skip the README fetch and accept the draft as-is. Rejected: AC-7 requires copy derived from
-  the actual repo, and the draft's accuracy against uncle's real feature set has not been
-  checked against source; this step is a verification/fetch, not a scope expansion.
+- CSS `order` reorder: rejected — source order stays wrong; CHANGE_SPEC.md IX-2 requires document
+  order.
+- Templating for card order: rejected — IX-3 requires the file stay plain static HTML.
 
 ## 3. Why the selected approach is preferred
 
-Confirms AC-7 without discarding already-correct work; the working-tree content becomes an
-input to check, not a foregone conclusion, so revision is targeted and small.
-
-## D-1: Working-tree state (discovered, not this plan's edit)
-
-`git diff frontend/public/home.html` and `git diff AGENTIC_WORKFLOW_STRATEGY.md` (both
-checked at planning time) show the working tree already differs from `HEAD` in exactly the
-card region (`frontend/public/home.html:490-500`) and one bullet
-(`AGENTIC_WORKFLOW_STRATEGY.md:14`), matching BX-1..BX-4 target state: links point to
-`https://github.com/unclehq/uncle`, body/tag copy drop the Claude/Codex-pairing framing, no
-`stagegate` string exists anywhere in the tree (`grep -rn stagegate .` outside `.git`: no
-matches). This contradicts BASELINE_REPORT.md section 4's "current behavior" snapshot, which
-was taken against `HEAD`/committed content, not the live working tree. Treated as current
-ground truth for this plan; BASELINE_REPORT.md is not re-run.
+Matches IX-3, minimal diff scoped to AC-1/AC-3, keeps AC-5/AC-8 trivially satisfiable.
 
 ## 4. Exact components to modify
 
-- `frontend/public/home.html:490-500` — only if step 2's README check finds the existing draft
-  body/tag copy (BX-2, BX-3) inaccurate against uncle's real feature set.
-- `AGENTIC_WORKFLOW_STRATEGY.md:11-19` (Positioning pivot section) — only if step 3 finds
-  remaining stale framing inconsistent with agent-agnostic positioning (BX-4).
+- `frontend/public/home.html:439-503` — "Open source" `.projects` div only.
 
 ## 5. Components explicitly not to modify
 
-- `frontend/public/home.html:463-489,507+` (sibling cards, IX-1, AC-8).
-- `AGENTIC_WORKFLOW_STRATEGY.md` "Name alternatives", "How to get contributors", "Advertising",
-  "Immediate next steps", "Related project recommendations" sections — unrelated backlog, CR
-  out-of-scope, CHANGE_SPEC.md section 15.
-- `app/main.py`, `frontend/vite.config.js` — CHANGE_SPEC.md section 8, IX-2.
+- `frontend/public/home.html:506+` (Live systems and later sections).
+- `app/main.py`, `frontend/vite.config.js`, `package.json`.
+- vLLM, H100 Roofline Study, Pydantic AI card content.
 
-## 6. Interface and API changes
+## 6. Compatibility strategy
 
-None. `/` route and `FileResponse` mechanism (I-1) untouched.
+No interface changes. `/` route continues serving `static/home.html` unchanged
+(app/main.py:1785-1786, CHANGE_SPEC.md BX-5).
 
-## 7. Compatibility strategy
+## 7. Error and recovery behavior
 
-No compatibility surface exists for static card copy; `rel="noopener noreferrer"` already
-present on both rewritten links (frontend/public/home.html:491,499) and must be kept if the
-lines are re-edited in step 2/3.
+Not applicable. A malformed move (unbalanced tags) is caught by the HTML-parse check (AC-7).
 
-## 8. Error and recovery behavior
+## 8. Rollback plan
 
-Not applicable — static text, no runtime error path (CHANGE_SPEC.md section 9).
+`git checkout -- frontend/public/home.html` restores prior state.
 
-## 9. Rollback plan
+## 9. Automated-test strategy
 
-Step 0 (below) snapshots the D-1 draft (`git diff HEAD > /tmp/d1-draft.patch`) before any
-plan edit runs. Rollback:
-- If steps 2/3 made no edit (draft confirmed accurate): no rollback action needed — tree is
-  already at the snapshotted state.
-- If steps 2/3 edited either file: `git checkout -- frontend/public/home.html
-  AGENTIC_WORKFLOW_STRATEGY.md` (restores `HEAD`), then `git apply /tmp/d1-draft.patch`
-  (restores the pre-existing D-1 draft). This undoes only this plan's edits, not D-1.
-No other rollback surface: no schema, migration, or build artifact holds state from this
-change.
+No test suite exists (no pytest/vitest/jest config, no CI). None added (CHANGE_SPEC.md section
+11). Verification uses the scripted checks below. Any test-report artifact this change produces
+must target only this spec's AC-1..AC-8 (card order, em-dash removal); it must not reuse or
+extend CHANGE_TEST_REPORT.md, VERIFICATION_REPORT.md, MANUAL_CHECKLIST.md, DEFECTS.md, or
+IMPLEMENTATION_NOTES.md from the prior "rewrite Uncle card" change (AR-001) — those check for
+`unclehq/uncle` link presence and the "Claude builds, Codex audits" phrase, which is out of scope
+here.
 
-## 10. Manual-verification strategy
+## 10. Regression-test strategy
 
-- `grep -o "unclehq/uncle" frontend/public/home.html | wc -l` → expect 3 (heading href, url
-  span, Code href) — AC-1. (`grep -c` undercounts when a match appears twice on one line, per
-  AR-001; do not use `-c` for this check.)
-- `grep -c "brianosaurus/agentic-workflow\|unclehq/stagegate" frontend/public/home.html` →
-  expect 0 — AC-1, AC-4.
-- `grep -rn "stagegate" . --exclude-dir=.git` → expect 0 matches repo-wide — AC-4.
-- `grep -in "claude builds\|codex audits\|claude/codex" frontend/public/home.html
-  AGENTIC_WORKFLOW_STRATEGY.md` → expect 0 — AC-3.
-- `python3 -c "import html.parser, pathlib; p=html.parser.HTMLParser();
-  p.feed(pathlib.Path('frontend/public/home.html').read_text())"` → exit 0 — AC-9.
-- `git diff HEAD -- frontend/public/home.html` → hunks confined to lines 490-500 — AC-8.
-- Manual read of `frontend/public/home.html:492-497` against AC-2's six required points, and
-  of `AGENTIC_WORKFLOW_STRATEGY.md:11-19` against AC-6, after step 1's README fetch — AC-2,
-  AC-6, AC-7.
+Content-identity check, not hunk-location: before editing, extract the vLLM, H100 Roofline
+Study, and Pydantic AI `<article>` blocks (delimited by their `<h3>` anchor text) into three
+strings; after editing, re-extract the same three blocks by anchor text and diff each string
+pair directly. All three must be byte-identical (AC-5). Separately confirm no line at or below
+current line 504 (`live-systems-heading` and beyond) changed, via `diff <(sed -n '504,$p' <old>)
+<(sed -n '<new-504-equivalent>,$p' <new>)` after accounting for the block's line-count shift
+(AC-8). This replaces the AR-002 hunk-location check.
 
-## 11. Regression-test strategy
+## 11. Manual-verification strategy
 
-No automated suite exists (BASELINE_REPORT.md section 7); manual checks above are the full
-regression net for this change. `python3 -m py_compile app/main.py` re-run only if step 2/3
-edits are made near unrelated code, which they are not — skipped.
+1. `grep -n "<h3>" frontend/public/home.html | sed -n '1,4p'` — confirm order is vLLM, Uncle,
+   H100 Roofline Study, Pydantic AI (AC-1).
+2. Em-dash and rewrite check: `grep -c "—" frontend/public/home.html` before/after differs by
+   exactly 1, and 0 within the Uncle card's new line range (AC-3, AC-6). Then
+   `grep -A5 "<h3>.*Uncle" frontend/public/home.html | grep -c "not a fixed pairing"` returns 1
+   and the same span still contains "Claude" and "Codex" (objective proxy for AC-4's meaning
+   preservation); follow with one manual read of the full rewritten clause for grammaticality
+   (AC-4).
+3. `python3 -c "import html.parser,pathlib; p=html.parser.HTMLParser(); p.feed(pathlib.Path('frontend/public/home.html').read_text())"` exits 0 (AC-7).
+4. Run the section 10 content-identity diffs and confirm zero differences (AC-2, AC-5, AC-8).
 
-## 12. Scope cuts under time pressure
+## 12. Implementation sequence
 
-None available: all nine acceptance criteria are required by CHANGE_REQUEST.md's checklist
-and are individually cheap (grep/manual read). No criterion is a candidate for deferral.
+1. Edit `frontend/public/home.html`: relocate the Uncle `<article class="card">` block (lines
+   490-502) to directly after the vLLM `<article>`'s closing `</article>` (line 460) and before
+   the H100 Roofline Study `<article>` (line 462); rewrite the clause at former line 493 to
+   remove the em dash while preserving meaning.
+   Owns: `frontend/public/home.html`
+   Depends on: none
 
-## 13. Risks and unresolved questions
-
-- Risk: `https://github.com/unclehq/uncle` fetch (step 1) fails or is unreachable. Resolution:
-  if the fetch cannot complete, steps 2/3 make no edit, step 4 reports AC-7 as unmet, and this
-  change does not merge until step 1 is re-run successfully — AC-7 failure is a merge blocker,
-  not a silently passed check or a no-op treated as success (AR-003).
-- Risk: re-editing `frontend/public/home.html:490-500` after step 1 could reintroduce an HTML
-  well-formedness break. Mitigated by the AC-9 `html.parser` check in step 4.
-
-## R-1: Restriction — no automated test framework introduced
-
-- source_kind: REPOSITORY (BASELINE_REPORT.md section 7: no test config found).
-- Requirement: CHANGE_SPEC.md section 15 non-goal ("do not add test infrastructure").
-- Required property: verification must use only tools already present (`python3`, `grep`,
-  `git`) — CAP-1 (ambient `python3` interpreter with stdlib `html.parser`, confirmed present
-  at BASELINE_REPORT.md section 8's executed commands).
-- Selected mechanism: shell `grep`/`git diff`/`python3 -c` one-liners (section 10).
-- Rationale: matches repo convention (static site, no CI) and CR scope.
-- Phase: CODING and LIVE_VERIFICATION both use the same commands; no separate live-only step.
-
-## R-2: Restriction — copy must originate from uncle's real repository
-
-- source_kind: USER (CHANGE_REQUEST.md acceptance criterion 1: "Read the uncle README and
-  source before writing copy").
-- Requirement: AC-7.
-- Required property: implementer states, with citation, what was read from
-  `github.com/unclehq/uncle` before finalizing or confirming copy.
-- Selected mechanism: step 1 fetch (LIVE_VERIFICATION phase — needs network; CAP-2, network
-  fetch capability, not probed in this planning session, no sandboxed network access
-  confirmed available here). If unavailable, AC-7 blocks merge per section 13.
-- Rationale: CR explicitly bans deriving copy from the old card's assumptions.
-- Non-secret prerequisite evidence: none required beyond public GitHub URL; no auth needed.
-
-## R-3: Restriction — rollback must not discard the pre-existing D-1 draft
-
-- source_kind: DESIGN (AR-002).
-- Requirement: rollback undoes only this plan's own edits.
-- Required property: a snapshot of D-1 exists before any plan edit, and rollback restores that
-  snapshot rather than `HEAD`, when no plan edit was made.
-- Selected mechanism: `git diff HEAD > /tmp/d1-draft.patch` in step 0, applied on rollback
-  (section 9).
-- Rationale: `HEAD` predates D-1; restoring it silently loses uncommitted work not authored by
-  this plan.
-- Phase: CODING (step 0 runs before step 1).
+2. Run verification commands from section 11 against the edited file and record results.
+   Owns: none (read-only verification; no file writes)
+   Depends on: 1
 
 ## Change-impact table
 
-| ID | Component | Planned change | Reason | Regression risk | Test coverage |
-|---|---|---|---|---|---|
-| CI-1 | `frontend/public/home.html` | Verify existing uncommitted draft (lines 490-500) against AC-1,3,4,5,8,9; revise body/tag only if step 1 finds inaccuracy | AC-2, AC-7, R-2 | Low — confined region, checked by AC-8/AC-9 | Manual grep + html.parser (section 10) |
-| CI-2 | `AGENTIC_WORKFLOW_STRATEGY.md` | Verify line 14 draft against AC-3, AC-6; revise Positioning pivot section only if step 1 finds inaccuracy | AC-6, R-2 | Low — single-file prose, no code path | Manual grep + read (section 10) |
-
-## Implementation sequence
-
-0. Snapshot current working tree: `git diff HEAD > /tmp/d1-draft.patch` (R-3). Owns: none.
-   Depends on: none.
-1. Fetch and read `https://github.com/unclehq/uncle` README and top-level source structure;
-   record findings against AC-2, AC-6, AC-7 and R-2. Compare to current draft text at
-   `frontend/public/home.html:492-497,500` and `AGENTIC_WORKFLOW_STRATEGY.md:14`. If the fetch
-   fails, stop and report per section 13 — do not proceed to steps 2-4 as if AC-7 were met.
-   Phase: LIVE_VERIFICATION. Owns: none. Depends on: 0.
-2. If step 1 finds the draft body copy or tag inaccurate against uncle's real scope, edit
-   `frontend/public/home.html:492-497,500` to correct it; keep `rel="noopener noreferrer"` on
-   both links (section 7); otherwise make no edit and record "draft confirmed accurate."
-   Owns: `frontend/public/home.html`. Depends on: 1.
-3. If step 1 finds `AGENTIC_WORKFLOW_STRATEGY.md`'s Positioning pivot section (lines 11-19)
-   still inconsistent with uncle's agent-agnostic framing beyond line 14, revise only that
-   section; leave Name alternatives / Immediate next steps / Advertising sections untouched
-   (section 5). Owns: `AGENTIC_WORKFLOW_STRATEGY.md`. Depends on: 1.
-4. Run every command in section 10 against the post-step-2/3 tree; confirm AC-1 through AC-9
-   all pass; confirm `git diff HEAD` touches only `frontend/public/home.html:490-500` and
-   `AGENTIC_WORKFLOW_STRATEGY.md:11-19`; write the PR description citing what was read from
-   `github.com/unclehq/uncle` in step 1 (AC-7 evidence). Owns: `*`. Depends on: 2, 3.
+| Component | Change | Test coverage |
+|---|---|---|
+| `frontend/public/home.html` | Move Uncle `<article>` block above H100 Roofline Study card; remove one em dash in its body copy | Section 10 content-identity diffs + section 11 manual checks |
 
 ## Traceability
 
 | Requirement | Behavior | Invariant | Component | Automated test | Manual check |
 |---|---|---|---|---|---|
-| AC-1 | BX-1 | — | CI-1 | none | section 10 grep #1 (`-o \| wc -l`, AR-001),#2 |
-| AC-2 | BX-2 | — | CI-1 | none | section 10 manual read |
-| AC-3 | BX-4 | IX-3 | CI-1, CI-2 | none | section 10 grep #4 |
-| AC-4 | — | — | CI-1 | none | section 10 grep #3 |
-| AC-5 | BX-3 | — | CI-1 | none | section 10 grep #1 (tag text) |
-| AC-6 | BX-4 | IX-3 | CI-2 | none | section 10 manual read |
-| AC-7 | — | R-2 | CI-1, CI-2 | none | step 1 fetch + PR citation; merge-blocking per section 13 |
-| AC-8 | BX-5 | IX-1 | CI-1 | none | section 10 git diff scope check |
-| AC-9 | — | IX-1, IX-2 | CI-1 | none | section 10 html.parser check |
+| AC-1 | BX-1 | IX-2 | `frontend/public/home.html` | none | Step 1 of section 11 |
+| AC-2 | BX-1 | IX-1 | `frontend/public/home.html` | none | Step 4 of section 11 |
+| AC-3 | BX-2 | — | `frontend/public/home.html` | none | Step 2 of section 11 |
+| AC-4 | BX-2 | — | `frontend/public/home.html` | none | Step 2 of section 11 |
+| AC-5 | BX-3 | IX-2 | `frontend/public/home.html` | none | Step 4 of section 11 / section 10 |
+| AC-6 | BX-2 | — | `frontend/public/home.html` | none | Step 2 of section 11 |
+| AC-7 | BX-1, BX-2 | IX-1, IX-3 | `frontend/public/home.html` | none | Step 3 of section 11 |
+| AC-8 | BX-4 | — | `frontend/public/home.html` | none | Step 4 of section 11 / section 10 |
 
-## Frozen change scope
+## Scope cuts under time pressure
 
-Rewrite the Agentic Workflow card (`frontend/public/home.html:490-500`) and
-`AGENTIC_WORKFLOW_STRATEGY.md`'s Positioning pivot section to describe `unclehq/uncle`
-accurately, per CHANGE_REQUEST.md and CHANGE_SPEC.md AC-1..AC-9. No other file, route, or
-sibling card changes.
+None — single-file, single-block move plus a one-clause rewrite; no reduced scope available
+without failing AC-1 or AC-3.
 
-## Files expected to change
+## Risks and unresolved questions
 
-- `frontend/public/home.html` (lines 490-500 only) — conditional on step 1 findings (CI-1).
-- `AGENTIC_WORKFLOW_STRATEGY.md` (lines 11-19 only) — conditional on step 1 findings (CI-2).
-
-## Files that must not change
-
-- `frontend/public/home.html:463-489,507+` (sibling cards).
-- `AGENTIC_WORKFLOW_STRATEGY.md` sections other than "Positioning pivot".
-- `app/main.py`, `frontend/vite.config.js`.
-
-## Expected behavioral differences
-
-- Card heading link, URL label, and Code link resolve to `https://github.com/unclehq/uncle`
-  instead of `unclehq/stagegate` (AC-1).
-- Card body and tag describe uncle's actual scope instead of the old Claude/Codex framing
-  (AC-2, AC-3, AC-5).
-- `AGENTIC_WORKFLOW_STRATEGY.md` Positioning pivot section no longer implies a fixed
-  Claude/Codex pairing (AC-6).
-
-## Expected unchanged behavior
-
-- `/` route and `FileResponse` serving mechanism (section 6).
-- All sibling cards on the portfolio home page, byte-identical (AC-8).
-- HTML document structure and parseability (AC-9).
-
-## Exact acceptance criteria
-
-AC-1 through AC-9 as defined in CHANGE_SPEC.md section 5, verified by the commands in
-section 10 of this plan (AC-1 count check corrected per AR-001).
-
-## Pre-implementation checks
-
-- Step 0 snapshot taken (`/tmp/d1-draft.patch` exists) before any edit — R-3.
-- D-1 state confirmed current: re-run `git diff frontend/public/home.html
-  AGENTIC_WORKFLOW_STRATEGY.md` and compare against the D-1 description; report divergence if
-  found.
-
-## Post-implementation checks
-
-All checks in section 10, run against the final tree, plus the `git diff HEAD` scope check in
-step 4. All nine must pass before the PR is written.
-
-## First features to cut if time expires
-
-None (section 12): every acceptance criterion is required and individually cheap to verify.
-
-## Conditions that require stopping implementation
-
-- Step 1's fetch of `https://github.com/unclehq/uncle` fails or is unreachable — stop, report
-  AC-7 as unmet and merge-blocked (section 13), do not proceed to steps 2-4.
-- `git diff HEAD` at step 4 touches any file or line range outside section 4's exact
-  components — stop, do not write the PR description, investigate the extra diff.
-- Step 0's snapshot is missing or unreadable when rollback is needed — stop and report before
-  running `git checkout --`, to avoid discarding D-1 without a way back (R-3).
+- R-1 (source_kind: USER; source: CHANGE_REQUEST.md "above this card"; requirement: AC-1;
+  required property: correct insertion point; selected mechanism: match CR's H100 excerpt to
+  home.html:464-465 per CHANGE_SPEC.md section 12 assumption; rationale: closest and only textual
+  match in the file; CAP: none needed, plain-text edit). Resolved by CHANGE_SPEC.md's stated
+  assumption and AC-1's explicit target; not a blocking question.
+- Build artifact `static/home.html` does not exist in this worktree; this plan edits the source
+  `frontend/public/home.html` only (Vite copies `public/*` verbatim on build). No build step is
+  part of this plan (CODING phase only; no LIVE_VERIFICATION step requires `npm run build`).
