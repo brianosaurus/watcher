@@ -9,3 +9,4 @@ __pycache__/
 /actions.log
 /bc_reset.epoch
 .claude/settings.local.json
+.uncle

@@ -1,1 +1,0 @@
-{"kind": "sampled_process", "name": "ssh", "pid": 13280, "parent_pid": 13272, "workflow_state": "ADVERSARIAL_REVIEW", "started_at": 1789956916.752245, "observations": 8, "elapsed_seconds": 3.822385916020721, "cpu_seconds": 0.01}

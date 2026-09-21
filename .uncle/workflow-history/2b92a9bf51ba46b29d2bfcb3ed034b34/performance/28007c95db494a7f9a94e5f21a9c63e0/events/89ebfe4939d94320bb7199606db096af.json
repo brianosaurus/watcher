@@ -1,1 +1,0 @@
-{"kind": "sampled_process", "name": "cat", "pid": 90342, "parent_pid": 90340, "workflow_state": "ANALYZE", "started_at": 1789956776.790679, "observations": 241, "elapsed_seconds": 131.1828469170141, "cpu_seconds": 0.0}

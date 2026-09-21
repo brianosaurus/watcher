@@ -1,3 +1,0 @@
-{"type": "assistant", "uncle_timing_native": true, "uncle_chat_output": true, "message": {"content": [{"type": "text", "text": "Issue 1 confirmed, seed URL confirmed. Writing the revised plan now."}]}}
-{"type": "assistant", "uncle_timing_native": true, "uncle_chat_output": true, "message": {"content": [{"type": "text", "text": "/Users/brianwoods/src/watcher-issue-1/CHANGE_PLAN.md"}]}}
-{"type": "result", "uncle_timing_native": true, "subtype": "success", "is_error": false, "error_detail": "", "usage": {"input_tokens": 6, "output_tokens": 5475, "cache_read_input_tokens": 140556, "cache_creation_input_tokens": 36840}, "total_cost_usd": 0.2302332, "input_includes_cache": false, "num_turns": 1, "duration_ms": 51166}

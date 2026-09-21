@@ -1,1 +1,0 @@
-{"kind": "tool_call", "name": "Read", "started_at": 1789956932.390109, "elapsed_seconds": 0.0073839169926941395, "process_exit": null, "pid": 16010, "workflow_state": "adversarial-review", "attempt_id": "bff0a3ebfd6d4628ac2a0a436c0743c6", "tool_status": "completed"}

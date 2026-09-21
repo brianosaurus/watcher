@@ -1,1 +1,0 @@
-{"kind": "sampled_process", "name": "zsh", "pid": 50505, "parent_pid": 44980, "workflow_state": "IMPLEMENT", "started_at": 1789957082.937255, "observations": 2, "elapsed_seconds": 0.5511287080007605, "cpu_seconds": 0.0}

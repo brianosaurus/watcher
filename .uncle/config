@@ -1,9 +1,0 @@
-# Uncle per-stage config: every stage picks its own runner,
-# reasoning effort, and model where supported.
-# Format: <stage>.runner | <stage>.effort | <stage>.model |
-#         <stage>.network VALUE
-#   (VALUE = runner, effort, model, or true/false for network).
-# OpenCode connections and credentials are stored separately.
-# Edit from `uncle` ->
-#   Configure, or by hand.
-misc.auto_mode true

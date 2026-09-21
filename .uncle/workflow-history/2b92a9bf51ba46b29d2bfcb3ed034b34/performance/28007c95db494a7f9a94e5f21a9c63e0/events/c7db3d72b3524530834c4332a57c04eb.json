@@ -1,1 +1,0 @@
-{"kind": "tool_call", "name": "Bash", "started_at": 1789956783.7073462, "elapsed_seconds": 0.047850500006461516, "process_exit": null, "pid": 90336, "workflow_state": "change-plan", "attempt_id": "9c0c80342b68459e86c3b1e7b4d17277", "tool_status": "completed"}

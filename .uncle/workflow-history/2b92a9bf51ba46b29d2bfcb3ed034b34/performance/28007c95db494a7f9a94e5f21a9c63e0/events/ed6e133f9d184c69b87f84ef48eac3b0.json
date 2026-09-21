@@ -1,1 +1,0 @@
-{"kind": "sampled_process", "name": "ssh", "pid": 90808, "parent_pid": 90807, "workflow_state": "ANALYZE", "started_at": 1789956789.2766552, "observations": 3, "elapsed_seconds": 1.0832982920110226, "cpu_seconds": 0.0}

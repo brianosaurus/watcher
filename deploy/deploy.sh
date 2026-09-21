@@ -3,8 +3,8 @@
 # Requires: BASIC_AUTH_USER, BASIC_AUTH_PASS in env (first run only, to seed .htpasswd).
 set -euo pipefail
 
-SSH_HOST="${SSH_HOST:-frankfurt}"
-REMOTE_DIR="/home/ubuntu/watcher"
+SSH_HOST="${SSH_HOST:-brian}"
+REMOTE_DIR="/root/watcher"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 # Build the React frontend (Vite) -> static/. static/ is generated (gitignored), so we
@@ -20,6 +20,9 @@ ssh "$SSH_HOST" "mkdir -p ${REMOTE_DIR}"
 COPYFILE_DISABLE=1 tar czf - --no-xattrs -C "$REPO_ROOT" \
     app static requirements.txt deploy \
     | ssh "$SSH_HOST" "cd ${REMOTE_DIR} && rm -rf static/assets && tar xzf - && rm -f ._* app/._* static/._* deploy/._*"
+
+echo "▶ Ensuring ~/venv exists"
+ssh "$SSH_HOST" "[ -x ~/venv/bin/python ] || python3 -m venv ~/venv"
 
 # ~/venv's wrapper pip is misconfigured (wrong shebang) — always use python -m pip
 echo "▶ Installing Python deps via ~/venv python -m pip"

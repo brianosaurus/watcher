@@ -1,1 +1,0 @@
-{"kind": "model_context", "name": "change-plan", "started_at": 1789956813.1714032, "elapsed_seconds": 0.0, "process_exit": null, "pid": 90336, "workflow_state": "change-plan", "attempt_id": "9c0c80342b68459e86c3b1e7b4d17277", "context_tokens": 57494, "context_source": "Claude request input plus cache read/write"}
