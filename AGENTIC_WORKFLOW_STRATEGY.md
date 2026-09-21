@@ -11,7 +11,7 @@ Saved from Claude Code session so you can resume work in a fresh instance.
 Most agent tools optimize to remove humans. This project does the opposite:
 
 - Human approval gates at every stage.
-- Adversarial review by a second model (Claude builds, Codex audits).
+- Adversarial review by an independent reviewer, decoupled from whichever coding agent (Claude, Codex, or others) implemented the change.
 - SHA-256 pinned specs so approved artifacts cannot be silently modified.
 - Immutable reviewer-owned files that the implementing agent cannot edit.
 - Speculative execution that is only adopted if the spec remains byte-identical.

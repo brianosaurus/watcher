@@ -1,0 +1,1 @@
+{"kind": "model_context", "name": "manual-checklist-review-worker-base-coverage", "started_at": 1789957092.913922, "elapsed_seconds": 0.0, "process_exit": null, "pid": 44630, "workflow_state": "manual-checklist-review-worker-base-coverage", "attempt_id": "296b4c22bb2e4e12a64900c7f328f434", "context_tokens": 74989, "context_source": "Claude request input plus cache read/write"}

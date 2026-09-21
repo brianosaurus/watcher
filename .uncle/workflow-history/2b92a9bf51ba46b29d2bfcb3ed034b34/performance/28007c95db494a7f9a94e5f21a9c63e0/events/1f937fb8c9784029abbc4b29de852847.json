@@ -1,0 +1,1 @@
+{"kind": "model_context", "name": "adversarial-review-worker-testability", "started_at": 1789956917.8646502, "elapsed_seconds": 0.0, "process_exit": null, "pid": 11062, "workflow_state": "adversarial-review-worker-testability", "attempt_id": "0f1b08d8b7514cfea79c35c67a135144", "context_tokens": 42368, "context_source": "Claude request input plus cache read/write"}

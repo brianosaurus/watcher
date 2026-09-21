@@ -1,0 +1,31 @@
+{
+  "steps": 4,
+  "steps_declaring_ownership": 0,
+  "groups": [
+    [
+      1
+    ],
+    [
+      2
+    ],
+    [
+      3
+    ],
+    [
+      4
+    ]
+  ],
+  "largest_group": 1,
+  "declared_paths": [],
+  "changed_files": [
+    "AGENTIC_WORKFLOW_STRATEGY.md",
+    "frontend/public/home.html"
+  ],
+  "declared_but_untouched": [],
+  "steps_that_could_run_in_parallel": [],
+  "changed_but_claimed_by_no_specific_step": [
+    "AGENTIC_WORKFLOW_STRATEGY.md",
+    "frontend/public/home.html"
+  ],
+  "declaration_accuracy": 0.0
+}

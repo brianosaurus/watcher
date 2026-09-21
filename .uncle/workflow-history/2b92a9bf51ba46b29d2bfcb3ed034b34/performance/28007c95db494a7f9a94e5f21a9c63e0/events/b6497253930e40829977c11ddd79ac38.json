@@ -1,0 +1,1 @@
+{"kind": "read_cache", "name": "stage-context", "started_at": 1789957169.4778318, "elapsed_seconds": 0.0025060176849365234, "process_exit": null, "pid": 67042, "offered_entries": 4, "invalidated_entries": 3, "context_bytes": 21627}

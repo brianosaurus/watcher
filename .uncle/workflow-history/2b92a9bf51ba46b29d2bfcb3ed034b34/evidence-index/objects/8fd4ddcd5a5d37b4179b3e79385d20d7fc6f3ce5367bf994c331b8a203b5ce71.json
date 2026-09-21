@@ -1,0 +1,1 @@
+{"version": 1, "sha256": "be5277eb495d005d6613b3431c366773f902bc8acf8c466692bbb72720c54188", "excerpt": "fastapi==0.115.4\nuvicorn[standard]==0.32.0\npsutil==6.1.0\n"}

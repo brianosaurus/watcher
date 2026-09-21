@@ -1,0 +1,1 @@
+{"kind": "model_context", "name": "adversarial-review", "started_at": 1789956932.3897638, "elapsed_seconds": 0.0, "process_exit": null, "pid": 16010, "workflow_state": "adversarial-review", "attempt_id": "bff0a3ebfd6d4628ac2a0a436c0743c6", "context_tokens": 48442, "context_source": "Claude request input plus cache read/write"}

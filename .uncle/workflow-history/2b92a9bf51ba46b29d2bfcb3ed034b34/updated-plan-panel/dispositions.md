@@ -1,0 +1,30 @@
+# Dispositions evidence packet — lens: dispositions
+
+## D-1: AR-001 (green-check gate greps target strings the change deletes) — unresolved in plan
+- Evidence: CHANGE_PLAN.md has no section addressing AR-001. `.uncle/workflow/green-check.commands` cmd3/cmd4 still grep for `unclehq/stagegate|brianosaurus/agentic-workflow` and `Claude builds, Codex audits` with no documented pass/fail semantics change; `.uncle/workflow/green-check.groups` still runs cmd3/cmd4 as group `3 4`.
+- Gap: CHANGE_PLAN.md sec 20 step 4 says "Run verification commands... confirm AC-1 through AC-9" but never states whether green-check cmd3/cmd4 are pre-change diagnostics (expected nonzero pre-change, must be re-interpreted) or driver-enforced gates. AR-001's required fix (state baseline-diagnostic framing, or update driver config) is absent from the plan.
+- Risk: If the driver's runner treats cmd3/cmd4 exit-nonzero (current baseline: cmd3 count=2, cmd4 count=2, both nonzero) as build failure at any point, the change is unbuildable by the gate as configured, or the gate silently gets bypassed without documented rationale.
+- Required correction: Plan must explicitly state cmd3/cmd4 interpretation post-change (expect count=0 after AC-1/AC-3 edits, since these are literal string-absence checks — should read as gates verifying the *strings are gone*, not "pre-change probes" as AR-001 assumed). CHANGE_PLAN.md must reconcile this: cmd3/cmd4 are legitimate post-change assertions (grep count of banned string), not stale diagnostics. Disposition should correct AR-001's characterization rather than accept it blindly — verify by rereading BASELINE_REPORT.md sec 8-9: same commands were run pre-change expecting nonzero; post-change grep for same string should be 0. Plan is silent on this reconciliation.
+
+## D-2: AR-002 (AC-7 network-fetch prerequisite, no fallback) — unresolved in plan
+- Evidence: CHANGE_PLAN.md sec 20 step 1 still requires fetching `github.com/unclehq/uncle` with no fallback; sec 22 "Risks and unresolved questions" does not mention network-access risk at all.
+- Gap: AR-002's required fix (add a fallback path if network fetch fails) is not present anywhere in CHANGE_PLAN.md.
+- Risk: Implementation blocks entirely if network access is unavailable in the execution sandbox (BASELINE_REPORT.md sec 9 notes no network access was exercised at baseline, and fastapi itself isn't installed — signal the sandbox may be network-restricted).
+- Required correction: Plan needs an explicit fallback/escalation (e.g., halt and request human-provided README text) for AC-7 step 1.
+
+## D-3: AR-003 (AC-5 tag-line grep accepts cosmetic edit) — unresolved
+- Evidence: CHANGE_PLAN.md Traceability row AC-5 (line 97) still lists only "grep old tag text absent" as verification, no manual-check column entry, matching AR-003's exact complaint.
+- Gap: No correction applied; plan unchanged from what AR-003 flagged.
+- Risk: A one-character edit to the tag line passes automated gate while remaining inaccurate (AC-5 requires the tag reflect uncle's actual scope, not just differ from old text).
+- Required correction: Add manual-check entry for AC-5 or a content-based assertion (e.g., tag must reference uncle-specific terms), not mere inequality to old string.
+
+## D-4: AR-004 (AC-3 phrase grep can miss reworded fixed-pairing claim) — evidence truncated, cannot confirm disposition
+- Evidence: ADVERSARIAL_REVIEW.md content was cut off after "AR-004... grep targets literal phrases `cla[...]" — file is 4304 bytes but excerpt ends mid-sentence; full AR-004 text and any AR-005+ not shown in driver evidence.
+- Gap: Cannot assess whether CHANGE_PLAN.md addresses AR-004 without the full finding text.
+- Required correction: Re-read ADVERSARIAL_REVIEW.md in full before finalizing revised plan; do not assume AR-004 is addressed.
+
+## Provenance note
+No new human-sign-off obligation identified in this lens beyond CHANGE_PLAN.md sec 18's existing self-declared position (no separate reviewer named in CHANGE_REQUEST.md). That position is unchanged and not challenged by this review.
+
+## Summary
+Plan (CHANGE_PLAN.md, unchanged hash from pre-review) does not incorporate fixes for AR-001, AR-002, or AR-003; AR-004 disposition unverifiable from truncated evidence. All four require explicit plan updates before this can be treated as a "revised" plan responding to adversarial review.

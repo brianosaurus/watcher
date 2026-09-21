@@ -1,0 +1,1 @@
+{"kind": "sampled_process", "name": "claude", "pid": 90348, "parent_pid": 90347, "workflow_state": "ANALYZE", "started_at": 1789956776.790679, "observations": 242, "elapsed_seconds": 131.7343797920039, "cpu_seconds": 3.82}
