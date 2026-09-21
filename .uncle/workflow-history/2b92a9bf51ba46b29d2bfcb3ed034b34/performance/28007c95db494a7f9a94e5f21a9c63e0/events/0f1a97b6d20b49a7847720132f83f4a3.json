@@ -1,0 +1,1 @@
+{"kind": "sampled_process", "name": "bash", "pid": 11082, "parent_pid": 11078, "workflow_state": "ADVERSARIAL_REVIEW", "started_at": 1789956910.177987, "observations": 32, "elapsed_seconds": 16.93617937498493, "cpu_seconds": 0.0}

@@ -1,0 +1,1 @@
+{"kind": "sampled_process", "name": "Python", "pid": 41649, "parent_pid": 41625, "workflow_state": "UPDATED_PLAN", "started_at": 1789957002.542714, "observations": 32, "elapsed_seconds": 17.424403459008317, "cpu_seconds": 0.0}

@@ -1,0 +1,1 @@
+{"kind": "sampled_process", "name": "bash", "pid": 41664, "parent_pid": 41656, "workflow_state": "UPDATED_PLAN", "started_at": 1789957002.542714, "observations": 33, "elapsed_seconds": 17.987887334020343, "cpu_seconds": 0.0}

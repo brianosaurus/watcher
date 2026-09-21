@@ -1,0 +1,1 @@
+{"kind": "process_start", "name": "python3", "started_at": 1789957075.2557209, "elapsed_seconds": 0, "process_exit": null, "pid": 44630, "child_pid": 44756, "span_id": "c9bffa6d44254384a702661e6b4b737a", "workflow_state": "IMPLEMENT"}

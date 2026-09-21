@@ -1,0 +1,1 @@
+{"kind": "process_start", "name": "bash", "started_at": 1789956909.1835678, "elapsed_seconds": 0, "process_exit": null, "pid": 9697, "child_pid": 9701, "span_id": "b4783e3c7bf44339a703ce1dab9be157", "workflow_state": "PLAN"}

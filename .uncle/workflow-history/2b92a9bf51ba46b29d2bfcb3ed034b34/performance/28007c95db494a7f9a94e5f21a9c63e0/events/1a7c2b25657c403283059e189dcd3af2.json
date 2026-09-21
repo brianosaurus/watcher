@@ -1,0 +1,1 @@
+{"kind": "sampled_process", "name": "git", "pid": 16815, "parent_pid": 16751, "workflow_state": "ADVERSARIAL_REVIEW", "started_at": 1789956938.5221992, "observations": 12, "elapsed_seconds": 5.988111791986739, "cpu_seconds": 0.32}

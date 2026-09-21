@@ -1,0 +1,1 @@
+{"kind": "model_context", "name": "updated-change-plan-review-worker-ownership", "started_at": 1789957021.2098966, "elapsed_seconds": 0.0, "process_exit": null, "pid": 41628, "workflow_state": "updated-change-plan-review-worker-ownership", "attempt_id": "300f28d0a74f4fa686cf273a7b7e49a4", "context_tokens": 58336, "context_source": "Claude request input plus cache read/write"}
