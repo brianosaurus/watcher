@@ -1867,6 +1867,11 @@ def blog_one_block_short_no_slash() -> FileResponse:
     return FileResponse(STATIC_DIR / "blog" / "one-block-short" / "index.html")
 
 
+@app.get("/blog/fail-fast-fail-often")
+def blog_fail_fast_fail_often_no_slash() -> FileResponse:
+    return FileResponse(STATIC_DIR / "blog" / "fail-fast-fail-often" / "index.html")
+
+
 # Blog posts: /blog serves static/blog/index.html, and each post lives at
 # /blog/<slug>/index.html. html=True lets StaticFiles serve index.html for
 # directory-like paths.
