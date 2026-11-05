@@ -1786,6 +1786,12 @@ def root() -> FileResponse:
     return FileResponse(STATIC_DIR / "home.html")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon() -> FileResponse:
+    """Site favicon (source: frontend/public/favicon.ico)."""
+    return FileResponse(STATIC_DIR / "favicon.ico", media_type="image/x-icon")
+
+
 @app.get("/resume.pdf")
 def resume_pdf() -> FileResponse:
     """Brian's resume, one click from the portfolio hero (source: frontend/public/resume.pdf)."""
