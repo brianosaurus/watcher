@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fail Fast, Fail Often in the Age of AI · Brian Woods</title>
+  <title>AI Makes Building Easy. Failing First Is the Hard Part. · Brian Woods</title>
   <meta name="description" content="Building is nearly free now, which makes thinking the scarce resource. Write the hypothesis, define success and failure, and pick a kill date before you ship.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/blog/fail-fast-fail-often/">
@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="/static/uncle-icon.png">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Fail Fast, Fail Often in the Age of AI">
+  <meta property="og:title" content="AI Makes Building Easy. Failing First Is the Hard Part.">
   <meta property="og:description" content="Building is nearly free now, which makes thinking the scarce resource. Write the hypothesis, define success and failure, and pick a kill date before you ship.">
   <meta property="og:url" content="https://brian.biz/blog/fail-fast-fail-often/">
   <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
@@ -22,7 +22,7 @@
   <meta property="article:tag" content="hypotheses">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Fail Fast, Fail Often in the Age of AI">
+  <meta name="twitter:title" content="AI Makes Building Easy. Failing First Is the Hard Part.">
   <meta name="twitter:description" content="Building is nearly free now, which makes thinking the scarce resource. Write the hypothesis, define success and failure, and pick a kill date before you ship.">
   <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
 
@@ -34,7 +34,7 @@
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "Fail Fast, Fail Often in the Age of AI",
+    "headline": "AI Makes Building Easy. Failing First Is the Hard Part.",
     "datePublished": "2026-11-04",
     "author": {
       "@type": "Person",
@@ -209,6 +209,21 @@
     ul, ol { margin: 0 0 20px; padding-left: 24px; }
     li { margin: 8px 0; }
 
+    figure.photo { margin: 32px 0; }
+    figure.photo img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    figure.photo figcaption {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+
     hr {
       border: 0;
       border-top: 1px solid var(--border);
@@ -243,84 +258,121 @@
 
   <article>
     <p class="eyebrow"><a href="/blog">Blog</a></p>
-    <h1>Fail Fast, Fail Often in the Age of AI</h1>
+    <h1>AI Makes Building Easy. Failing First Is the Hard Part.</h1>
     <p class="meta">2026-11-04</p>
 
-    <p><em>Hypothesis-driven innovation vs. build-first, ask-later.</em></p>
+    <p><em>Or: how to be wrong quickly, cheaply, and on purpose.</em></p>
 
-    <h2>What &ldquo;fail fast&rdquo; means, and where it came from</h2>
+    <p>Everyone has a guy. A friend, a cousin, an uncle. Let's call him Dave. Dave is made
+    up, but you know him anyway.</p>
 
-    <p>&ldquo;Fail fast&rdquo; is the idea that when something is going to go wrong, you want
-    to find out immediately and cheaply, not late and expensively. It started as an
-    engineering principle, and later became a business slogan.</p>
+    <p>Last spring Dave discovered AI, and by Thursday he was an &ldquo;app guy.&rdquo; He built
+    an app that matches dog owners who live exactly 0.4 miles apart, in an afternoon, on his
+    phone, during the game. He has a logo. He has a waitlist: three cousins and a man from his
+    gym who was being polite.</p>
 
-    <p>The engineering version is older. In 1985, Jim Gray, writing about fault tolerance at
-    Tandem Computers in <em>Why Do Computers Stop and What Can Be Done About It?</em>,
-    described &ldquo;fail-fast&rdquo; modules: components that either work correctly or stop
-    the moment they detect a fault, instead of limping along and corrupting everything
-    downstream. Jim Shore brought the phrase to everyday programmers in his 2004 IEEE
-    Software article &ldquo;Fail Fast,&rdquo; arguing that code should raise an error at the
-    point of the problem, not several layers away where it is hard to trace.</p>
+    <p>Ask Dave who the customer is and he says &ldquo;dog owners.&rdquo; Ask how he'll know
+    it's working and he says &ldquo;we'll see how it goes.&rdquo; Ask what would make him quit
+    and he looks at you like you asked him to disown a child. Dave isn't stupid. Dave is
+    <em>fast</em>. AI taught him how to build. It didn't teach him how to find out whether
+    anyone wants the thing.</p>
 
-    <p>The business version took off in the 2000s and 2010s, as Silicon Valley absorbed the
-    lessons of cheap, rapid experimentation. Steve Blank's customer development and
-    Eric Ries's <em>The Lean Startup</em> (2011) made the argument that a startup's job is
-    validated learning: run the cheapest experiment that could prove you wrong, and
-    change course quickly. Facebook's &ldquo;move fast and break things&rdquo; was the
-    same instinct, in cruder form. &ldquo;Fail fast, fail often&rdquo; is the bumper-sticker
-    version of all of it.</p>
+    <p>That's the gap this post is about. Building <em>is</em> easy now, but innovation was
+    never about the building. It's about knowing what to build, for whom, and how to learn
+    you're wrong before you fall in love with it. The fundamentals didn't get easier. They
+    got easier to skip.</p>
 
-    <p>Both versions rest on the same condition: a failure only helps if you can see it
-    and learn from it. Keep that in mind for what follows.</p>
+    <h2>What &ldquo;fail fast&rdquo; actually means</h2>
 
-    <h2>Why this matters now</h2>
+    <p>It doesn't mean &ldquo;screw up constantly and write a thread about it.&rdquo; The idea
+    is simple: if something is going to go wrong, find out <em>immediately</em> and
+    <em>cheaply</em>. It began in engineering. In 1985, Jim Gray described &ldquo;fail-fast&rdquo;
+    modules at Tandem Computers: components that stop the instant they detect a fault instead
+    of quietly corrupting everything downstream. Jim Shore brought the phrase to everyday
+    programmers in 2004. Then Silicon Valley turned it into a bumper sticker, with help from
+    Steve Blank, Eric Ries's <em>The Lean Startup</em> (2011), and Facebook's &ldquo;move fast
+    and break things.&rdquo;</p>
 
-    <p>Before AI coding tools, building was expensive. A new product or feature meant
-    weeks of engineering time, real money, and a team betting its quarter on the
-    outcome. That cost was a forcing function. It made us stop and ask the
-    uncomfortable questions <em>before</em> committing:</p>
+    <figure class="photo">
+      <img src="/blog/fail-fast-fail-often/fail-fast.jpg" width="1400" height="788"
+           alt="The back of a dented, scratched white Tesla with a California vanity plate reading FAILFST and a dumbbell sticker.">
+      <figcaption>Field-tested. The bumper-sticker version of the philosophy, dents included.</figcaption>
+    </figure>
 
-    <ul>
-      <li>What do we believe is true?</li>
-      <li>What would have to be true for this to work?</li>
-      <li>What's the cheapest way to find out if we're wrong?</li>
-    </ul>
+    <p>The bumper sticker skips the part that matters: <strong>failure only helps if you can
+    see it and learn from it.</strong> A failure nobody notices isn't a lesson. It's just a
+    failure with good PR.</p>
 
-    <p>So we ran the smoke test, did the customer interviews, faked the button and
-    counted clicks. We proved (or killed) the hypothesis first, then built.</p>
+    <h2>The shoe guy</h2>
 
-    <h2>Now building is nearly free</h2>
+    <p>Zappos is almost insultingly cheap. In 1999, Nick Swinmurn believed people would buy
+    shoes online without trying them on. The grown-up test was a warehouse and an inventory.
+    He didn't have the money to be that grown-up, so he photographed shoes in local stores and
+    put the photos on a website. When someone ordered, he bought the pair at full price and
+    shipped it himself. He lost money on every sale, and it didn't matter. He was testing
+    one question, and he had his answer before he had anything to sell. The site became
+    Zappos, and Amazon bought it in 2009 for a reported $1.2 billion.</p>
 
-    <p>An AI agent can spin up a working prototype before lunch. Somewhere along the
-    way, a lot of us quietly dropped the fundamentals. The new loop is: build it,
-    ship it, see what happens. &ldquo;We'll learn from the data.&rdquo;</p>
+    <h2>The pin that wasn't a phone</h2>
 
-    <p>The problem is that you can't learn from data when you never wrote down what you
-    expected. Without a hypothesis, every result looks like a signal, and nothing
-    ever clearly fails. We end up with a graveyard of half-used features, each one
-    &ldquo;kind of promising,&rdquo; none of them teaching us anything.</p>
+    <p>Humane's AI Pin bet that people would ditch their phone screen for a voice-driven
+    device on their lapel. A rough prototype and a few dozen volunteers could have started
+    answering that in a week. Instead, Humane raised hundreds of millions for custom hardware
+    and launched in 2024 at $699 plus a subscription. The first moment a customer could say
+    &ldquo;no thanks&rdquo; came after the money was spent. In February 2025, Humane sold its
+    team and technology to HP for $116 million, and the Pins stopped working within days.
+    Nothing says &ldquo;we hear you&rdquo; like a very expensive lapel ornament.</p>
 
-    <p>That is the catch in &ldquo;fail fast, fail often.&rdquo; Failing only counts if you
-    can tell that you failed. Failing fast is cheap now. Failing <em>legibly</em> is
-    still on you.</p>
+    <p>The idea may well have been wrong, and that's allowed. The tragedy was the price of
+    finding out. Zappos paid almost nothing to learn its hypothesis was true. Humane paid
+    <em>everything</em> to learn it was false.</p>
+
+    <h2>128 releases, zero users</h2>
+
+    <p>AI adds a new way to fail, because building got cheap. In a
+    <a href="https://github.com/KiniunCorp/s2s-verify/blob/main/docs/post-mortem.md" rel="noopener noreferrer">postmortem published in August 2026</a>,
+    solo founder Gus Chiriboga described using AI coding agents to build a tool for supervising
+    AI coding agents. He shipped 128 releases with CI, tests, bilingual docs and governance
+    policies. External users: zero. Very thorough governance for a country with no citizens.
+    His second attempt had 442 passing tests, and broke the moment he used it for real,
+    because the tests checked his own model of the system.</p>
+
+    <p>His diagnosis, after about two years: technical work was how he avoided real users.
+    &ldquo;Agents make building so cheap that building becomes the procrastination.&rdquo; And:
+    &ldquo;Tests validate your model of the system. Only strangers validate the system.&rdquo;
+    Put both on a mug.</p>
 
     <h2>Thinking is the scarce resource</h2>
 
-    <p>Cheap building didn't make thinking optional. It made thinking the <em>only</em>
-    scarce resource left. The cost of a bad idea used to be engineering time. Now
-    it's focus, maintenance, user confusion, and a product nobody can explain.</p>
+    <p>The new loop is: build it, ship it, &ldquo;learn from the data.&rdquo; It sounds
+    responsible. It's a trap wearing a lanyard. You can't learn from data when you never wrote
+    down what you expected, so every result looks like a signal and nothing ever clearly
+    fails. A flat chart is &ldquo;early.&rdquo; A silent launch is &ldquo;building
+    awareness.&rdquo; Soon you're curating a graveyard of half-used features, each one
+    &ldquo;kind of promising.&rdquo;</p>
+
+    <p>Failing fast is cheap now. Failing <em>legibly</em> is still your job. Cheap building
+    made thinking the only scarce resource left, and the machine will happily build the wrong
+    thing at astonishing speed without ever asking, &ldquo;Are you sure?&rdquo;</p>
 
     <h2>Before the next build</h2>
 
     <ol>
       <li><strong>Write the hypothesis in one sentence:</strong> &ldquo;We believe [user] will
-      [behavior] because [reason].&rdquo;</li>
-      <li><strong>Define what success and failure look like</strong> <em>before</em> you ship.</li>
-      <li><strong>Pick a kill date.</strong></li>
+      [behavior] because [reason].&rdquo; If you can't fill in the blanks, you're not ready to
+      build. You're ready to think.</li>
+      <li><strong>Define success and failure</strong> <em>before</em> you ship. After is when
+      everything looks like a win.</li>
+      <li><strong>Pick a kill date.</strong> Put it on a calendar, and tell someone who will
+      hold you to it.</li>
     </ol>
 
-    <p>Let the agents build fast, and fail fast and often. We still have to decide what's
-    worth building, and to notice when the answer was no.</p>
+    <p><strong>So write the hypothesis. Set the kill date. You have the most powerful
+    building tools in history, so aim them at the right thing, and learn something every
+    time. Every honest failure is a course correction, and course corrections are how you
+    reach the moon.</strong></p>
+
+    <p><strong>Now go put your work in front of a stranger.</strong></p>
 
     <div class="tags">
       <span class="tag">ai</span>
