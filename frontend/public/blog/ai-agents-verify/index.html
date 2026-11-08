@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Agents Can Write Code. Who Verifies Their Work? · Brian Woods</title>
+  <meta name="description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/ai-agents-verify/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="AI Agents Can Write Code. Who Verifies Their Work?">
+  <meta property="og:description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <meta property="og:url" content="https://brian.biz/blog/ai-agents-verify/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-08">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="verification">
+  <meta property="article:tag" content="provenance">
+  <meta property="article:tag" content="uncle">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AI Agents Can Write Code. Who Verifies Their Work?">
+  <meta name="twitter:description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "AI Agents Can Write Code. Who Verifies Their Work?",
+    "datePublished": "2026-11-08",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/ai-agents-verify/",
+    "description": "Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.",
+    "keywords": ["ai-agents","verification","provenance","uncle"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="/blog">Blog</a></p>
+    <h1>AI Agents Can Write Code. Who Verifies Their Work?</h1>
+    <p class="meta">2026-11-08</p>
+
+    <p><em>We are giving coding agents more autonomy without changing how we establish trust in the software they produce.</em></p>
+    <p>AI coding agents have crossed an important threshold. They can take an issue, explore a repository, write code, run tests, and open a pull request. They can build a working application from a sentence. Some can do it in minutes.</p>
+    <p>That's impressive. It's also created a problem I don't think we've adequately addressed.</p>
+    <p><strong>We're allowing the same system that writes the code to tell us whether the code is good.</strong></p>
+    <p>An agent implements a feature, runs some tests, reviews its own changes, and reports success. We get a summary that says the implementation is complete, the tests pass, and the code is ready.</p>
+    <p>But what actually happened?</p>
+    <p>Did the tests run? Did they finish successfully? Did the reviewer examine the final version of the code? Did the code change after review? Is the artifact we're about to merge the same artifact that passed verification?</p>
+    <p>Those are different questions from whether the agent believes it did a good job. And they're questions we should be able to answer without asking the agent.</p>
+
+    <h2>The agent is not the authority</h2>
+
+    <p>For most of my career, I've worked on systems where correctness matters more than the confidence of the component producing an answer. At Yahoo, I worked on anti-spam infrastructure handling billions of messages a month. More recently, I've worked on distributed systems, ML infrastructure, and LLM inference.</p>
+    <p>One lesson from that work has stayed with me: a component shouldn't get to declare its own output trustworthy just because it produced it.</p>
+    <p>We already understand this in traditional software engineering. The developer writes the code. Tests execute independently. CI records the results. Reviewers examine the changes. The repository maintains the history. Release systems decide what gets published.</p>
+    <p>These mechanisms aren't perfect. They don't guarantee correct software. But they establish boundaries between producing something and deciding whether to trust it. AI agents make those boundaries more important, not less.</p>
+    <p>A coding agent is capable of making mistakes, misunderstanding instructions, overlooking failures, and producing plausible explanations for things that didn't happen. That doesn't require malicious intent. A model can confidently report success because it misunderstood a tool response or lost track of an earlier failure.</p>
+    <p>The more autonomous the agent becomes, the less reasonable it is to treat its final summary as authoritative.</p>
+
+    <h2>A second agent isn't enough</h2>
+
+    <p>One popular response is to have another model review the first model's work. That's useful. I use independent review myself. But it doesn't solve the entire problem.</p>
+    <p>Suppose Agent A implements a change. Agent B reviews it and approves it. Agent A then modifies one file to address a separate issue before publishing. The final code is no longer the code Agent B reviewed.</p>
+    <p>Both agents might have behaved reasonably. The review might have been excellent. The tests might have passed. But the review no longer establishes anything about the final artifact. Here's a simplified example:</p>
+    <pre><code>Implementation       tree f12b8...
+                         |
+                         v
+Independent review   tree f12b8...   PASS
+                         |
+                         v
+Verification         tree f12b8...   PASS
+                         |
+                         v
+Publication          tree 91ae3...
+
+                     NOT VERIFIED</code></pre>
+    <p>The important distinction is that the review wasn't necessarily wrong. <strong>It was a review of different code.</strong></p>
+    <p>Adding more reviewers doesn't fix this. Neither does using a more capable model. You need a way to establish that the thing being published is the thing that passed the required process.</p>
+
+    <h2>The change is the unit of trust</h2>
+
+    <p>Most agent frameworks are organized around the agent. Which model is running? What tools can it use? How much context does it have? How does it recover from failure? How do multiple agents coordinate? Those are important engineering questions.</p>
+    <p>But I've become more interested in a different question: <strong>what can we prove about the software change after the agents are finished?</strong></p>
+    <p>A software change has an identity. In Git, we can identify the contents of a tree using its hash. That gives us something concrete to attach evidence to.</p>
+    <p>Instead of recording that an agent said it completed a review, we can record that a review stage completed against a particular tree. Instead of accepting a claim that tests passed, we can record the actual verification result. Instead of recording that a person approved something, we can bind the approval to the artifact they examined. And before publication, we can check whether the artifact still matches.</p>
+    <p>The intended process becomes:</p>
+    <pre><code>Requirements
+     |
+     v
+Approved plan
+     |
+     v
+Implementation       tree f12b8...
+     |
+     v
+Independent review   tree f12b8...   PASS
+     |
+     v
+Verification         tree f12b8...   PASS
+     |
+     v
+Human approval       tree f12b8...
+     |
+     v
+Publication          tree f12b8...
+
+                     VERIFIED</code></pre>
+    <p>If the tree changes, the evidence no longer applies to the new tree. That sounds obvious. But it's a property that needs to be enforced by the workflow, not merely requested in a prompt.</p>
+
+    <h2>The agent shouldn't write its own evidence</h2>
+
+    <p>There's another subtle problem. Suppose an agent completes a task and writes a JSON file containing its results:</p>
+    <pre><code>{
+  "implementation": "pass",
+  "review": "pass",
+  "tests": "pass",
+  "approved": true
+}</code></pre>
+    <p>That file is structured, but structure doesn't make it trustworthy. If the agent controls the evidence, it can accidentally or deliberately misrepresent the outcome.</p>
+    <p>A better approach is for the system coordinating the workflow to record what actually happened. The verification driver invokes the checks, observes their exit codes, records the artifact identity, and produces the evidence. The agent can generate code and explain its decisions. It cannot turn a failed test into a passing result by writing a convincing summary.</p>
+    <p>The evidence also needs to distinguish between three outcomes:</p>
+    <pre><code>pass
+fail
+unavailable</code></pre>
+    <p>That third state matters. A test that never ran isn't a passing test. A reviewer that timed out didn't approve the change. Missing evidence is not evidence of success. A workflow can have policies about what to do when evidence is unavailable, but it shouldn't rewrite history to make the result look better.</p>
+
+    <h2>I built Uncle to explore this</h2>
+
+    <p>I've been working on an open-source project called <a href="https://github.com/unclehq/uncle">Uncle</a>. Uncle is a terminal-native development system that orchestrates coding agents such as Claude, Codex, Kimi, and locally hosted models. You can describe an application or give it a GitHub issue. It plans the work, implements it, performs independent review and verification, and prepares a pull request. You can talk to Uncle while it works, redirect an implementation, ask questions, or let it run unattended.</p>
+    <p>The part I'm most interested in, though, isn't generating the code. It's establishing what happened afterward.</p>
+    <p>Uncle separates the coding agents from the workflow driver that records verification evidence. The implementing agent doesn't approve its own work. Reviews and checks are associated with the relevant Git tree. Human approvals are recorded separately from delegated decisions.</p>
+    <p>For completed changes, Uncle can produce a portable attestation using an in-toto statement wrapped in a DSSE envelope. The attestation binds together the requirements, plan, implementation artifact, review evidence, verification results, approvals, and publication artifact. The goal is to let someone independently check whether the published change went through the process claimed for it. For example:</p>
+    <pre><code>uncle verify</code></pre>
+    <p>Or for a pull request:</p>
+    <pre><code>uncle verify 123</code></pre>
+    <p>If the Git tree no longer matches the artifact identified in the evidence, the verifier refuses to call it verified. The verifier also distinguishes artifact integrity from signature authenticity. An unsigned record or a signature without an established trust root is not equivalent to trusted, authenticated provenance.</p>
+    <p>These distinctions are deliberate. I don't want a system that says "verified" merely because that sounds reassuring. I want one that can explain what it checked, what passed, what failed, and what it couldn't establish.</p>
+
+    <h2>Verification is not correctness</h2>
+
+    <p>This is an important limitation. A change can pass every required stage and still contain bugs. A reviewer can miss something. Tests can be incomplete. A specification can be wrong. Two models can make the same mistake.</p>
+    <p>A valid attestation doesn't establish that the software is secure, correct, or useful. It establishes something narrower: that the evidence applies to the identified artifact and that the recorded process satisfies the verifier's requirements.</p>
+    <p>That's still valuable. If a test passed against one tree but we're publishing another, we should know. If a change was built unattended without human approval, we shouldn't describe it as human-approved. If the attestation isn't signed by a trusted identity, we shouldn't imply that it is.</p>
+    <p>These are not solutions to every problem in AI-generated software. They're basic engineering properties that should remain true regardless of how capable the models become.</p>
+
+    <h2>Why this matters more as agents improve</h2>
+
+    <p>Today, many coding agents still require substantial supervision. But the direction is clear. They're becoming more capable, more autonomous, and able to work on larger changes. As that happens, the amount of code produced by agents can grow much faster than our capacity to inspect it manually.</p>
+    <p>We can respond by adding more AI reviewers. We probably will. But those reviewers will also be probabilistic systems. They'll have their own failure modes, context limitations, and blind spots. I think we need two complementary approaches.</p>
+    <p>First, use models to do the work they're good at: implementing changes, finding defects, explaining code, and proposing repairs.</p>
+    <p>Second, use deterministic mechanisms wherever possible to establish facts that shouldn't depend on a model's judgment. Did a command execute? What was its exit status? Which artifact was reviewed? Which tree was published? Was approval given by a person, or delegated to an agent? Does the evidence still match? These are questions software can answer without an LLM.</p>
+    <p>The distinction matters because <strong>model intelligence and workflow integrity are not the same thing</strong>. A better model might write better code. It doesn't eliminate the need to establish what was reviewed, tested, and published.</p>
+
+    <h2>What still needs work</h2>
+
+    <p>Uncle is a developing open-source project, not a finished solution to software supply-chain security. Its integrity model has limitations. Not every change currently carries a signed attestation, and unattended changes are deliberately distinguished from human-approved ones.</p>
+    <p>The implementation also needs scrutiny. Are the trust boundaries correctly enforced? Are there edge cases where evidence can become stale? Are the verifier's assumptions appropriate? Can an agent influence something that should be outside its authority? Those are the kinds of questions I want other engineers to ask.</p>
+    <p>The project is written largely in Bash and Python, and it supports multiple coding-agent runners. There are opportunities to contribute to verification, tests, integrations, the terminal interface, and developer experience. I'm particularly interested in people who can find ways to break the integrity guarantees. A convincing counterexample is more useful than a compliment.</p>
+
+    <h2>Delegate the work, not the responsibility</h2>
+
+    <p>I don't think the future of software development is humans manually reviewing every line an AI agent writes. But I also don't think the answer is to trust an agent because it sounds confident, or because another agent agrees with it.</p>
+    <p>We need systems where agents can do increasingly substantial work while the boundaries around verification, approval, and publication remain explicit. That means separating what an agent can do from what it can declare authoritative. It means treating the software change as the object we're verifying. And it means preserving enough evidence that another engineer can independently evaluate what happened.</p>
+    <p>AI agents are getting very good at writing software. <strong>Now we need to get equally serious about proving what they actually did.</strong></p>
+
+    <hr>
+
+    <p><em>Uncle is open source and looking for contributors. The repository is at <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. If you're interested in coding agents, verification, developer tooling, or software supply-chain integrity, I'd welcome contributions, criticism, and attempts to break its assumptions.</em></p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">verification</span>
+      <span class="tag">provenance</span>
+      <span class="tag">uncle</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="/">Brian Woods</a> · <a href="/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
