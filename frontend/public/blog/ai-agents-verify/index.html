@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Agents Can Write Code. Who Verifies Their Work? · Brian Woods</title>
-  <meta name="description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <title>The Review Wasn't Wrong. It Was a Review of Different Code. · Brian Woods</title>
+  <meta name="description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/blog/ai-agents-verify/">
   <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
   <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="AI Agents Can Write Code. Who Verifies Their Work?">
-  <meta property="og:description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <meta property="og:title" content="The Review Wasn't Wrong. It Was a Review of Different Code.">
+  <meta property="og:description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
   <meta property="og:url" content="https://brian.biz/blog/ai-agents-verify/">
   <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
   <meta property="article:published_time" content="2026-11-08">
@@ -22,8 +22,8 @@
   <meta property="article:tag" content="uncle">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="AI Agents Can Write Code. Who Verifies Their Work?">
-  <meta name="twitter:description" content="Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.">
+  <meta name="twitter:title" content="The Review Wasn't Wrong. It Was a Review of Different Code.">
+  <meta name="twitter:description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
   <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "AI Agents Can Write Code. Who Verifies Their Work?",
+    "headline": "The Review Wasn't Wrong. It Was a Review of Different Code.",
     "datePublished": "2026-11-08",
     "author": {
       "@type": "Person",
@@ -42,7 +42,7 @@
       "url": "https://brian.biz/"
     },
     "url": "https://brian.biz/blog/ai-agents-verify/",
-    "description": "Coding agents are getting more autonomous, but we still let the system that writes the code vouch for it. The change, not the agent, should be the unit of trust.",
+    "description": "Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.",
     "keywords": ["ai-agents","verification","provenance","uncle"]
   }
   </script>
@@ -243,21 +243,18 @@
 
   <article>
     <p class="eyebrow"><a href="/blog">Blog</a></p>
-    <h1>AI Agents Can Write Code. Who Verifies Their Work?</h1>
+    <h1>The Review Wasn't Wrong. It Was a Review of Different Code.</h1>
     <p class="meta">2026-11-08</p>
 
+    <p>Agent A implements a change. Agent B reviews it and approves. Agent A then edits one more file before publishing, and the code that ships is no longer the code Agent B reviewed. Nobody did anything wrong. The review was fine. <strong>It was a review of different code.</strong></p>
+    <p>That gap is what I've been working on in <a href="https://github.com/unclehq/uncle">Uncle</a> (<a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>), an open-source system that orchestrates coding agents and records what actually happened to a change. This post is about why I think the software change, not the agent, should be the unit of trust.</p>
     <p><em>We are giving coding agents more autonomy without changing how we establish trust in the software they produce.</em></p>
-    <p>AI coding agents have crossed an important threshold. They can take an issue, explore a repository, write code, run tests, and open a pull request. They can build a working application from a sentence. Some can do it in minutes.</p>
-    <p>That's impressive. It's also created a problem I don't think we've adequately addressed.</p>
-    <p><strong>We're allowing the same system that writes the code to tell us whether the code is good.</strong></p>
-    <p>An agent implements a feature, runs some tests, reviews its own changes, and reports success. We get a summary that says the implementation is complete, the tests pass, and the code is ready.</p>
-    <p>But what actually happened?</p>
-    <p>Did the tests run? Did they finish successfully? Did the reviewer examine the final version of the code? Did the code change after review? Is the artifact we're about to merge the same artifact that passed verification?</p>
-    <p>Those are different questions from whether the agent believes it did a good job. And they're questions we should be able to answer without asking the agent.</p>
+    <p>Agents can now take an issue, write code, run tests, and open a pull request, in minutes. Then the same system that wrote the code tells us whether the code is good. We get a summary that says the implementation is complete, the tests pass, and the code is ready.</p>
+    <p>But what actually happened? Did the tests run, and finish successfully? Did the reviewer examine the final version of the code? Is the artifact we're about to merge the same artifact that passed verification? Those are different questions from whether the agent believes it did a good job, and we should be able to answer them without asking the agent.</p>
 
     <h2>The agent is not the authority</h2>
 
-    <p>For most of my career, I've worked on systems where correctness matters more than the confidence of the component producing an answer. At Yahoo, I worked on anti-spam infrastructure handling billions of messages a month. More recently, I've worked on distributed systems, ML infrastructure, and LLM inference.</p>
+    <p>For most of my career, I've worked on systems where correctness matters more than the confidence of the component producing an answer. At Yahoo I built Yahoo Mail's anti-spam system, which handled billions of messages a month and produced six patents. More recently I've worked on distributed systems, ML infrastructure, and LLM inference.</p>
     <p>One lesson from that work has stayed with me: a component shouldn't get to declare its own output trustworthy just because it produced it.</p>
     <p>We already understand this in traditional software engineering. The developer writes the code. Tests execute independently. CI records the results. Reviewers examine the changes. The repository maintains the history. Release systems decide what gets published.</p>
     <p>These mechanisms aren't perfect. They don't guarantee correct software. But they establish boundaries between producing something and deciding whether to trust it. AI agents make those boundaries more important, not less.</p>
@@ -331,6 +328,18 @@ fail
 unavailable</code></pre>
     <p>That third state matters. A test that never ran isn't a passing test. A reviewer that timed out didn't approve the change. Missing evidence is not evidence of success. A workflow can have policies about what to do when evidence is unavailable, but it shouldn't rewrite history to make the result look better.</p>
 
+    <h2>Isn't this just branch protection?</h2>
+
+    <p>Partly, and it's the first thing I'd ask. GitHub can dismiss stale approvals when new commits are pushed, and required checks run against the head commit. If your whole process happens inside a pull request, that covers a lot. It misses a few things:</p>
+    <ul>
+      <li><strong>It starts too late.</strong> The agent's review and verification happen locally, before any PR exists, where GitHub has no visibility.</li>
+      <li><strong>An LLM reviewer's pass isn't a GitHub approval.</strong> Nothing dismisses it when the code changes, because GitHub doesn't know it exists.</li>
+      <li><strong>The evidence travels with the change.</strong> Someone can check it outside GitHub, without trusting your CI.</li>
+      <li><strong>It binds more than code.</strong> The approved plan and the requirements are pinned too, not only the diff.</li>
+      <li><strong>It records who approved.</strong> A person approving and an approval delegated to an agent look identical to GitHub. Here they are recorded differently.</li>
+    </ul>
+    <p>This isn't new in spirit. SLSA, in-toto, and a growing set of tools attach provenance to builds or pull requests. Uncle's focus is narrower: binding an agent's internal process stages (plan, implementation, review, verification, approval) to one Git tree.</p>
+
     <h2>I built Uncle to explore this</h2>
 
     <p>I've been working on an open-source project called <a href="https://github.com/unclehq/uncle">Uncle</a>. Uncle is a terminal-native development system that orchestrates coding agents such as Claude, Codex, Kimi, and locally hosted models. You can describe an application or give it a GitHub issue. It plans the work, implements it, performs independent review and verification, and prepares a pull request. You can talk to Uncle while it works, redirect an implementation, ask questions, or let it run unattended.</p>
@@ -340,8 +349,31 @@ unavailable</code></pre>
     <pre><code>uncle verify</code></pre>
     <p>Or for a pull request:</p>
     <pre><code>uncle verify 123</code></pre>
-    <p>If the Git tree no longer matches the artifact identified in the evidence, the verifier refuses to call it verified. The verifier also distinguishes artifact integrity from signature authenticity. An unsigned record or a signature without an established trust root is not equivalent to trusted, authenticated provenance.</p>
+    <p>Here is the real output, from running <code>uncle verify</code> against a pull request on this site's own repository:</p>
+    <pre><code>$ uncle verify 4
+UNCLE CHANGE VERIFICATION
+
+✓ attestation canonical, in-toto Statement, schema v1
+○ no signature (authentication: none)
+✗ approved ADVERSARIAL_REVIEW digest mismatch (embedded copy)
+  approved:  ed6813b0a5af0110ba2e3344ec1c0cecd7c7e6bb5ff845d439d22784f5f9d8f0
+  present:   missing
+
+NOT VERIFIED</code></pre>
+    <p>That change merged anyway. The verifier didn't block it; it reported that the review document the approval was bound to could not be found, and declined to call the result verified. Note the middle line too: with no signature, this attestation can show integrity but not authenticity.</p>
+
+<p>If the Git tree no longer matches the artifact identified in the evidence, the verifier refuses to call it verified. The verifier also distinguishes artifact integrity from signature authenticity. An unsigned record or a signature without an established trust root is not equivalent to trusted, authenticated provenance.</p>
     <p>These distinctions are deliberate. I don't want a system that says "verified" merely because that sounds reassuring. I want one that can explain what it checked, what passed, what failed, and what it couldn't establish.</p>
+
+    <h2>What I'm defending against</h2>
+
+    <p>I should be explicit about the threat model, because "accidentally or deliberately" hides a real question: can an agent with shell access on the same machine just edit the evidence?</p>
+    <ul>
+      <li><strong>In scope:</strong> an agent that is mistaken or careless. It misreads a tool result, forgets a failure, or edits code after review. The driver records exit codes and tree identities itself, so these show up as mismatches.</li>
+      <li><strong>Partly in scope:</strong> a fully hostile agent with unsandboxed shell access. An agent that can write to the same filesystem as the driver can, in principle, tamper with local state. What Uncle offers there is detection by anyone who later checks the evidence against the tree, and signatures where a trust root is configured. An unsigned attestation does not protect against this.</li>
+      <li><strong>Out of scope:</strong> a compromised machine or a compromised verifier, and bugs that every reviewer and test happens to miss.</li>
+    </ul>
+    <p>Run agents in a sandbox if you're worried about the second case. I'd rather state the boundary than have you find it.</p>
 
     <h2>Verification is not correctness</h2>
 
