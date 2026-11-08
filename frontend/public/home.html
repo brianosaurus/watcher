@@ -475,11 +475,10 @@
 
         <article class="card">
           <h3><a href="/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a><span class="url">brian.biz/blog/ai-agents-verify</span></h3>
-          <p>Coding agents now write, test, and review their own changes, then report success. The
-          change, not the agent, should be the unit of trust: bind review and verification evidence
-          to a Git tree, have the workflow driver (not the agent) record it, and refuse to call
-          anything verified once the tree changes. Verification is not correctness, and the post
-          says where Uncle's guarantees stop.</p>
+          <p>Agent A writes it, Agent B reviews it, Agent A edits one more file and ships. The review
+          was fine; it was a review of different code. A weary, sarcastic case for pinning review
+          evidence to a Git tree, with real <code>uncle verify</code> output (it says NOT VERIFIED
+          about my own PR) and a threat model, because "trust me" is not a control.</p>
           <div class="links">
             <a href="/blog/ai-agents-verify/">Read</a>
             <span class="tag">agent verification · provenance · attestations</span>
