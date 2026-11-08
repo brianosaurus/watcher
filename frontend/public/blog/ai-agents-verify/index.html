@@ -246,110 +246,42 @@
     <h1>The Review Wasn't Wrong. It Was a Review of Different Code.</h1>
     <p class="meta">2026-11-08</p>
 
-    <p>Agent A implements a change. Agent B reviews it and approves. Agent A then edits one more file before publishing, and the code that ships is no longer the code Agent B reviewed. Nobody did anything wrong. The review was fine. <strong>It was a review of different code.</strong></p>
-    <p>That gap is what I've been working on in <a href="https://github.com/unclehq/uncle">Uncle</a> (<a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>), an open-source system that orchestrates coding agents and records what actually happened to a change. This post is about why I think the software change, not the agent, should be the unit of trust.</p>
-    <p><em>We are giving coding agents more autonomy without changing how we establish trust in the software they produce.</em></p>
-    <p>Agents can now take an issue, write code, run tests, and open a pull request, in minutes. Then the same system that wrote the code tells us whether the code is good. We get a summary that says the implementation is complete, the tests pass, and the code is ready.</p>
-    <p>But what actually happened? Did the tests run, and finish successfully? Did the reviewer examine the final version of the code? Is the artifact we're about to merge the same artifact that passed verification? Those are different questions from whether the agent believes it did a good job, and we should be able to answer them without asking the agent.</p>
+    <p>Agent A writes a change. Agent B reviews it and says it looks great. Agent A then edits one more file &ldquo;real quick&rdquo; and ships. Nobody lied. The review was fine. <strong>It was a review of different code.</strong></p>
+    <p>I have been doing this for roughly thirty years, and I can report that &ldquo;the thing we checked is not the thing we shipped&rdquo; is the oldest bug in the business. We have simply found a way to do it faster and with more confidence. I wrote <a href="https://github.com/unclehq/uncle">Uncle</a> (<a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>) because I got tired of it.</p>
 
     <h2>The agent is not the authority</h2>
 
-    <p>For most of my career, I've worked on systems where correctness matters more than the confidence of the component producing an answer. At Yahoo I built Yahoo Mail's anti-spam system, which handled billions of messages a month and produced six patents. More recently I've worked on distributed systems, ML infrastructure, and LLM inference.</p>
-    <p>One lesson from that work has stayed with me: a component shouldn't get to declare its own output trustworthy just because it produced it.</p>
-    <p>We already understand this in traditional software engineering. The developer writes the code. Tests execute independently. CI records the results. Reviewers examine the changes. The repository maintains the history. Release systems decide what gets published.</p>
-    <p>These mechanisms aren't perfect. They don't guarantee correct software. But they establish boundaries between producing something and deciding whether to trust it. AI agents make those boundaries more important, not less.</p>
-    <p>A coding agent is capable of making mistakes, misunderstanding instructions, overlooking failures, and producing plausible explanations for things that didn't happen. That doesn't require malicious intent. A model can confidently report success because it misunderstood a tool response or lost track of an earlier failure.</p>
-    <p>The more autonomous the agent becomes, the less reasonable it is to treat its final summary as authoritative.</p>
-
-    <h2>A second agent isn't enough</h2>
-
-    <p>One popular response is to have another model review the first model's work. That's useful. I use independent review myself. But it doesn't solve the entire problem.</p>
-    <p>Suppose Agent A implements a change. Agent B reviews it and approves it. Agent A then modifies one file to address a separate issue before publishing. The final code is no longer the code Agent B reviewed.</p>
-    <p>Both agents might have behaved reasonably. The review might have been excellent. The tests might have passed. But the review no longer establishes anything about the final artifact. Here's a simplified example:</p>
-    <pre><code>Implementation       tree f12b8...
-                         |
-                         v
-Independent review   tree f12b8...   PASS
-                         |
-                         v
-Verification         tree f12b8...   PASS
-                         |
-                         v
-Publication          tree 91ae3...
-
-                     NOT VERIFIED</code></pre>
-    <p>The important distinction is that the review wasn't necessarily wrong. <strong>It was a review of different code.</strong></p>
-    <p>Adding more reviewers doesn't fix this. Neither does using a more capable model. You need a way to establish that the thing being published is the thing that passed the required process.</p>
+    <p>At Yahoo I built Yahoo Mail's anti-spam system. Billions of messages a month, six patents, and one durable lesson: a component does not get to declare its own output trustworthy because it produced it. Spammers taught me that. Apparently it also applies to the thing we now let write our code, review our code, and then tell us how it went.</p>
+    <p>Today's workflow: the agent implements, tests, reviews itself, and reports &ldquo;done, all green.&rdquo; Did the tests run? Did they finish? Did the reviewer look at the final code? Who knows, ask the agent. (It will say yes. It is very confident. It is always very confident.)</p>
+    <p>A second reviewing agent does not fix this. Adding reviewers to an unbound review is just adding more people to a meeting that has already ended.</p>
 
     <h2>The change is the unit of trust</h2>
 
-    <p>Most agent frameworks are organized around the agent. Which model is running? What tools can it use? How much context does it have? How does it recover from failure? How do multiple agents coordinate? Those are important engineering questions.</p>
-    <p>But I've become more interested in a different question: <strong>what can we prove about the software change after the agents are finished?</strong></p>
-    <p>A software change has an identity. In Git, we can identify the contents of a tree using its hash. That gives us something concrete to attach evidence to.</p>
-    <p>Instead of recording that an agent said it completed a review, we can record that a review stage completed against a particular tree. Instead of accepting a claim that tests passed, we can record the actual verification result. Instead of recording that a person approved something, we can bind the approval to the artifact they examined. And before publication, we can check whether the artifact still matches.</p>
-    <p>The intended process becomes:</p>
-    <pre><code>Requirements
-     |
-     v
-Approved plan
-     |
-     v
-Implementation       tree f12b8...
-     |
-     v
+    <p>A Git tree has a hash. That is a concrete thing to staple evidence to. So record that the review passed <em>against tree f12b8</em>, that the tests passed <em>against tree f12b8</em>, that a human approved <em>tree f12b8</em>, and then check, before publishing, that you are still holding tree f12b8:</p>
+    <pre><code>Implementation       tree f12b8...
 Independent review   tree f12b8...   PASS
-     |
-     v
 Verification         tree f12b8...   PASS
-     |
-     v
-Human approval       tree f12b8...
-     |
-     v
-Publication          tree f12b8...
+Publication          tree 91ae3...
 
-                     VERIFIED</code></pre>
-    <p>If the tree changes, the evidence no longer applies to the new tree. That sounds obvious. But it's a property that needs to be enforced by the workflow, not merely requested in a prompt.</p>
-
-    <h2>The agent shouldn't write its own evidence</h2>
-
-    <p>There's another subtle problem. Suppose an agent completes a task and writes a JSON file containing its results:</p>
-    <pre><code>{
-  "implementation": "pass",
-  "review": "pass",
-  "tests": "pass",
-  "approved": true
-}</code></pre>
-    <p>That file is structured, but structure doesn't make it trustworthy. If the agent controls the evidence, it can accidentally or deliberately misrepresent the outcome.</p>
-    <p>A better approach is for the system coordinating the workflow to record what actually happened. The verification driver invokes the checks, observes their exit codes, records the artifact identity, and produces the evidence. The agent can generate code and explain its decisions. It cannot turn a failed test into a passing result by writing a convincing summary.</p>
-    <p>The evidence also needs to distinguish between three outcomes:</p>
-    <pre><code>pass
-fail
-unavailable</code></pre>
-    <p>That third state matters. A test that never ran isn't a passing test. A reviewer that timed out didn't approve the change. Missing evidence is not evidence of success. A workflow can have policies about what to do when evidence is unavailable, but it shouldn't rewrite history to make the result look better.</p>
+                     NOT VERIFIED</code></pre>
+    <p>Revolutionary, I know. Change the tree and the evidence stops applying. The only twist is that the workflow has to enforce it, because &ldquo;please remember to re-run the review&rdquo; in a prompt is a wish, not a control.</p>
+    <p>Same for the evidence itself. If the agent writes the JSON that says <code>"tests": "pass"</code>, you have learned what the agent would like you to believe. The driver runs the checks, reads the exit codes, and writes the record. Three outcomes: pass, fail, unavailable. A test that never ran is not a pass. A reviewer that timed out did not approve. Missing evidence is not good news, whatever the dashboard colour.</p>
 
     <h2>Isn't this just branch protection?</h2>
 
-    <p>Partly, and it's the first thing I'd ask. GitHub can dismiss stale approvals when new commits are pushed, and required checks run against the head commit. If your whole process happens inside a pull request, that covers a lot. It misses a few things:</p>
+    <p>Mostly, if everything happens inside a pull request. GitHub will dismiss stale approvals and run required checks on the head commit. Good. Now the parts it can't see:</p>
     <ul>
-      <li><strong>It starts too late.</strong> The agent's review and verification happen locally, before any PR exists, where GitHub has no visibility.</li>
-      <li><strong>An LLM reviewer's pass isn't a GitHub approval.</strong> Nothing dismisses it when the code changes, because GitHub doesn't know it exists.</li>
-      <li><strong>The evidence travels with the change.</strong> Someone can check it outside GitHub, without trusting your CI.</li>
-      <li><strong>It binds more than code.</strong> The approved plan and the requirements are pinned too, not only the diff.</li>
-      <li><strong>It records who approved.</strong> A person approving and an approval delegated to an agent look identical to GitHub. Here they are recorded differently.</li>
+      <li>The agent's review and verification happen locally, before a PR exists. GitHub is not in the room.</li>
+      <li>An LLM reviewer's thumbs-up is not a GitHub approval, so nothing dismisses it when the code changes.</li>
+      <li>The evidence travels with the change, so you can check it without trusting my CI.</li>
+      <li>It pins the plan and the requirements, not only the diff.</li>
+      <li>It records whether a human approved or an agent approved on a human's behalf. GitHub cannot tell these apart.</li>
     </ul>
-    <p>This isn't new in spirit. SLSA, in-toto, and a growing set of tools attach provenance to builds or pull requests. Uncle's focus is narrower: binding an agent's internal process stages (plan, implementation, review, verification, approval) to one Git tree.</p>
+    <p>None of this is a new idea. SLSA and in-toto exist, and several newer tools attach provenance to builds and PRs. Uncle's narrow bit is binding an agent's internal stages (plan, implement, review, verify, approve) to one tree.</p>
 
-    <h2>I built Uncle to explore this</h2>
+    <h2>Does it work? Here is the actual output</h2>
 
-    <p>I've been working on an open-source project called <a href="https://github.com/unclehq/uncle">Uncle</a>. Uncle is a terminal-native development system that orchestrates coding agents such as Claude, Codex, Kimi, and locally hosted models. You can describe an application or give it a GitHub issue. It plans the work, implements it, performs independent review and verification, and prepares a pull request. You can talk to Uncle while it works, redirect an implementation, ask questions, or let it run unattended.</p>
-    <p>The part I'm most interested in, though, isn't generating the code. It's establishing what happened afterward.</p>
-    <p>Uncle separates the coding agents from the workflow driver that records verification evidence. The implementing agent doesn't approve its own work. Reviews and checks are associated with the relevant Git tree. Human approvals are recorded separately from delegated decisions.</p>
-    <p>For completed changes, Uncle can produce a portable attestation using an in-toto statement wrapped in a DSSE envelope. The attestation binds together the requirements, plan, implementation artifact, review evidence, verification results, approvals, and publication artifact. The goal is to let someone independently check whether the published change went through the process claimed for it. For example:</p>
-    <pre><code>uncle verify</code></pre>
-    <p>Or for a pull request:</p>
-    <pre><code>uncle verify 123</code></pre>
-    <p>Here is the real output, from running <code>uncle verify</code> against a pull request on this site's own repository:</p>
+    <p>Running <code>uncle verify</code> on a PR in this site's own repo:</p>
     <pre><code>$ uncle verify 4
 UNCLE CHANGE VERIFICATION
 
@@ -360,47 +292,25 @@ UNCLE CHANGE VERIFICATION
   present:   missing
 
 NOT VERIFIED</code></pre>
-    <p>That change merged anyway. The verifier didn't block it; it reported that the review document the approval was bound to could not be found, and declined to call the result verified. Note the middle line too: with no signature, this attestation can show integrity but not authenticity.</p>
-
-<p>If the Git tree no longer matches the artifact identified in the evidence, the verifier refuses to call it verified. The verifier also distinguishes artifact integrity from signature authenticity. An unsigned record or a signature without an established trust root is not equivalent to trusted, authenticated provenance.</p>
-    <p>These distinctions are deliberate. I don't want a system that says "verified" merely because that sounds reassuring. I want one that can explain what it checked, what passed, what failed, and what it couldn't establish.</p>
+    <p>Yes, that is my own PR, and yes, it merged anyway. The verifier didn't block it; it just declined to call it verified, which is exactly the job. A tool that only ever says &ldquo;verified&rdquo; is called a green checkmark, and we already have plenty of those. Note the unsigned line too: integrity, not authenticity.</p>
 
     <h2>What I'm defending against</h2>
 
-    <p>I should be explicit about the threat model, because "accidentally or deliberately" hides a real question: can an agent with shell access on the same machine just edit the evidence?</p>
     <ul>
-      <li><strong>In scope:</strong> an agent that is mistaken or careless. It misreads a tool result, forgets a failure, or edits code after review. The driver records exit codes and tree identities itself, so these show up as mismatches.</li>
-      <li><strong>Partly in scope:</strong> a fully hostile agent with unsandboxed shell access. An agent that can write to the same filesystem as the driver can, in principle, tamper with local state. What Uncle offers there is detection by anyone who later checks the evidence against the tree, and signatures where a trust root is configured. An unsigned attestation does not protect against this.</li>
-      <li><strong>Out of scope:</strong> a compromised machine or a compromised verifier, and bugs that every reviewer and test happens to miss.</li>
+      <li><strong>In scope:</strong> an agent that is mistaken or careless: misreads a tool result, forgets a failure, edits after review. The driver records exit codes and tree identities itself, so this shows up as a mismatch.</li>
+      <li><strong>Partly in scope:</strong> a hostile agent with unsandboxed shell access. If it can write where the driver writes, it can tamper with local state. You get detection when someone later checks evidence against the tree, plus signatures where a trust root exists. Unsigned means no protection here. Use a sandbox.</li>
+      <li><strong>Out of scope:</strong> a compromised machine or verifier, and bugs every reviewer and test misses.</li>
     </ul>
-    <p>Run agents in a sandbox if you're worried about the second case. I'd rather state the boundary than have you find it.</p>
 
     <h2>Verification is not correctness</h2>
 
-    <p>This is an important limitation. A change can pass every required stage and still contain bugs. A reviewer can miss something. Tests can be incomplete. A specification can be wrong. Two models can make the same mistake.</p>
-    <p>A valid attestation doesn't establish that the software is secure, correct, or useful. It establishes something narrower: that the evidence applies to the identified artifact and that the recorded process satisfies the verifier's requirements.</p>
-    <p>That's still valuable. If a test passed against one tree but we're publishing another, we should know. If a change was built unattended without human approval, we shouldn't describe it as human-approved. If the attestation isn't signed by a trusted identity, we shouldn't imply that it is.</p>
-    <p>These are not solutions to every problem in AI-generated software. They're basic engineering properties that should remain true regardless of how capable the models become.</p>
-
-    <h2>Why this matters more as agents improve</h2>
-
-    <p>Today, many coding agents still require substantial supervision. But the direction is clear. They're becoming more capable, more autonomous, and able to work on larger changes. As that happens, the amount of code produced by agents can grow much faster than our capacity to inspect it manually.</p>
-    <p>We can respond by adding more AI reviewers. We probably will. But those reviewers will also be probabilistic systems. They'll have their own failure modes, context limitations, and blind spots. I think we need two complementary approaches.</p>
-    <p>First, use models to do the work they're good at: implementing changes, finding defects, explaining code, and proposing repairs.</p>
-    <p>Second, use deterministic mechanisms wherever possible to establish facts that shouldn't depend on a model's judgment. Did a command execute? What was its exit status? Which artifact was reviewed? Which tree was published? Was approval given by a person, or delegated to an agent? Does the evidence still match? These are questions software can answer without an LLM.</p>
-    <p>The distinction matters because <strong>model intelligence and workflow integrity are not the same thing</strong>. A better model might write better code. It doesn't eliminate the need to establish what was reviewed, tested, and published.</p>
-
-    <h2>What still needs work</h2>
-
-    <p>Uncle is a developing open-source project, not a finished solution to software supply-chain security. Its integrity model has limitations. Not every change currently carries a signed attestation, and unattended changes are deliberately distinguished from human-approved ones.</p>
-    <p>The implementation also needs scrutiny. Are the trust boundaries correctly enforced? Are there edge cases where evidence can become stale? Are the verifier's assumptions appropriate? Can an agent influence something that should be outside its authority? Those are the kinds of questions I want other engineers to ask.</p>
-    <p>The project is written largely in Bash and Python, and it supports multiple coding-agent runners. There are opportunities to contribute to verification, tests, integrations, the terminal interface, and developer experience. I'm particularly interested in people who can find ways to break the integrity guarantees. A convincing counterexample is more useful than a compliment.</p>
+    <p>A change can pass every stage and still be wrong. Reviewers miss things, tests are incomplete, specs are wrong, and two models can make the same mistake in perfect harmony. A valid attestation says the evidence applies to <em>this</em> artifact and the recorded process met the verifier's requirements. That is all. It is still more than &ldquo;the agent said so.&rdquo;</p>
+    <p>Uncle is young and I'd bet on it having holes. It's mostly Bash and Python, supports several agent runners, and not every change carries a signed attestation yet. I would much rather you break it than compliment it. A convincing counterexample beats a compliment every time.</p>
 
     <h2>Delegate the work, not the responsibility</h2>
 
-    <p>I don't think the future of software development is humans manually reviewing every line an AI agent writes. But I also don't think the answer is to trust an agent because it sounds confident, or because another agent agrees with it.</p>
-    <p>We need systems where agents can do increasingly substantial work while the boundaries around verification, approval, and publication remain explicit. That means separating what an agent can do from what it can declare authoritative. It means treating the software change as the object we're verifying. And it means preserving enough evidence that another engineer can independently evaluate what happened.</p>
-    <p>AI agents are getting very good at writing software. <strong>Now we need to get equally serious about proving what they actually did.</strong></p>
+    <p>I don't think the future is humans reading every line an agent writes. I also don't think it's trusting the agent because it sounds sure, or because a second agent nodded along. Let them do the work. Keep &ldquo;what was checked, by whom, against what&rdquo; somewhere an agent can't edit.</p>
+    <p><strong>Agents are getting very good at writing software. Time we got equally good at proving what they did.</strong></p>
 
     <hr>
 
