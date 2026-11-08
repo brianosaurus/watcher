@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Review Wasn't Wrong. It Was a Review of Different Code. · Brian Woods</title>
+  <meta name="description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/ai-agents-verify/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Review Wasn't Wrong. It Was a Review of Different Code.">
+  <meta property="og:description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
+  <meta property="og:url" content="https://brian.biz/blog/ai-agents-verify/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-08">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="verification">
+  <meta property="article:tag" content="provenance">
+  <meta property="article:tag" content="uncle">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="The Review Wasn't Wrong. It Was a Review of Different Code.">
+  <meta name="twitter:description" content="Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Review Wasn't Wrong. It Was a Review of Different Code.",
+    "datePublished": "2026-11-08",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/ai-agents-verify/",
+    "description": "Coding agents can review their own work and report success, but the code that gets published may not be the code that was reviewed. The software change, not the agent, should be the unit of trust.",
+    "keywords": ["ai-agents","verification","provenance","uncle"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="/blog">Blog</a></p>
+    <h1>The Review Wasn't Wrong. It Was a Review of Different Code.</h1>
+    <p class="meta">2026-11-08</p>
+
+    <p>Agent A writes a change. Agent B reviews it and says it looks great. Agent A then edits one more file &ldquo;real quick&rdquo; and ships. Nobody lied. The review was fine. <strong>It was a review of different code.</strong></p>
+    <p>I have been doing this for roughly thirty years, and I can report that &ldquo;the thing we checked is not the thing we shipped&rdquo; is the oldest bug in the business. We have simply found a way to do it faster and with more confidence. I wrote <a href="https://github.com/unclehq/uncle">Uncle</a> (<a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>) because I got tired of it.</p>
+
+    <h2>The agent is not the authority</h2>
+
+    <p>At Yahoo I built Yahoo Mail's anti-spam system. Billions of messages a month, six patents, and one durable lesson: a component does not get to declare its own output trustworthy because it produced it. Spammers taught me that. Apparently it also applies to the thing we now let write our code, review our code, and then tell us how it went.</p>
+    <p>Today's workflow: the agent implements, tests, reviews itself, and reports &ldquo;done, all green.&rdquo; Did the tests run? Did they finish? Did the reviewer look at the final code? Who knows, ask the agent. (It will say yes. It is very confident. It is always very confident.)</p>
+    <p>A second reviewing agent does not fix this. Adding reviewers to an unbound review is just adding more people to a meeting that has already ended.</p>
+
+    <h2>The change is the unit of trust</h2>
+
+    <p>A Git tree has a hash. That is a concrete thing to staple evidence to. So record that the review passed <em>against tree f12b8</em>, that the tests passed <em>against tree f12b8</em>, that a human approved <em>tree f12b8</em>, and then check, before publishing, that you are still holding tree f12b8:</p>
+    <pre><code>Implementation       tree f12b8...
+Independent review   tree f12b8...   PASS
+Verification         tree f12b8...   PASS
+Publication          tree 91ae3...
+
+                     NOT VERIFIED</code></pre>
+    <p>Revolutionary, I know. Change the tree and the evidence stops applying. The only twist is that the workflow has to enforce it, because &ldquo;please remember to re-run the review&rdquo; in a prompt is a wish, not a control.</p>
+    <p>Same for the evidence itself. If the agent writes the JSON that says <code>"tests": "pass"</code>, you have learned what the agent would like you to believe. The driver runs the checks, reads the exit codes, and writes the record. Three outcomes: pass, fail, unavailable. A test that never ran is not a pass. A reviewer that timed out did not approve. Missing evidence is not good news, whatever the dashboard colour.</p>
+
+    <h2>Isn't this just branch protection?</h2>
+
+    <p>Mostly, if everything happens inside a pull request. GitHub will dismiss stale approvals and run required checks on the head commit. Good. Now the parts it can't see:</p>
+    <ul>
+      <li>The agent's review and verification happen locally, before a PR exists. GitHub is not in the room.</li>
+      <li>An LLM reviewer's thumbs-up is not a GitHub approval, so nothing dismisses it when the code changes.</li>
+      <li>The evidence travels with the change, so you can check it without trusting my CI.</li>
+      <li>It pins the plan and the requirements, not only the diff.</li>
+      <li>It records whether a human approved or an agent approved on a human's behalf. GitHub cannot tell these apart.</li>
+    </ul>
+    <p>None of this is a new idea. SLSA and in-toto exist, and several newer tools attach provenance to builds and PRs. Uncle's narrow bit is binding an agent's internal stages (plan, implement, review, verify, approve) to one tree.</p>
+
+    <h2>Does it work? Here is the actual output</h2>
+
+    <p>Running <code>uncle verify</code> on a PR in this site's own repo:</p>
+    <pre><code>$ uncle verify 4
+UNCLE CHANGE VERIFICATION
+
+✓ attestation canonical, in-toto Statement, schema v1
+○ no signature (authentication: none)
+✗ approved ADVERSARIAL_REVIEW digest mismatch (embedded copy)
+  approved:  ed6813b0a5af0110ba2e3344ec1c0cecd7c7e6bb5ff845d439d22784f5f9d8f0
+  present:   missing
+
+NOT VERIFIED</code></pre>
+    <p>Yes, that is my own PR, and yes, it merged anyway. The verifier didn't block it; it just declined to call it verified, which is exactly the job. A tool that only ever says &ldquo;verified&rdquo; is called a green checkmark, and we already have plenty of those. Note the unsigned line too: integrity, not authenticity.</p>
+
+    <h2>What I'm defending against</h2>
+
+    <ul>
+      <li><strong>In scope:</strong> an agent that is mistaken or careless: misreads a tool result, forgets a failure, edits after review. The driver records exit codes and tree identities itself, so this shows up as a mismatch.</li>
+      <li><strong>Partly in scope:</strong> a hostile agent with unsandboxed shell access. If it can write where the driver writes, it can tamper with local state. You get detection when someone later checks evidence against the tree, plus signatures where a trust root exists. Unsigned means no protection here. Use a sandbox.</li>
+      <li><strong>Out of scope:</strong> a compromised machine or verifier, and bugs every reviewer and test misses.</li>
+    </ul>
+
+    <h2>Verification is not correctness</h2>
+
+    <p>A change can pass every stage and still be wrong. Reviewers miss things, tests are incomplete, specs are wrong, and two models can make the same mistake in perfect harmony. A valid attestation says the evidence applies to <em>this</em> artifact and the recorded process met the verifier's requirements. That is all. It is still more than &ldquo;the agent said so.&rdquo;</p>
+    <p>Uncle is young and I'd bet on it having holes. It's mostly Bash and Python, supports several agent runners, and not every change carries a signed attestation yet. I would much rather you break it than compliment it. A convincing counterexample beats a compliment every time.</p>
+
+    <h2>Delegate the work, not the responsibility</h2>
+
+    <p>I don't think the future is humans reading every line an agent writes. I also don't think it's trusting the agent because it sounds sure, or because a second agent nodded along. Let them do the work. Keep &ldquo;what was checked, by whom, against what&rdquo; somewhere an agent can't edit.</p>
+    <p><strong>Agents are getting very good at writing software. Time we got equally good at proving what they did.</strong></p>
+
+    <hr>
+
+    <p><em>Uncle is open source and looking for contributors. The repository is at <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. If you're interested in coding agents, verification, developer tooling, or software supply-chain integrity, I'd welcome contributions, criticism, and attempts to break its assumptions.</em></p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">verification</span>
+      <span class="tag">provenance</span>
+      <span class="tag">uncle</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="/">Brian Woods</a> · <a href="/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
