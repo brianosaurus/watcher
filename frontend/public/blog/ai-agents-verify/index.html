@@ -258,12 +258,27 @@
     <h2>The change is the unit of trust</h2>
 
     <p>A Git tree has a hash. That is a concrete thing to staple evidence to. So record that the review passed <em>against tree f12b8</em>, that the tests passed <em>against tree f12b8</em>, that a human approved <em>tree f12b8</em>, and then check, before publishing, that you are still holding tree f12b8:</p>
-    <pre><code>Implementation       tree f12b8...
-Independent review   tree f12b8...   PASS
-Verification         tree f12b8...   PASS
-Publication          tree 91ae3...
+    <pre><code>➜ uncle verify
+UNCLE CHANGE VERIFICATION
 
-                     NOT VERIFIED</code></pre>
+verifying the attestation on refs/heads/main
+✓ attestation canonical, in-toto Statement, schema v1
+○ no signature (authentication: none)
+✓ approved adversarial review 85cc…c1a4
+✓ approved project plan 713a…9bea
+✓ approved requirements interpretation 17f9…6bda
+✓ approved updated project plan 618a…2c6f
+✓ implementation artifact 252a…1816
+✓ independent review (unavailable, pass, 21 findings, 21 dispositions)
+✓ verification pass
+✓ audit pass
+✓ blocking findings dispositioned: 6 of 6
+✗ required gate ADVERSARIAL_REVIEW has no human approval
+  approved_by:  empty
+  delegated_by: unattended
+✓ head tree matches release artifact 252a…1816
+
+NOT HUMAN VERIFIED</code></pre>
     <p>Revolutionary, I know. Change the tree and the evidence stops applying. The only twist is that the workflow has to enforce it, because &ldquo;please remember to re-run the review&rdquo; in a prompt is a wish, not a control.</p>
     <p>Same for the evidence itself. If the agent writes the JSON that says <code>"tests": "pass"</code>, you have learned what the agent would like you to believe. The driver runs the checks, reads the exit codes, and writes the record. Three outcomes: pass, fail, unavailable. A test that never ran is not a pass. A reviewer that timed out did not approve. Missing evidence is not good news, whatever the dashboard colour.</p>
 
