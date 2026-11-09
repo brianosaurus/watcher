@@ -293,6 +293,29 @@ UNCLE CHANGE VERIFICATION
 
 NOT VERIFIED</code></pre>
     <p>Yes, that is my own PR, and yes, it merged anyway. The verifier didn't block it; it just declined to call it verified, which is exactly the job. A tool that only ever says &ldquo;verified&rdquo; is called a green checkmark, and we already have plenty of those. Note the unsigned line too: integrity, not authenticity.</p>
+    <p>For contrast, here is a change that went through the whole process, from a demo project:</p>
+    <pre><code>$ uncle verify
+UNCLE CHANGE VERIFICATION
+
+verifying the attestation on refs/heads/main
+✓ attestation canonical, in-toto Statement, schema v1
+○ no signature (authentication: none)
+✓ approved adversarial review 85cc…c1a4
+✓ approved project plan 713a…9bea
+✓ approved requirements interpretation 17f9…6bda
+✓ approved updated project plan 618a…2c6f
+✓ implementation artifact 252a…1816
+✓ independent review (unavailable, pass, 21 findings, 21 dispositions)
+✓ verification pass
+✓ audit pass
+✓ blocking findings dispositioned: 6 of 6
+✗ required gate ADVERSARIAL_REVIEW has no human approval
+  approved_by:  empty
+  delegated_by: unattended
+✓ head tree matches release artifact 252a…1816
+
+NOT HUMAN VERIFIED</code></pre>
+    <p>Everything checks out: the plan, the requirements, the review, the tests, and the tree you're holding is the tree that was reviewed. It still doesn't get to say &ldquo;verified.&rdquo; The run was unattended, so the adversarial-review gate was approved by the agent on nobody's behalf, and Uncle says so instead of rounding up. That last line is the whole point: <em>verified</em> and <em>a human looked at it</em> are different claims, and the tool refuses to blur them. Also note the reviewer line, which reports <code>unavailable</code> for one of its stages. Unavailable is not pass, and it's printed anyway.</p>
 
     <h2>What I'm defending against</h2>
 
