@@ -258,28 +258,24 @@
     <h2>The change is the unit of trust</h2>
 
     <p>A Git tree has a hash. That is a concrete thing to staple evidence to. So record that the review passed against a particular tree, that the tests passed against that same tree, that a human approved it, and then check, before publishing, that you are still holding that tree. Here is a real run from a demo project:</p>
-    <pre><code>➜  uncle verify
+    <pre><code>➜  uncle git:(main) uncle verify
 UNCLE CHANGE VERIFICATION
 
 verifying the attestation on refs/heads/main
 ✓ attestation canonical, in-toto Statement, schema v1
-○ no signature (authentication: none)
-✓ approved adversarial review 85cc…c1a4
-✓ approved project plan 713a…9bea
-✓ approved requirements interpretation 17f9…6bda
-✓ approved updated project plan 618a…2c6f
-✓ implementation artifact 252a…1816
-✓ independent review (unavailable, pass, 21 findings, 21 dispositions)
-✓ verification pass
-✓ audit pass
-✓ blocking findings dispositioned: 6 of 6
+○ signature present (ssh); no trust root at .uncle/allowed_signers
+✓ approved adversarial review b178…4e2e
+✓ approved baseline report 8eb8…00d4
+✓ approved change plan e552…0841
+✓ approved change spec 7462…8531
+✓ implementation artifact 9edd…fedc
+✗ verification result is fail, not pass; 3 commands: 1 pass, 1 pre-existing, 1 regressed
+✓ blocking findings dispositioned: 0 of 0
 ✗ required gate ADVERSARIAL_REVIEW has no human approval
   approved_by:  empty
   delegated_by: unattended
-✓ head tree matches release artifact 252a…1816
-
-NOT HUMAN VERIFIED</code></pre>
-    <p>Everything checks out: the plan, the requirements, the review, the tests, and the last green check is the one that matters, because the tree you are holding is the tree that was reviewed (<code>252a…1816</code>). It still doesn't get to say &ldquo;verified.&rdquo; The run was unattended, so the adversarial-review gate was approved by the agent on nobody's behalf, and Uncle says so instead of rounding up. <em>Verified</em> and <em>a human looked at it</em> are different claims, and the tool refuses to blur them. Note also the reviewer line, which reports <code>unavailable</code> for one of its stages. Unavailable is not pass, and it's printed anyway.</p>
+✓ head tree matches release artifact 9edd…fedc</code></pre>
+    <p>The last green check is the one that matters here: the tree you are holding, <code>9edd…fedc</code>, is the tree that was reviewed, so the evidence applies to this code. That is all it tells you. Two lines are red. The verification run failed (one command regressed against the baseline), and the adversarial-review gate was approved by the agent on nobody's behalf, because the run was unattended. Uncle prints both instead of rounding up. Also note the signature line: a signature is present, but with no trust root to check it against, it proves nothing about who signed. <em>Verified</em>, <em>signed</em> and <em>a human looked at it</em> are different claims, and the tool refuses to blur them.</p>
     <p>Revolutionary, I know. Change the tree and the evidence stops applying. The only twist is that the workflow has to enforce it, because &ldquo;please remember to re-run the review&rdquo; in a prompt is a wish, not a control.</p>
     <p>Same for the evidence itself. If the agent writes the JSON that says <code>"tests": "pass"</code>, you have learned what the agent would like you to believe. The driver runs the checks, reads the exit codes, and writes the record. Three outcomes: pass, fail, unavailable. A test that never ran is not a pass. A reviewer that timed out did not approve. Missing evidence is not good news, whatever the dashboard colour.</p>
 
