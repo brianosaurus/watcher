@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Agents Can Build an Application. Can They Keep It Working? · Brian Woods</title>
+  <meta name="description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/ai-agents-keep-it-working/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="AI Agents Can Build an Application. Can They Keep It Working?">
+  <meta property="og:description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <meta property="og:url" content="https://brian.biz/blog/ai-agents-keep-it-working/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-10">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="verification">
+  <meta property="article:tag" content="provenance">
+  <meta property="article:tag" content="uncle">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AI Agents Can Build an Application. Can They Keep It Working?">
+  <meta name="twitter:description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "AI Agents Can Build an Application. Can They Keep It Working?",
+    "datePublished": "2026-11-10",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/ai-agents-keep-it-working/",
+    "description": "The hard part of agentic software development isn't generating code. It's making sure every new change preserves what already works.",
+    "keywords": ["ai-agents","verification","provenance","uncle"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="/blog">Blog</a></p>
+    <h1>AI Agents Can Build an Application. Can They Keep It Working?</h1>
+    <p class="meta">2026-11-10</p>
+
+    <p><em>The hard part of agentic software development isn't generating code. It's making sure every new change preserves what already works.</em></p>
+
+    <p>We've reached a strange point in software engineering.</p>
+
+    <p>An AI coding agent can build an entire application. Give it a specification, access to a repository, and enough time, and it can produce thousands of lines of code, tests, documentation, and a working interface.</p>
+
+    <p>That's impressive. But building an application once isn't the same as developing one.</p>
+
+    <p>Real software is never finished. Requirements change. Bugs appear. Features accumulate. Dependencies evolve. A working application becomes the starting point for the next change, and then the next, and then the next.</p>
+
+    <p>That's where agentic coding gets interesting.</p>
+
+    <p><strong>If we want AI agents to develop complete applications that improve over time, rather than repeatedly produce impressive but fragile prototypes, we need a way to establish what works, preserve that evidence, and verify every subsequent change against it.</strong></p>
+
+    <p>Without that discipline, we're not really developing software. We're generating successive versions and hoping each one is better than the last.</p>
+
+    <h2>The problem isn't the first build</h2>
+
+    <p>Imagine asking an AI agent to build a web application.</p>
+
+    <p>It creates a backend, a database, an authentication system, and a frontend. It writes tests. Everything passes.</p>
+
+    <p>You review the result. It looks good.</p>
+
+    <p>Now you ask the agent to add a feature.</p>
+
+    <p>It changes twelve files, updates several dependencies, modifies the database schema, and adjusts some existing functionality to accommodate the new feature.</p>
+
+    <p>The new feature works.</p>
+
+    <p>But does everything else?</p>
+
+    <p>Maybe. The agent might have excellent tests. It might have reviewed its own changes. It might even have used a second agent to inspect the implementation.</p>
+
+    <p>None of those things, by themselves, establish that the application is better than it was before.</p>
+
+    <p>And none of them necessarily establish that the code being delivered is the exact code that was reviewed.</p>
+
+    <p>These are two separate problems.</p>
+
+    <p>The first is correctness: does the software behave as intended?</p>
+
+    <p>The second is integrity: is this the same software that was tested, reviewed, and approved?</p>
+
+    <p>You need both.</p>
+
+    <h2>A passing review is evidence about a particular version of the code</h2>
+
+    <p>Suppose an AI agent completes a change.</p>
+
+    <p>A second agent reviews it. The tests pass. The change is approved.</p>
+
+    <p>At that moment, we have evidence about a particular state of the repository.</p>
+
+    <p>Call it Tree A.</p>
+
+    <p>Now suppose the coding agent makes one more modification after the review. Perhaps it fixes a typo, updates the README, or changes a configuration file.</p>
+
+    <p>We now have Tree B.</p>
+
+    <p>The original review may have been perfectly accurate. The tests may have been perfectly valid.</p>
+
+    <p>But they were performed against Tree A.</p>
+
+    <p><strong>We cannot automatically transfer that evidence to Tree B.</strong></p>
+
+    <p>This is a fundamental problem with treating agentic development as a conversation rather than an engineering process.</p>
+
+    <p>An agent can say it finished. Another agent can say it reviewed the work. A third can summarize the results.</p>
+
+    <p>But what exactly did they review?</p>
+
+    <p>And is that what we're about to ship?</p>
+
+    <h2>A one-line experiment</h2>
+
+    <p>I built an open-source coding agent called <a href="https://github.com/unclehq/uncle">Uncle</a> to explore this problem.</p>
+
+    <p>One of its design principles is that verification evidence should be tied to the exact Git tree it describes.</p>
+
+    <p>Git already gives us a useful primitive for this. A tree object identifies the contents and structure of a repository snapshot. Change a tracked file, and the resulting tree identity changes.</p>
+
+    <p>That lets us perform a simple experiment.</p>
+
+    <p>Start with a repository that has completed Uncle's review and verification process.</p>
+
+    <p>Verification passes.</p>
+
+    <p>We have evidence associated with the reviewed Git tree.</p>
+
+    <p>Now change one line in <code>README.md</code> and commit it.</p>
+
+    <p>Nothing dramatic. No malicious code. No complicated exploit. Just a documentation change.</p>
+
+    <p>But the Git tree is now different.</p>
+
+    <p>Run verification again, this time asking whether the original review evidence applies to the new tree.</p>
+
+    <p>It shouldn't pass.</p>
+
+    <p>Not because the README change is necessarily wrong.</p>
+
+    <p>Not because the application is necessarily broken.</p>
+
+    <p>It should fail because <strong>the evidence describes a different artifact</strong>.</p>
+
+    <p>The original review hasn't become invalid. It remains valid evidence about the original tree. It simply cannot establish that the new tree received the same review.</p>
+
+    <p>To restore verification, the changed tree needs new evidence.</p>
+
+    <p>That's the entire idea.</p>
+
+    <p>A system should never claim that a version of software has been reviewed merely because a previous version was reviewed.</p>
+
+    <p>This experiment demonstrates an integrity property, not a guarantee of correctness. And it depends on the verifier explicitly comparing the new tree against the original attestation. Merely verifying the old artifact again should still succeed.</p>
+
+    <h2>Why this matters more with AI agents</h2>
+
+    <p>Human developers make mistakes. They forget to run tests, introduce regressions, and occasionally commit changes after review.</p>
+
+    <p>We've spent decades developing tools and practices to reduce those risks.</p>
+
+    <p>Version control. Continuous integration. Code review. Branch protection. Reproducible builds. Release signing.</p>
+
+    <p>AI agents don't eliminate the need for those practices.</p>
+
+    <p>They make them more important.</p>
+
+    <p>The reason is velocity.</p>
+
+    <p>A human engineer might make a handful of meaningful changes in an afternoon. An AI agent can modify dozens of files in minutes, and multiple agents can work on different parts of the same system simultaneously.</p>
+
+    <p>The cost of producing changes has collapsed.</p>
+
+    <p>The cost of understanding whether those changes are safe has not.</p>
+
+    <p>In fact, it may have increased.</p>
+
+    <p>When an agent can generate more code than a human can reasonably inspect, we need stronger ways to establish what was changed, what was tested, what was reviewed, and whether the resulting artifact is the one we intended to deliver.</p>
+
+    <p>We cannot solve that problem by asking the agent to be more careful.</p>
+
+    <p>We need engineering mechanisms that don't depend on the agent remembering to be careful.</p>
+
+    <h2>Software development is a sequence of verified transitions</h2>
+
+    <p>I think this changes how we should think about agentic development.</p>
+
+    <p>Instead of treating software development as a sequence of prompts, we should treat it as a sequence of transitions between known states.</p>
+
+    <p>Start with a verified application.</p>
+
+    <p>Call that state A.</p>
+
+    <p>Ask an agent to implement a feature. It produces state B.</p>
+
+    <p>Before accepting B, establish several things:</p>
+
+    <ul>
+      <li>The intended feature works.</li>
+      <li>Existing required behavior still works.</li>
+      <li>The change satisfies the project's constraints.</li>
+      <li>The review and test evidence applies to the exact resulting artifact.</li>
+      <li>The artifact being accepted is the one that passed those checks.</li>
+    </ul>
+
+    <p>Only then does B become the new accepted baseline.</p>
+
+    <p>The next feature starts from B and produces C.</p>
+
+    <p>Then C must earn its place as the new baseline.</p>
+
+    <p>A → B → C → D.</p>
+
+    <p>Each accepted state has evidence supporting it.</p>
+
+    <p>Each transition must satisfy the requirements for acceptance.</p>
+
+    <p>And every piece of evidence must be associated with the artifact it actually describes.</p>
+
+    <p>This doesn't mean every change needs a human to read every line of code. It means every accepted change needs to pass a defined verification process.</p>
+
+    <p>Some checks can be automated. Some can be performed by independent agents. Some require human judgment.</p>
+
+    <p>The important thing is that the process produces evidence rather than reassurance.</p>
+
+    <h2>Verification is not the same as proving correctness</h2>
+
+    <p>There's an important limitation here.</p>
+
+    <p>A Git-tree attestation cannot tell us whether a feature is useful.</p>
+
+    <p>It cannot prove that an algorithm is correct.</p>
+
+    <p>It cannot establish that a security vulnerability doesn't exist.</p>
+
+    <p>It cannot guarantee that the tests cover every important behavior.</p>
+
+    <p>What it can do is establish that particular evidence applies to a particular artifact.</p>
+
+    <p>That sounds modest, but it's essential.</p>
+
+    <p>Imagine running an excellent test suite against one version of an application and then deploying a different version.</p>
+
+    <p>The quality of the tests doesn't help if the results aren't tied to what you deploy.</p>
+
+    <p>The same is true of agent reviews.</p>
+
+    <p>We need both meaningful validation and artifact integrity.</p>
+
+    <p>Tests and reviews establish properties of software, within the limits of what they actually check.</p>
+
+    <p>Attestations and tree identity establish which software those results describe.</p>
+
+    <p>Neither replaces the other.</p>
+
+    <h2>The application must improve, not merely change</h2>
+
+    <p>There's another piece of this that I think deserves more attention.</p>
+
+    <p>Passing verification doesn't automatically mean an application has improved.</p>
+
+    <p>A new feature might work while making the product harder to use. A refactoring might preserve test results while making the system more difficult to maintain. A performance optimization might help one workload and hurt another.</p>
+
+    <p>So the acceptance process needs more than a green checkmark.</p>
+
+    <p>It needs explicit expectations.</p>
+
+    <p>What behavior are we trying to add?</p>
+
+    <p>What behavior must remain unchanged?</p>
+
+    <p>What performance, security, reliability, and compatibility constraints must continue to hold?</p>
+
+    <p>How will we know whether the change was successful?</p>
+
+    <p>These questions are familiar to experienced engineers. They're also exactly the questions that become easy to skip when generating software is nearly effortless.</p>
+
+    <p>The faster we can build, the more important it becomes to define what success means before we build.</p>
+
+    <p>For an agentically developed application, I would want each accepted version to carry enough evidence to answer two questions:</p>
+
+    <p><strong>Is this the exact artifact we evaluated?</strong></p>
+
+    <p><strong>Did that evaluation establish the properties we require?</strong></p>
+
+    <p>The first is an integrity question.</p>
+
+    <p>The second is an engineering question.</p>
+
+    <p>Together, they provide a foundation for continuous improvement.</p>
+
+    <p>They still don't guarantee that every accepted version is objectively better. That requires choosing good requirements, tests, and measurements. But they give us a disciplined way to make progress and detect regressions instead of relying on intuition.</p>
+
+    <h2>The only sustainable way forward</h2>
+
+    <p>I don't believe every AI coding project needs Uncle.</p>
+
+    <p>There are other ways to implement these ideas. GitHub branch protection, CI systems, artifact attestations, reproducible builds, and established software supply-chain frameworks already provide important pieces of the solution.</p>
+
+    <p>But I do believe that <strong>some form of evidence-backed, artifact-bound acceptance is necessary if we're going to rely on agents to develop and maintain substantial applications over time.</strong></p>
+
+    <p>The specific tools are negotiable.</p>
+
+    <p>The engineering principle isn't.</p>
+
+    <p>If we cannot establish which version of the software was evaluated, what requirements it satisfied, and whether the version we're accepting is the same one, we have no reliable basis for claiming that our application is improving.</p>
+
+    <p>We can keep prompting agents.</p>
+
+    <p>We can keep generating features.</p>
+
+    <p>We can keep watching demonstrations that look fantastic.</p>
+
+    <p>But eventually we need to know whether the application we have today is actually better than the one we had yesterday.</p>
+
+    <p>And we need to know that without simply asking the agent that wrote it.</p>
+
+    <p>That's the problem I'm working on with <a href="https://github.com/unclehq/uncle">Uncle</a>.</p>
+
+    <p>AI agents have made building software dramatically easier.</p>
+
+    <p><strong>Now we need to make accumulating trustworthy improvements just as systematic.</strong></p>
+
+    <p>Because the future of agentic software development isn't an agent that can build an application once.</p>
+
+    <p>It's an engineering process that lets agents keep improving that application without losing what made it work in the first place.</p>
+
+    <hr>
+
+    <p><em>Uncle is open source: <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. For a closer look at the artifact-integrity problem, see <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code</a>.</em></p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">verification</span>
+      <span class="tag">provenance</span>
+      <span class="tag">uncle</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="/">Brian Woods</a> · <a href="/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
