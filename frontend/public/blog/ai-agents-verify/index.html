@@ -258,7 +258,7 @@
     <h2>The change is the unit of trust</h2>
 
     <p>A Git tree has a hash. That is a concrete thing to staple evidence to. So record that the review passed against a particular tree, that the tests passed against that same tree, that a human approved it, and then check, before publishing, that you are still holding that tree. Here is a real run from a demo project:</p>
-    <pre><code>➜  uncle verify
+    <pre><code>➜ uncle verify
 UNCLE CHANGE VERIFICATION
 
 verifying the attestation on refs/heads/main
@@ -268,7 +268,7 @@ verifying the attestation on refs/heads/main
 ✓ approved project plan 3ca8…d0f2
 ✓ approved requirements interpretation 71e6…e70d
 ✓ approved updated project plan 65a8…81a9
-✓ implementation artifact 6be1…aa07
+✓ implementation artifact 59ef…a7b1
 ✓ review stage ran (recorded result: pass)
 ✓ plan stage ran (recorded result: pass)
 ✓ implementation stage ran (recorded result: pass)
@@ -278,7 +278,8 @@ verifying the attestation on refs/heads/main
 ✓ build verdict recorded: NOT_READY; completed over an override (attested as recorded, not as correct)
 ✓ blocking findings dispositioned: 0 of 0
 ✓ human approvals: adversarial review, implementation review, project plan, requirements interpretation, updated project plan
-✓ head tree matches release artifact 6be1…aa07
+✓ head tree matches release artifact 59ef…a7b1
+✓ revalidated: carried forward from d007…20c1 across documentation only (README.md)
 
 VERIFIED</code></pre>
     <p>The last green check is the one that matters here: the tree you are holding, <code>9edd…fedc</code>, is the tree that was reviewed, so the evidence applies to this code. That is all it tells you. Two lines are red. The verification run failed (one command regressed against the baseline), and the adversarial-review gate was approved by the agent on nobody's behalf, because the run was unattended. Uncle prints both instead of rounding up. Also note the signature line: a signature is present, but with no trust root to check it against, it proves nothing about who signed. <em>Verified</em>, <em>signed</em> and <em>a human looked at it</em> are different claims, and the tool refuses to blur them.</p>
