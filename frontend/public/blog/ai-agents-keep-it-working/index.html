@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Agents Can Build an Application. Can They Keep It Working? · Brian Woods</title>
-  <meta name="description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <title>What Agent Provenance Has to Do That CI Never Did · Brian Woods</title>
+  <meta name="description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/blog/ai-agents-keep-it-working/">
   <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
   <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="AI Agents Can Build an Application. Can They Keep It Working?">
-  <meta property="og:description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <meta property="og:title" content="What Agent Provenance Has to Do That CI Never Did">
+  <meta property="og:description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
   <meta property="og:url" content="https://brian.biz/blog/ai-agents-keep-it-working/">
   <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
   <meta property="article:published_time" content="2026-11-10">
@@ -22,8 +22,8 @@
   <meta property="article:tag" content="uncle">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="AI Agents Can Build an Application. Can They Keep It Working?">
-  <meta name="twitter:description" content="The hard part of agentic software development isn&#x27;t generating code. It&#x27;s making sure every new change preserves what already works.">
+  <meta name="twitter:title" content="What Agent Provenance Has to Do That CI Never Did">
+  <meta name="twitter:description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
   <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "AI Agents Can Build an Application. Can They Keep It Working?",
+    "headline": "What Agent Provenance Has to Do That CI Never Did",
     "datePublished": "2026-11-10",
     "author": {
       "@type": "Person",
@@ -42,7 +42,7 @@
       "url": "https://brian.biz/"
     },
     "url": "https://brian.biz/blog/ai-agents-keep-it-working/",
-    "description": "The hard part of agentic software development isn't generating code. It's making sure every new change preserves what already works.",
+    "description": "Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.",
     "keywords": ["ai-agents","verification","provenance","uncle"]
   }
   </script>
@@ -215,6 +215,12 @@
       margin: 48px 0;
     }
 
+    .table-scroll { overflow-x: auto; margin: 24px 0; }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--bg-elevated); color: var(--text-bright); }
+
     footer {
       position: relative;
       z-index: 1;
@@ -243,300 +249,124 @@
 
   <article>
     <p class="eyebrow"><a href="/blog">Blog</a></p>
-    <h1>AI Agents Can Build an Application. Can They Keep It Working?</h1>
-    <p class="meta">2026-11-10</p>
-
-    <p><em>The hard part of agentic software development isn't generating code. It's making sure every new change preserves what already works.</em></p>
-
-    <p>We've reached a strange point in software engineering.</p>
-
-    <p>An AI coding agent can build an entire application. Give it a specification, access to a repository, and enough time, and it can produce thousands of lines of code, tests, documentation, and a working interface.</p>
-
-    <p>That's impressive. But building an application once isn't the same as developing one.</p>
-
-    <p>Real software is never finished. Requirements change. Bugs appear. Features accumulate. Dependencies evolve. A working application becomes the starting point for the next change, and then the next, and then the next.</p>
-
-    <p>That's where agentic coding gets interesting.</p>
-
-    <p><strong>If we want AI agents to develop complete applications that improve over time, rather than repeatedly produce impressive but fragile prototypes, we need a way to establish what works, preserve that evidence, and verify every subsequent change against it.</strong></p>
-
-    <p>Without that discipline, we're not really developing software. We're generating successive versions and hoping each one is better than the last.</p>
-
-    <h2>The problem isn't the first build</h2>
-
-    <p>Imagine asking an AI agent to build a web application.</p>
-
-    <p>It creates a backend, a database, an authentication system, and a frontend. It writes tests. Everything passes.</p>
-
-    <p>You review the result. It looks good.</p>
-
-    <p>Now you ask the agent to add a feature.</p>
-
-    <p>It changes twelve files, updates several dependencies, modifies the database schema, and adjusts some existing functionality to accommodate the new feature.</p>
-
-    <p>The new feature works.</p>
-
-    <p>But does everything else?</p>
-
-    <p>Maybe. The agent might have excellent tests. It might have reviewed its own changes. It might even have used a second agent to inspect the implementation.</p>
-
-    <p>None of those things, by themselves, establish that the application is better than it was before.</p>
-
-    <p>And none of them necessarily establish that the code being delivered is the exact code that was reviewed.</p>
-
-    <p>These are two separate problems.</p>
-
-    <p>The first is correctness: does the software behave as intended?</p>
-
-    <p>The second is integrity: is this the same software that was tested, reviewed, and approved?</p>
-
-    <p>You need both.</p>
-
-    <h2>A passing review is evidence about a particular version of the code</h2>
-
-    <p>Suppose an AI agent completes a change.</p>
-
-    <p>A second agent reviews it. The tests pass. The change is approved.</p>
-
-    <p>At that moment, we have evidence about a particular state of the repository.</p>
-
-    <p>Call it Tree A.</p>
-
-    <p>Now suppose the coding agent makes one more modification after the review. Perhaps it fixes a typo, updates the README, or changes a configuration file.</p>
-
-    <p>We now have Tree B.</p>
-
-    <p>The original review may have been perfectly accurate. The tests may have been perfectly valid.</p>
-
-    <p>But they were performed against Tree A.</p>
-
-    <p><strong>We cannot automatically transfer that evidence to Tree B.</strong></p>
-
-    <p>This is a fundamental problem with treating agentic development as a conversation rather than an engineering process.</p>
-
-    <p>An agent can say it finished. Another agent can say it reviewed the work. A third can summarize the results.</p>
-
-    <p>But what exactly did they review?</p>
-
-    <p>And is that what we're about to ship?</p>
-
-    <h2>A one-line experiment</h2>
-
-    <p>I built an open-source coding agent called <a href="https://github.com/unclehq/uncle">Uncle</a> to explore this problem.</p>
-
-    <p>One of its design principles is that verification evidence should be tied to the exact Git tree it describes.</p>
-
-    <p>Git already gives us a useful primitive for this. A tree object identifies the contents and structure of a repository snapshot. Change a tracked file, and the resulting tree identity changes.</p>
-
-    <p>That lets us perform a simple experiment.</p>
-
-    <p>Start with a repository that has completed Uncle's review and verification process.</p>
-
-    <p>Verification passes.</p>
-
-    <p>We have evidence associated with the reviewed Git tree.</p>
-
-    <p>Now change one line in <code>README.md</code> and commit it.</p>
-
-    <p>Nothing dramatic. No malicious code. No complicated exploit. Just a documentation change.</p>
-
-    <p>But the Git tree is now different.</p>
-
-    <p>Run verification again, this time asking whether the original review evidence applies to the new tree.</p>
-
-    <p>It shouldn't pass.</p>
-
-    <p>Not because the README change is necessarily wrong.</p>
-
-    <p>Not because the application is necessarily broken.</p>
-
-    <p>It should fail because <strong>the evidence describes a different artifact</strong>.</p>
-
-    <p>The original review hasn't become invalid. It remains valid evidence about the original tree. It simply cannot establish that the new tree received the same review.</p>
-
-    <p>To restore verification, the changed tree needs new evidence.</p>
-
-    <p>That's the entire idea.</p>
-
-    <p>A system should never claim that a version of software has been reviewed merely because a previous version was reviewed.</p>
-
-    <p>This experiment demonstrates an integrity property, not a guarantee of correctness. And it depends on the verifier explicitly comparing the new tree against the original attestation. Merely verifying the old artifact again should still succeed.</p>
-
-    <h2>Why this matters more with AI agents</h2>
-
-    <p>Human developers make mistakes. They forget to run tests, introduce regressions, and occasionally commit changes after review.</p>
-
-    <p>We've spent decades developing tools and practices to reduce those risks.</p>
-
-    <p>Version control. Continuous integration. Code review. Branch protection. Reproducible builds. Release signing.</p>
-
-    <p>AI agents don't eliminate the need for those practices.</p>
-
-    <p>They make them more important.</p>
-
-    <p>The reason is velocity.</p>
-
-    <p>A human engineer might make a handful of meaningful changes in an afternoon. An AI agent can modify dozens of files in minutes, and multiple agents can work on different parts of the same system simultaneously.</p>
-
-    <p>The cost of producing changes has collapsed.</p>
-
-    <p>The cost of understanding whether those changes are safe has not.</p>
-
-    <p>In fact, it may have increased.</p>
-
-    <p>When an agent can generate more code than a human can reasonably inspect, we need stronger ways to establish what was changed, what was tested, what was reviewed, and whether the resulting artifact is the one we intended to deliver.</p>
-
-    <p>We cannot solve that problem by asking the agent to be more careful.</p>
-
-    <p>We need engineering mechanisms that don't depend on the agent remembering to be careful.</p>
-
-    <h2>Software development is a sequence of verified transitions</h2>
-
-    <p>I think this changes how we should think about agentic development.</p>
-
-    <p>Instead of treating software development as a sequence of prompts, we should treat it as a sequence of transitions between known states.</p>
-
-    <p>Start with a verified application.</p>
-
-    <p>Call that state A.</p>
-
-    <p>Ask an agent to implement a feature. It produces state B.</p>
-
-    <p>Before accepting B, establish several things:</p>
-
-    <ul>
-      <li>The intended feature works.</li>
-      <li>Existing required behavior still works.</li>
-      <li>The change satisfies the project's constraints.</li>
-      <li>The review and test evidence applies to the exact resulting artifact.</li>
-      <li>The artifact being accepted is the one that passed those checks.</li>
-    </ul>
-
-    <p>Only then does B become the new accepted baseline.</p>
-
-    <p>The next feature starts from B and produces C.</p>
-
-    <p>Then C must earn its place as the new baseline.</p>
-
-    <p>A → B → C → D.</p>
-
-    <p>Each accepted state has evidence supporting it.</p>
-
-    <p>Each transition must satisfy the requirements for acceptance.</p>
-
-    <p>And every piece of evidence must be associated with the artifact it actually describes.</p>
-
-    <p>This doesn't mean every change needs a human to read every line of code. It means every accepted change needs to pass a defined verification process.</p>
-
-    <p>Some checks can be automated. Some can be performed by independent agents. Some require human judgment.</p>
-
-    <p>The important thing is that the process produces evidence rather than reassurance.</p>
-
-    <h2>Verification is not the same as proving correctness</h2>
-
-    <p>There's an important limitation here.</p>
-
-    <p>A Git-tree attestation cannot tell us whether a feature is useful.</p>
-
-    <p>It cannot prove that an algorithm is correct.</p>
-
-    <p>It cannot establish that a security vulnerability doesn't exist.</p>
-
-    <p>It cannot guarantee that the tests cover every important behavior.</p>
-
-    <p>What it can do is establish that particular evidence applies to a particular artifact.</p>
-
-    <p>That sounds modest, but it's essential.</p>
-
-    <p>Imagine running an excellent test suite against one version of an application and then deploying a different version.</p>
-
-    <p>The quality of the tests doesn't help if the results aren't tied to what you deploy.</p>
-
-    <p>The same is true of agent reviews.</p>
-
-    <p>We need both meaningful validation and artifact integrity.</p>
-
-    <p>Tests and reviews establish properties of software, within the limits of what they actually check.</p>
-
-    <p>Attestations and tree identity establish which software those results describe.</p>
-
-    <p>Neither replaces the other.</p>
-
-    <h2>The application must improve, not merely change</h2>
-
-    <p>There's another piece of this that I think deserves more attention.</p>
-
-    <p>Passing verification doesn't automatically mean an application has improved.</p>
-
-    <p>A new feature might work while making the product harder to use. A refactoring might preserve test results while making the system more difficult to maintain. A performance optimization might help one workload and hurt another.</p>
-
-    <p>So the acceptance process needs more than a green checkmark.</p>
-
-    <p>It needs explicit expectations.</p>
-
-    <p>What behavior are we trying to add?</p>
-
-    <p>What behavior must remain unchanged?</p>
-
-    <p>What performance, security, reliability, and compatibility constraints must continue to hold?</p>
-
-    <p>How will we know whether the change was successful?</p>
-
-    <p>These questions are familiar to experienced engineers. They're also exactly the questions that become easy to skip when generating software is nearly effortless.</p>
-
-    <p>The faster we can build, the more important it becomes to define what success means before we build.</p>
-
-    <p>For an agentically developed application, I would want each accepted version to carry enough evidence to answer two questions:</p>
-
-    <p><strong>Is this the exact artifact we evaluated?</strong></p>
-
-    <p><strong>Did that evaluation establish the properties we require?</strong></p>
-
-    <p>The first is an integrity question.</p>
-
-    <p>The second is an engineering question.</p>
-
-    <p>Together, they provide a foundation for continuous improvement.</p>
-
-    <p>They still don't guarantee that every accepted version is objectively better. That requires choosing good requirements, tests, and measurements. But they give us a disciplined way to make progress and detect regressions instead of relying on intuition.</p>
-
-    <h2>The only sustainable way forward</h2>
-
-    <p>I don't believe every AI coding project needs Uncle.</p>
-
-    <p>There are other ways to implement these ideas. GitHub branch protection, CI systems, artifact attestations, reproducible builds, and established software supply-chain frameworks already provide important pieces of the solution.</p>
-
-    <p>But I do believe that <strong>some form of evidence-backed, artifact-bound acceptance is necessary if we're going to rely on agents to develop and maintain substantial applications over time.</strong></p>
-
-    <p>The specific tools are negotiable.</p>
-
-    <p>The engineering principle isn't.</p>
-
-    <p>If we cannot establish which version of the software was evaluated, what requirements it satisfied, and whether the version we're accepting is the same one, we have no reliable basis for claiming that our application is improving.</p>
-
-    <p>We can keep prompting agents.</p>
-
-    <p>We can keep generating features.</p>
-
-    <p>We can keep watching demonstrations that look fantastic.</p>
-
-    <p>But eventually we need to know whether the application we have today is actually better than the one we had yesterday.</p>
-
-    <p>And we need to know that without simply asking the agent that wrote it.</p>
-
-    <p>That's the problem I'm working on with <a href="https://github.com/unclehq/uncle">Uncle</a>.</p>
-
-    <p>AI agents have made building software dramatically easier.</p>
-
-    <p><strong>Now we need to make accumulating trustworthy improvements just as systematic.</strong></p>
-
-    <p>Because the future of agentic software development isn't an agent that can build an application once.</p>
-
-    <p>It's an engineering process that lets agents keep improving that application without losing what made it work in the first place.</p>
-
-    <hr>
-
-    <p><em>Uncle is open source: <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. For a closer look at the artifact-integrity problem, see <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code</a>.</em></p>
+    <h1>What Agent Provenance Has to Do That CI Never Did</h1>
+    <p class="meta">2026-11-10 · Brian Woods</p>
+
+<p>Binding review evidence to the exact code that was reviewed is not a new idea. SLSA names the threat. GitHub ships a checkbox for it. Other people are already attaching in-toto attestations to agent-authored pull requests.</p>
+<p>What is new is that coding agents break two assumptions those tools rely on: that the system producing the evidence is separate from the author, and that an approval from your account means you approved. This post covers what the existing tools do, where they stop when an agent is doing the work, and how to close the gap. I'll use Uncle, the open-source tool I'm building, as the worked example, but the mechanisms are the point. Any tool can implement them.</p>
+<h2>Why this matters now</h2>
+<p>Writing code used to be the expensive part, and the person who wrote it could vouch for it. Vibe coding ends both. Anyone can produce a working app in an afternoon, and the person shipping it often hasn't read most of the code. They can't vouch for it, so whatever trust there is has to come from the process that produced it.</p>
+<p>The volume is already large. A study of public GitHub activity found 2,830,284 agent-authored pull requests between January 2024 and April 2026. AI review of those PRs grew by more than two orders of magnitude between early and mid 2025, and agents now routinely review other agents' code. The authors note that human review of these PRs can't be observed in their data. (<a href="https://arxiv.org/abs/2608.21311">Selvanayagam and Ghaleb, ESEM 2026</a>)</p>
+<p>That last point is the problem. When a downstream user, a reviewer, or you six months later looks at a change, nothing says whether a person approved it, which tree an agent reviewed, or whether the tests ever ran. These apps handle real user data, and today's vibe-coded app becomes tomorrow's dependency. The software supply chain spent a decade learning not to trust artifacts without provenance. Agents are making code without provenance the default again.</p>
+<h2>What already exists</h2>
+<p>If one of these covers your case, use it.</p>
+<ul>
+<li><strong>The SLSA threat model</strong> lists "modify code after review" as a named threat: a reviewer approves a good change, then the author swaps in bad code. The prescribed fix is to require review of the most recent revision before submission. (<a href="https://slsa.dev/spec/draft/threats">SLSA threats</a>)</li>
+<li><strong>The SLSA Source Track</strong> defines attestations for source revisions, including whether code review happened. Its review requirement says trusted robots may be exempted from code review. (<a href="https://slsa.dev/spec/v1.1/source-requirements">SLSA source requirements</a>)</li>
+<li><strong>GitHub branch protection</strong> can dismiss stale approvals when new commits are pushed and require approval of the most recent reviewable push. Graphite's <a href="https://github.com/withgraphite/dismiss-stale-approvals">dismiss-stale-approvals</a> action refines it by comparing range-diffs.</li>
+<li><strong><a href="https://github.com/AuroraAeon/agentattest">agentattest</a></strong> binds an AI coding-agent run to a git patch, tree, PR and approval state in an in-toto Statement, signed with Sigstore. Its README treats agent and model names as self-asserted metadata.</li>
+<li><strong><a href="https://github.com/Praxso/attested">attested</a></strong> turns a test run into a signed in-toto receipt for agent-authored pull requests, signed in GitHub Actions.</li>
+</ul>
+<p>These are good tools. The platform-side ones assume a person behind the account and a trusted CI system producing the evidence. Coding agents remove both.</p>
+<h2>The assumptions coding agents break</h2>
+<p><strong>1. The evidence producer is separate from the author.</strong> In normal CI, the developer pushes code and a runner they don't control produces the test results. A coding agent runs on your laptop, in your repository, usually with a shell. It is the author and it shares a filesystem with wherever the evidence gets written. If the agent can write the file that says "tests passed," that file is a claim, not evidence.</p>
+<p><strong>2. An approval from your account means you approved.</strong> GitHub knows which account clicked approve. It cannot know whether you read the diff or whether an agent running under your <code>gh</code> token approved on your behalf. Agents act with their user's credentials, so "approved by Brian" stops meaning what it says.</p>
+<p><strong>3. The work happens before the platform sees it.</strong> An agent may run dozens of implement, review and fix loops locally before anything is pushed. Platform-side controls start when a pull request exists. Everything before that, including which tree the reviewer actually looked at, is invisible to them.</p>
+<p>Agents also add a failure mode human developers rarely have: they report success for checks that never ran. The linter wasn't installed, the network was down, the test command timed out, and the summary still says "all checks pass."</p>
+<h2>What current tools don't do</h2>
+<p>Each row is a place where the existing assumption fails once an agent is doing the work.</p>
+<div class="table-scroll" role="region" aria-label="Agent provenance comparison" tabindex="0">
+<table>
+<thead>
+<tr>
+<th scope="col">Question</th>
+<th scope="col">Existing tools assume</th>
+<th scope="col">With a coding agent</th>
+<th scope="col">What's needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where is evidence produced?</td>
+<td>On a CI runner, after push</td>
+<td>Locally, before any PR exists</td>
+<td>Bind evidence to trees during local work</td>
+</tr>
+<tr>
+<td>Who writes the evidence?</td>
+<td>A trusted CI system</td>
+<td>The agent shares the filesystem</td>
+<td>A driver writes it from exit codes it observed, and detects tampering</td>
+</tr>
+<tr>
+<td>Who approved?</td>
+<td>The account holder</td>
+<td>An agent using your credentials</td>
+<td>Record human approval and delegated approval as different things</td>
+</tr>
+<tr>
+<td>What if a check didn't run?</td>
+<td>The CI job fails</td>
+<td>The agent says "done"</td>
+<td>Record <code>unavailable</code> and treat it as blocking</td>
+</tr>
+<tr>
+<td>Did the code change after review?</td>
+<td>Stale PR approvals get dismissed</td>
+<td>Changes before push are invisible</td>
+<td>Check that the reviewed, verified and published trees are identical</td>
+</tr>
+<tr>
+<td>Who holds the signing key?</td>
+<td>CI's OIDC identity</td>
+<td>A key on the agent's machine</td>
+<td>A key the agent can't use</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To be fair to agentattest: it records an approval state and fails on missing evidence. As far as I can tell from its README, it doesn't separate human from delegated approval or say how checks that never ran are represented. If I've got that wrong, I'd like to know.</p>
+<h2>How to do it</h2>
+<p>These are the mechanisms Uncle uses. Each one closes a row of the table above.</p>
+<ol>
+<li><strong>Bind every stage's evidence to a Git tree.</strong> When a stage finishes (requirements, review, plan, implementation, verification, audit, release), write an envelope recording its result, the digests of its evidence documents, and the artifact digest. The artifact is the Git tree of the working files, minus the tool's own state. Serialize it as canonical JSON (RFC 8785) so hashes and signatures are reproducible.</li>
+<li><strong>Let the driver write evidence, never the model.</strong> The orchestrating process writes envelopes from validator exit codes, gate records and its own hashing. The envelope directory is driver-owned: if anything writes to it during the implementation stage, the driver reverts it from a pre-stage snapshot, logs the attempt and stops the run.</li>
+<li><strong>Make "didn't run" a result.</strong> Each stage records <code>pass</code>, <code>fail</code> or <code>unavailable</code>. Review and audit envelopes are pre-written as <code>unavailable</code> before the reviewer starts, so a reviewer that crashes or never returns leaves that on record. For review, verification and audit, <code>fail</code> and <code>unavailable</code> both block release, and no flag or environment variable changes that.</li>
+<li><strong>Record who approved separately from who delegated.</strong> Each gate records <code>approved_by</code> (a person) separately from <code>delegated_by</code> (<code>unattended</code>, <code>supervisor:explicit:&lt;name&gt;</code>, <code>supervisor:standing:&lt;name&gt;</code>). Only a human keystroke satisfies a required gate. The verifier refuses a gate a supervisor agent approved and reports unattended gates as not human verified.</li>
+<li><strong>Invalidate downstream evidence on change.</strong> Re-approving a document, or going back into implementation, deletes every envelope after it. Evidence can't outlive the inputs it was produced from.</li>
+<li><strong>Check tree equality at the end.</strong> Before release, confirm that implementation, verification input and audit input all name the same tree. Then confirm the published tree equals that tree and the attestation subject. Wrap the result in an in-toto Statement with a DSSE envelope so anyone can verify it with standard formats. Uncle's verifier is a single Python file that needs only <code>git</code>.</li>
+<li><strong>Sign with a key the agent can't use.</strong> Without a signature you get integrity, not authenticity: anything that can rewrite the code can rewrite an unsigned attestation. An ordinary SSH key loaded in ssh-agent doesn't help either, because an unsandboxed agent can call <code>ssh-keygen -Y sign</code> just as the driver does. Use a hardware key that requires a touch (an SSH <code>sk-</code> key) or Sigstore's interactive login, and supply a trust root at verify time.</li>
+</ol>
+<p>None of these is cryptographically novel. The design work is in deciding what the agent is allowed to touch, and in making the absence of evidence count against a change.</p>
+<h2>What this still doesn't prove</h2>
+<ul>
+<li><strong>Correctness.</strong> A verified change went through the process on the code you have. It can still be wrong or insecure. The review is only as good as the reviewer, and the tests only as good as the tests.</li>
+<li><strong>Safety from a hostile agent with your keys.</strong> If the agent can use your signing key, it can sign a forged attestation. Hardware keys and sandboxes are the defense, not the attestation format.</li>
+<li><strong>A compromised machine or verifier.</strong> If the driver or the verifier itself is compromised, every guarantee above is gone.</li>
+<li><strong>Uncle's own history, today.</strong> The attestations committed to Uncle's repository are unsigned, so verifying them gives integrity only (exit 3). Some changes were committed directly, without an attestation.</li>
+</ul>
+<p>Open problems I haven't solved yet:</p>
+<ul>
+<li><strong>Concurrent merges.</strong> Two changes reviewed against the same parent produce a merged tree nobody reviewed. That needs an integration attestation that is explicit about what was re-verified and what wasn't.</li>
+<li><strong>History.</strong> Verifying the latest change should also tell you every earlier change passed. That means chaining attestations along the commit graph and logging their digests to a transparency log like Rekor, so a stolen key can't rewrite the past.</li>
+</ul>
+<h2>The short version</h2>
+<p>Provenance tools were built for a world where the build system was trusted and an approval came from a person. Coding agents run next to the evidence and approve with your credentials. The fix isn't new cryptography. It's a driver the agent can't overrule, evidence that records what didn't happen as well as what did, and approvals that say who actually made them.</p>
+<p>Uncle is open source at <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. The artifact-integrity problem is covered in more depth in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a> If you know a tool that already does any of this, tell me. I'd rather cite it than reinvent it.</p>
+<h3>Sources</h3>
+<ul>
+<li><a href="https://slsa.dev/spec/draft/threats">SLSA threat model</a></li>
+<li><a href="https://slsa.dev/spec/v1.1/source-requirements">SLSA v1.1 Source requirements</a></li>
+<li><a href="https://github.com/withgraphite/dismiss-stale-approvals">withgraphite/dismiss-stale-approvals</a></li>
+<li><a href="https://github.com/AuroraAeon/agentattest">agentattest</a></li>
+<li><a href="https://github.com/Praxso/attested">Praxso/attested</a></li>
+<li>
+<p><a href="https://github.com/unclehq/uncle/blob/main/docs/verify.md">Uncle: verifying a change</a> and <a href="https://github.com/unclehq/uncle/blob/main/GITHUB_INTEGRATION.md">GitHub integration</a></p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/2608.21311">Selvanayagam and Ghaleb, "AI-to-AI Code Reviews of GitHub Pull Requests" (ESEM 2026)</a></p>
+</li>
+</ul>
 
     <div class="tags">
       <span class="tag">ai-agents</span>
