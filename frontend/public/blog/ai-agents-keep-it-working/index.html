@@ -3,27 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>What Agent Provenance Has to Do That CI Never Did · Brian Woods</title>
-  <meta name="description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
+  <title>The Hard Part of AI Coding Is the Second Change · Brian Woods</title>
+  <meta name="description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/blog/ai-agents-keep-it-working/">
   <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
   <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="What Agent Provenance Has to Do That CI Never Did">
-  <meta property="og:description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
+  <meta property="og:title" content="The Hard Part of AI Coding Is the Second Change">
+  <meta property="og:description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
   <meta property="og:url" content="https://brian.biz/blog/ai-agents-keep-it-working/">
   <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
   <meta property="article:published_time" content="2026-11-10">
+  <meta property="article:modified_time" content="2026-11-11">
   <meta property="article:tag" content="ai-agents">
   <meta property="article:tag" content="verification">
   <meta property="article:tag" content="provenance">
   <meta property="article:tag" content="uncle">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="What Agent Provenance Has to Do That CI Never Did">
-  <meta name="twitter:description" content="Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.">
+  <meta name="twitter:title" content="The Hard Part of AI Coding Is the Second Change">
+  <meta name="twitter:description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
   <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,15 +35,16 @@
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "What Agent Provenance Has to Do That CI Never Did",
+    "headline": "The Hard Part of AI Coding Is the Second Change",
     "datePublished": "2026-11-10",
+    "dateModified": "2026-11-11",
     "author": {
       "@type": "Person",
       "name": "Brian Woods",
       "url": "https://brian.biz/"
     },
     "url": "https://brian.biz/blog/ai-agents-keep-it-working/",
-    "description": "Coding agents change who produces evidence and who approves code. What agent provenance needs beyond CI: artifact-bound evidence, independent drivers, and explicit human approvals.",
+    "description": "AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.",
     "keywords": ["ai-agents","verification","provenance","uncle"]
   }
   </script>
@@ -217,7 +219,7 @@
 
     .table-scroll { overflow-x: auto; margin: 24px 0; }
     .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
     th, td { padding: 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
     th { background: var(--bg-elevated); color: var(--text-bright); }
 
@@ -249,124 +251,68 @@
 
   <article>
     <p class="eyebrow"><a href="/blog">Blog</a></p>
-    <h1>What Agent Provenance Has to Do That CI Never Did</h1>
-    <p class="meta">2026-11-10 · Brian Woods</p>
+    <h1>The Hard Part of AI Coding Is the Second Change</h1>
+    <p class="meta">Published 2026-11-10 · Updated 2026-11-11 · Brian Woods</p>
 
-<p>Binding review evidence to the exact code that was reviewed is not a new idea. SLSA names the threat. GitHub ships a checkbox for it. Other people are already attaching in-toto attestations to agent-authored pull requests.</p>
-<p>What is new is that coding agents break two assumptions those tools rely on: that the system producing the evidence is separate from the author, and that an approval from your account means you approved. This post covers what the existing tools do, where they stop when an agent is doing the work, and how to close the gap. I'll use Uncle, the open-source tool I'm building, as the worked example, but the mechanisms are the point. Any tool can implement them.</p>
-<h2>Why this matters now</h2>
-<p>Writing code used to be the expensive part, and the person who wrote it could vouch for it. Vibe coding ends both. Anyone can produce a working app in an afternoon, and the person shipping it often hasn't read most of the code. They can't vouch for it, so whatever trust there is has to come from the process that produced it.</p>
-<p>The volume is already large. A study of public GitHub activity found 2,830,284 agent-authored pull requests between January 2024 and April 2026. AI review of those PRs grew by more than two orders of magnitude between early and mid 2025, and agents now routinely review other agents' code. The authors note that human review of these PRs can't be observed in their data. (<a href="https://arxiv.org/abs/2608.21311">Selvanayagam and Ghaleb, ESEM 2026</a>)</p>
-<p>That last point is the problem. When a downstream user, a reviewer, or you six months later looks at a change, nothing says whether a person approved it, which tree an agent reviewed, or whether the tests ever ran. These apps handle real user data, and today's vibe-coded app becomes tomorrow's dependency. The software supply chain spent a decade learning not to trust artifacts without provenance. Agents are making code without provenance the default again.</p>
-<h2>What already exists</h2>
-<p>If one of these covers your case, use it.</p>
+
+<p>An AI agent builds a payment service. The tests pass. The demo works.</p>
+<p>Then you ask for retries. The agent adds them, but a timeout can mean the charge succeeded and the response got lost. Now a retry charges the customer twice.</p>
+<p>The feature works. The system got worse. The test suite may even be larger. Quantity has always been easier to measure than judgment.</p>
+<p><strong>AI makes building something that works once cheaper. Maintaining it means preserving what must stay true.</strong> Payments must not duplicate. Users must not see another tenant's data. Migrations must tolerate the previous application version.</p>
+<p>Before accepting a change, I want four answers:</p>
 <ul>
-<li><strong>The SLSA threat model</strong> lists "modify code after review" as a named threat: a reviewer approves a good change, then the author swaps in bad code. The prescribed fix is to require review of the most recent revision before submission. (<a href="https://slsa.dev/spec/draft/threats">SLSA threats</a>)</li>
-<li><strong>The SLSA Source Track</strong> defines attestations for source revisions, including whether code review happened. Its review requirement says trusted robots may be exempted from code review. (<a href="https://slsa.dev/spec/v1.1/source-requirements">SLSA source requirements</a>)</li>
-<li><strong>GitHub branch protection</strong> can dismiss stale approvals when new commits are pushed and require approval of the most recent reviewable push. Graphite's <a href="https://github.com/withgraphite/dismiss-stale-approvals">dismiss-stale-approvals</a> action refines it by comparing range-diffs.</li>
-<li><strong><a href="https://github.com/AuroraAeon/agentattest">agentattest</a></strong> binds an AI coding-agent run to a git patch, tree, PR and approval state in an in-toto Statement, signed with Sigstore. Its README treats agent and model names as self-asserted metadata.</li>
-<li><strong><a href="https://github.com/Praxso/attested">attested</a></strong> turns a test run into a signed in-toto receipt for agent-authored pull requests, signed in GitHub Actions.</li>
+<li><strong>Specification:</strong> What must remain true?</li>
+<li><strong>Validation:</strong> Which checks support that claim?</li>
+<li><strong>Provenance:</strong> Does the evidence describe the code we're shipping?</li>
+<li><strong>Authorization:</strong> Who can approve it?</li>
 </ul>
-<p>These are good tools. The platform-side ones assume a person behind the account and a trusted CI system producing the evidence. Coding agents remove both.</p>
-<h2>The assumptions coding agents break</h2>
-<p><strong>1. The evidence producer is separate from the author.</strong> In normal CI, the developer pushes code and a runner they don't control produces the test results. A coding agent runs on your laptop, in your repository, usually with a shell. It is the author and it shares a filesystem with wherever the evidence gets written. If the agent can write the file that says "tests passed," that file is a claim, not evidence.</p>
-<p><strong>2. An approval from your account means you approved.</strong> GitHub knows which account clicked approve. It cannot know whether you read the diff or whether an agent running under your <code>gh</code> token approved on your behalf. Agents act with their user's credentials, so "approved by Brian" stops meaning what it says.</p>
-<p><strong>3. The work happens before the platform sees it.</strong> An agent may run dozens of implement, review and fix loops locally before anything is pushed. Platform-side controls start when a pull request exists. Everything before that, including which tree the reviewer actually looked at, is invisible to them.</p>
-<p>Agents also add a failure mode human developers rarely have: they report success for checks that never ran. The linter wasn't installed, the network was down, the test command timed out, and the summary still says "all checks pass."</p>
-<h2>What current tools don't do</h2>
-<p>Each row is a place where the existing assumption fails once an agent is doing the work.</p>
-<div class="table-scroll" role="region" aria-label="Agent provenance comparison" tabindex="0">
-<table>
-<thead>
-<tr>
-<th scope="col">Question</th>
-<th scope="col">Existing tools assume</th>
-<th scope="col">With a coding agent</th>
-<th scope="col">What's needed</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Where is evidence produced?</td>
-<td>On a CI runner, after push</td>
-<td>Locally, before any PR exists</td>
-<td>Bind evidence to trees during local work</td>
-</tr>
-<tr>
-<td>Who writes the evidence?</td>
-<td>A trusted CI system</td>
-<td>The agent shares the filesystem</td>
-<td>A driver writes it from exit codes it observed, and detects tampering</td>
-</tr>
-<tr>
-<td>Who approved?</td>
-<td>The account holder</td>
-<td>An agent using your credentials</td>
-<td>Record human approval and delegated approval as different things</td>
-</tr>
-<tr>
-<td>What if a check didn't run?</td>
-<td>The CI job fails</td>
-<td>The agent says "done"</td>
-<td>Record <code>unavailable</code> and treat it as blocking</td>
-</tr>
-<tr>
-<td>Did the code change after review?</td>
-<td>Stale PR approvals get dismissed</td>
-<td>Changes before push are invisible</td>
-<td>Check that the reviewed, verified and published trees are identical</td>
-</tr>
-<tr>
-<td>Who holds the signing key?</td>
-<td>CI's OIDC identity</td>
-<td>A key on the agent's machine</td>
-<td>A key the agent can't use</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>To be fair to agentattest: it records an approval state and fails on missing evidence. As far as I can tell from its README, it doesn't separate human from delegated approval or say how checks that never ran are represented. If I've got that wrong, I'd like to know.</p>
-<h2>How to do it</h2>
-<p>These are the mechanisms Uncle uses. Each one closes a row of the table above.</p>
+<p>Use CI and branch protection. Bind evidence to the exact code, and put human gates where requirements change or risk is accepted. An agent's permission to work isn't permission to approve itself.</p>
+
+<h2>Who accepts a change?</h2>
+<p>A person, ultimately. The agent writes code and is never the one who accepts it. Splitting the roles:</p>
+<ul>
+<li><strong>The agent</strong> proposes the change.</li>
+<li><strong>A separate workflow</strong> that the agent doesn't control runs the required checks and records the evidence.</li>
+<li><strong>A human</strong> sets the acceptance policy, approves changes to requirements, accepts known risk, and makes the final call, for example by merging the pull request.</li>
+</ul>
+<p>That doesn't mean a person reads every diff. For routine changes, the policy and the independent checks do most of the work, and a failed required check blocks acceptance on its own. People spend their attention where it matters: when what must stay true changes, or when someone chooses to ship anyway. Which changes need a person and which can pass automatically is a policy decision, and it belongs to the humans who own the system.</p>
+
+<h2>What a valid signature does and doesn't tell you</h2>
+<p>I tested this with a <a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/verify_demo.py">synthetic experiment</a> against <a href="https://github.com/unclehq/uncle">Uncle</a>'s verifier. In one case, a signed record of a build whose tests and audit failed came back <strong>VERIFIED</strong>. The record was authentic under the fixture's trust root. That didn't make the software ready to ship.</p>
+<p>These are two separate questions:</p>
+<ul>
+<li><strong>Attestation validity:</strong> Is this record authentic, intact, and bound to the expected artifact?</li>
+<li><strong>Release readiness:</strong> Does the record satisfy the required tests, reviews, approvals and acceptance policy?</li>
+</ul>
+<p>The verifier answers the first. A verifier that authenticates a record of failed tests is behaving correctly. The failure occurs when another system mistakes authenticity for authorization to release. Its output was honest about the second ("NOT_READY ... attested as recorded, not as correct"). The danger is downstream: when one system's successful verification becomes another system's permission to publish. An authentic record of failed tests is still authentic. It is not evidence that a release should proceed.</p>
+<p>The 15 cases (<a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/verify_demo.py">script</a>, <a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/results.json">full transcript</a>) cover single-change verifier behavior only. The harness controls the keys and approvals, and the verifier doesn't rerun tests. They say nothing about independent trust or a production workflow.</p>
+
+<h2>The trust boundary</h2>
+<p>Any scheme like this assumes the agent cannot modify the signing keys, the verifier's trust roots, or the effective acceptance policy. It also assumes that CI configuration and tests the agent can edit don't silently become trusted policy. If the agent can change any of these, a signature only authenticates a record produced inside the same compromised boundary.</p>
+<p>The experiment shows a case of this. An attacker's key signed the attestation and the repository's own trust file was replaced to match. The verifier returned VERIFIED, because by default it reads its trust root from the repo. Supplying the root from outside the repo made the same attestation fail.</p>
+<p>A local approval prompt isn't cryptographic proof of human intent either.</p>
+
+<h2>A proposal anyone can implement</h2>
+<p>None of these primitives are new. Git provides content-addressed history, in-toto and SLSA define provenance and attestations, Sigstore handles signing and identity, and CI with branch protection enforces much of this inside a pull request. The open problem is connecting requirements, evidence and approvals across agent-driven changes without letting the agent certify its own work. Git records how code changed. This graph would record which changes were accepted, under which requirements and policies, and on the basis of which evidence. The two histories are related, but they answer different questions. CI already records test results, and provenance systems already bind evidence to artifacts. The addition is linking the acceptance decisions themselves, across successive changes. What follows is a proposed design, not something I'm claiming Uncle fully does today.</p>
 <ol>
-<li><strong>Bind every stage's evidence to a Git tree.</strong> When a stage finishes (requirements, review, plan, implementation, verification, audit, release), write an envelope recording its result, the digests of its evidence documents, and the artifact digest. The artifact is the Git tree of the working files, minus the tool's own state. Serialize it as canonical JSON (RFC 8785) so hashes and signatures are reproducible.</li>
-<li><strong>Let the driver write evidence, never the model.</strong> The orchestrating process writes envelopes from validator exit codes, gate records and its own hashing. The envelope directory is driver-owned: if anything writes to it during the implementation stage, the driver reverts it from a pre-stage snapshot, logs the attempt and stops the run.</li>
-<li><strong>Make "didn't run" a result.</strong> Each stage records <code>pass</code>, <code>fail</code> or <code>unavailable</code>. Review and audit envelopes are pre-written as <code>unavailable</code> before the reviewer starts, so a reviewer that crashes or never returns leaves that on record. For review, verification and audit, <code>fail</code> and <code>unavailable</code> both block release, and no flag or environment variable changes that.</li>
-<li><strong>Record who approved separately from who delegated.</strong> Each gate records <code>approved_by</code> (a person) separately from <code>delegated_by</code> (<code>unattended</code>, <code>supervisor:explicit:&lt;name&gt;</code>, <code>supervisor:standing:&lt;name&gt;</code>). Only a human keystroke satisfies a required gate. The verifier refuses a gate a supervisor agent approved and reports unattended gates as not human verified.</li>
-<li><strong>Invalidate downstream evidence on change.</strong> Re-approving a document, or going back into implementation, deletes every envelope after it. Evidence can't outlive the inputs it was produced from.</li>
-<li><strong>Check tree equality at the end.</strong> Before release, confirm that implementation, verification input and audit input all name the same tree. Then confirm the published tree equals that tree and the attestation subject. Wrap the result in an in-toto Statement with a DSSE envelope so anyone can verify it with standard formats. Uncle's verifier is a single Python file that needs only <code>git</code>.</li>
-<li><strong>Sign with a key the agent can't use.</strong> Without a signature you get integrity, not authenticity: anything that can rewrite the code can rewrite an unsigned attestation. An ordinary SSH key loaded in ssh-agent doesn't help either, because an unsandboxed agent can call <code>ssh-keygen -Y sign</code> just as the driver does. Use a hardware key that requires a touch (an SSH <code>sk-</code> key) or Sigstore's interactive login, and supply a trust root at verify time.</li>
+<li><strong>Attest each accepted change.</strong> The record holds the source tree hash, the requirements and policy version, hashes of the test and review evidence, and the identities and scope of human approvals. A trusted workflow signs it with a key the coding agent cannot use.</li>
+<li><strong>Link to what came before.</strong> Each attestation includes the hashes of the preceding accepted attestations. These links form a directed acyclic graph (DAG): a normal change references its predecessor, and a merge references every parent and adds validation of the combined result. Parent approvals alone don't approve a merge.<p>For example, suppose two agents independently produce changes B and C from accepted state A, and both pass their required checks. Merging B and C produces state D, which has a new tree identity. D needs its own validation and acceptance evidence; the approvals for B and C do not automatically approve their combination.</p></li>
+<li><strong>Verify by walking the graph.</strong> Starting from the current PR, a verifier follows the links to an explicitly trusted starting point, checks signatures against independently managed trust roots, matches evidence to artifacts, and enforces the acceptance policy. Missing evidence, failed required checks or absent approvals must prevent acceptance. Verified history can be cached, provided policy and trust changes invalidate the affected entries.</li>
+<li><strong>Keep the records out of the agent's reach.</strong> Store the evidence durably, and anchor accepted graph heads outside the agent's control so a rewritten history can be detected.</li>
 </ol>
-<p>None of these is cryptographically novel. The design work is in deciding what the agent is allowed to touch, and in making the absence of evidence count against a change.</p>
-<h2>What this still doesn't prove</h2>
-<ul>
-<li><strong>Correctness.</strong> A verified change went through the process on the code you have. It can still be wrong or insecure. The review is only as good as the reviewer, and the tests only as good as the tests.</li>
-<li><strong>Safety from a hostile agent with your keys.</strong> If the agent can use your signing key, it can sign a forged attestation. Hardware keys and sandboxes are the defense, not the attestation format.</li>
-<li><strong>A compromised machine or verifier.</strong> If the driver or the verifier itself is compromised, every guarantee above is gone.</li>
-<li><strong>Uncle's own history, today.</strong> The attestations committed to Uncle's repository are unsigned, so verifying them gives integrity only (exit 3). Some changes were committed directly, without an attestation.</li>
-</ul>
-<p>Open problems I haven't solved yet:</p>
-<ul>
-<li><strong>Concurrent merges.</strong> Two changes reviewed against the same parent produce a merged tree nobody reviewed. That needs an integration attestation that is explicit about what was re-verified and what wasn't.</li>
-<li><strong>History.</strong> Verifying the latest change should also tell you every earlier change passed. That means chaining attestations along the commit graph and logging their digests to a transparency log like Rekor, so a stolen key can't rewrite the past.</li>
-</ul>
-<h2>The short version</h2>
-<p>Provenance tools were built for a world where the build system was trusted and an approval came from a person. Coding agents run next to the evidence and approve with your credentials. The fix isn't new cryptography. It's a driver the agent can't overrule, evidence that records what didn't happen as well as what did, and approvals that say who actually made them.</p>
-<p>Uncle is open source at <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a>. The artifact-integrity problem is covered in more depth in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a> If you know a tool that already does any of this, tell me. I'd rather cite it than reinvent it.</p>
-<h3>Sources</h3>
-<ul>
-<li><a href="https://slsa.dev/spec/draft/threats">SLSA threat model</a></li>
-<li><a href="https://slsa.dev/spec/v1.1/source-requirements">SLSA v1.1 Source requirements</a></li>
-<li><a href="https://github.com/withgraphite/dismiss-stale-approvals">withgraphite/dismiss-stale-approvals</a></li>
-<li><a href="https://github.com/AuroraAeon/agentattest">agentattest</a></li>
-<li><a href="https://github.com/Praxso/attested">Praxso/attested</a></li>
-<li>
-<p><a href="https://github.com/unclehq/uncle/blob/main/docs/verify.md">Uncle: verifying a change</a> and <a href="https://github.com/unclehq/uncle/blob/main/GITHUB_INTEGRATION.md">GitHub integration</a></p>
-</li>
-<li>
-<p><a href="https://arxiv.org/abs/2608.21311">Selvanayagam and Ghaleb, "AI-to-AI Code Reviews of GitHub Pull Requests" (ESEM 2026)</a></p>
-</li>
-</ul>
+<p>Cryptography protects the records and their relationships. It cannot prove the tests were sufficient or the software is correct. You can build this around existing CI and review tools, whether or not you use Uncle.</p>
+
+<h2>Back to the retries</h2>
+<p>Here is how that design would handle the payment change:</p>
+<ol>
+<li>The agent implements retries.</li>
+<li>Policy requires idempotency evidence, so those tests run in a workflow the agent doesn't control.</li>
+<li>The results are bound to the exact source tree, and that workflow signs the attestation.</li>
+<li>A failed required check blocks acceptance, however confident the agent's summary is.</li>
+<li>The next change references this one, but approvals don't carry over where the code or policy they covered has changed.</li>
+</ol>
+<p>It still can't guarantee correctness. The tests might miss a race condition, and production will find paths the validation environment never saw. The four questions govern whether a change is accepted. They don't replace observability, rollback, incident response or engineering judgment.</p>
+<p><strong>Generating the next version is getting cheap. Deciding whether to accept it is still the job.</strong></p>
 
     <div class="tags">
       <span class="tag">ai-agents</span>

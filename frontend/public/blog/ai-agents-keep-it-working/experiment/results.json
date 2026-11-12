@@ -1,0 +1,121 @@
+{
+  "uncle_commit": "b27e23c235e01d1da42498a1a149ae406a7c6f08",
+  "verifier_sha256": "9303bc5bd95971a65754a3903859df065c4ec54d6b48c999db99120425d2cb67",
+  "scope": "Synthetic single-change fixtures; the harness controls keys, trust files and claims. No agent, real approval, publication, predecessor chain or merge tested.",
+  "expectation_basis": "Implementation-derived consistency checks, not an independent correctness oracle.",
+  "cases": [
+    {
+      "scenario": "baseline",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    },
+    {
+      "scenario": "source-after-review",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2717 head tree does not match the release artifact\n  head tree (filtered): 061a74edb9f9337af18bca3355b99f087295c752\n  release artifact:     cc905dc67b11963e786eb5874c8bdcb406ddf018\n  subject digest:       cc905dc67b11963e786eb5874c8bdcb406ddf018\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - head tree does not match the release artifact\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "missing-approval",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2717 required gate CHANGE_SPEC has no human approval\n  approved_by:  empty\n  delegated_by: empty\n\u2713 head tree matches release artifact cc90\u2026f018\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - required gate CHANGE_SPEC has no human approval\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "unavailable-verification",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2717 verification result is unavailable, not pass; synthetic missing check\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - verification result is unavailable, not pass; synthetic missing check\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "unattended-approval",
+      "expected_exit": 3,
+      "actual_exit": 3,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u25cb made unattended, no human approval: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nNOT HUMAN VERIFIED\n"
+    },
+    {
+      "scenario": "failed-outcomes-procedure",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 review stage ran (recorded result: pass)\n\u2713 plan stage ran (recorded result: pass)\n\u2713 implementation stage ran (recorded result: pass)\n\u2713 verification stage ran (recorded result: fail)\n\u2713 audit stage ran (recorded result: fail)\n\u2713 procedure followed\n\u2713 build verdict recorded: NOT_READY; completed over an override (attested as recorded, not as correct)\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    },
+    {
+      "scenario": "semantic-regression",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact 061a\u2026c752\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact 061a\u2026c752\n\nVERIFIED\n",
+      "single_charge_test": {
+        "exit": 0,
+        "stdout": "single-charge test: PASS\n"
+      },
+      "retry_test": {
+        "exit": 1,
+        "stdout": "Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert charge(ledger, \"request-1\", 10) == 10, \"retry duplicated the charge\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: retry duplicated the charge\n"
+      }
+    },
+    {
+      "scenario": "unsigned",
+      "expected_exit": 3,
+      "actual_exit": 3,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u25cb no signature (authentication: none)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nINTEGRITY ONLY \u2014 NOT AUTHENTICATED\n"
+    },
+    {
+      "scenario": "tampered-payload",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2717 DSSE payload differs from the attestation bytes\n  payload sha256:     fa23faf7569865cc31b7d978f2a3b024018fdd2706ff919562e7580220fce792\n  attestation sha256: 05f0bceda2219118469ca38eb4cfb65b1dd1dfaf8ebe0f24b15ca92ce130f54e\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - DSSE payload differs from the attestation bytes\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "replaced-repo-trust",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, .uncle/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    },
+    {
+      "scenario": "replaced-repo-trust-external-root",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2717 signature invalid against /temporary/allowed_signers\n  principals tried: fixture@example.invalid\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - signature invalid against /temporary/allowed_signers\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "different-repository-label",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    },
+    {
+      "scenario": "different-subject-tree",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2717 head tree does not match the release artifact\n  head tree (filtered): cc905dc67b11963e786eb5874c8bdcb406ddf018\n  release artifact:     cc905dc67b11963e786eb5874c8bdcb406ddf018\n  subject digest:       0000000000000000000000000000000000000000\n\nNOT VERIFIED\n\nThis change could not be verified. Do not trust its attestation as it stands.\nReasons:\n  - head tree does not match the release artifact\n\nFix the failed checks listed above (for example, re-run the workflow after the tree changed),\nthen run uncle verify again.\n"
+    },
+    {
+      "scenario": "excluded-workflow-document",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    },
+    {
+      "scenario": "excluded-state",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "command": "python3 uncle-verify.py --tree HEAD --allowed-signers /temporary/allowed_signers",
+      "stdout": "UNCLE CHANGE VERIFICATION\n\n\u2713 attestation canonical, in-toto Statement, schema v1\n\u2713 signature valid (ssh: fixture@example.invalid, /temporary/allowed_signers)\n\u2713 approved change spec 3451\u2026a3ff\n\u2713 implementation artifact cc90\u2026f018\n\u2713 independent review (, pass, 0 findings, 0 dispositions)\n\u2713 verification pass\n\u2713 audit pass\n\u2713 blocking findings dispositioned: 0 of 0\n\u2713 human approvals: change spec\n\u2713 head tree matches release artifact cc90\u2026f018\n\nVERIFIED\n"
+    }
+  ]
+}
