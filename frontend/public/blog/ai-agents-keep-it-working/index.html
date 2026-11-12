@@ -246,11 +246,11 @@
   <div class="grid" aria-hidden="true"></div>
 
   <nav>
-    <a class="back" href="/">← Brian Woods</a>
+    <a class="back" href="https://brian.biz/">← Brian Woods</a>
   </nav>
 
   <article>
-    <p class="eyebrow"><a href="/blog">Blog</a></p>
+    <p class="eyebrow"><a href="https://brian.biz/blog">Blog</a></p>
     <h1>The Hard Part of AI Coding Is the Second Change</h1>
     <p class="meta">Published 2026-11-10 · Updated 2026-11-11 · Brian Woods</p>
 
@@ -277,8 +277,8 @@
 <li><strong>Attestation validity:</strong> Is this record authentic, intact, and bound to the expected artifact?</li>
 <li><strong>Release readiness:</strong> Does the record satisfy the required tests, reviews, approvals and acceptance policy?</li>
 </ul>
-<p>The verifier answers the first. A verifier that authenticates a record of failed tests is behaving correctly. The failure occurs when another system mistakes authenticity for authorization to release. Its output was honest about the second ("NOT_READY ... attested as recorded, not as correct"). The danger is downstream: when one system's successful verification becomes another system's permission to publish. An authentic record of failed tests is still authentic. It is not evidence that a release should proceed.</p>
-<p>The 15 cases (<a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/verify_demo.py">script</a>, <a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/results.json">full transcript</a>) cover single-change verifier behavior only. The harness controls the keys and approvals, and the verifier doesn't rerun tests. They say nothing about independent trust or a production workflow.</p>
+<p>The verifier answers the first question. A verifier that authenticates a record of failed tests is behaving correctly, and its output said so: "NOT_READY ... attested as recorded, not as correct." The failure occurs when another system mistakes authenticity for authorization to release. An authentic record of failed tests is not evidence that a release should proceed.</p>
+<p>The 15 cases (<a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/results.json">full transcript</a>) cover single-change verifier behavior only. The harness controls the keys and approvals, and the verifier doesn't rerun tests. They say nothing about independent trust or a production workflow.</p>
 
 <h2>The trust boundary</h2>
 <p>Any scheme like this assumes the agent cannot modify the signing keys, the verifier's trust roots, or the effective acceptance policy. It also assumes that CI configuration and tests the agent can edit don't silently become trusted policy. If the agent can change any of these, a signature only authenticates a record produced inside the same compromised boundary.</p>
