@@ -268,14 +268,7 @@
 </ul>
 <p>Use CI and branch protection. Bind evidence to the exact code, and put human gates where requirements change or risk is accepted. An agent's permission to work isn't permission to approve itself.</p>
 
-<h2>Who accepts a change?</h2>
-<p>A person, ultimately. The agent writes code and is never the one who accepts it. Splitting the roles:</p>
-<ul>
-<li><strong>The agent</strong> proposes the change.</li>
-<li><strong>A separate workflow</strong> that the agent doesn't control runs the required checks and records the evidence.</li>
-<li><strong>A human</strong> sets the acceptance policy, approves changes to requirements, accepts known risk, and makes the final call, for example by merging the pull request.</li>
-</ul>
-<p>That doesn't mean a person reads every diff. For routine changes, the policy and the independent checks do most of the work, and a failed required check blocks acceptance on its own. People spend their attention where it matters: when what must stay true changes, or when someone chooses to ship anyway. Which changes need a person and which can pass automatically is a policy decision, and it belongs to the humans who own the system.</p>
+<p>Agents propose changes. Independent workflows produce evidence, and humans define the acceptance policy, approve changes to requirements, and accept risk. Routine changes may pass automatically under that policy, but agents must not be able to change the rules governing their own acceptance.</p>
 
 <h2>What a valid signature does and doesn't tell you</h2>
 <p>I tested this with a <a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/verify_demo.py">synthetic experiment</a> against <a href="https://github.com/unclehq/uncle">Uncle</a>'s verifier. In one case, a signed record of a build whose tests and audit failed came back <strong>VERIFIED</strong>. The record was authentic under the fixture's trust root. That didn't make the software ready to ship.</p>
@@ -293,11 +286,12 @@
 <p>A local approval prompt isn't cryptographic proof of human intent either.</p>
 
 <h2>A proposal anyone can implement</h2>
+<p>The question is how to preserve that evidence across successive changes without allowing the agent to approve its own work.</p>
 <p>None of these primitives are new. Git provides content-addressed history, in-toto and SLSA define provenance and attestations, Sigstore handles signing and identity, and CI with branch protection enforces much of this inside a pull request. The open problem is connecting requirements, evidence and approvals across agent-driven changes without letting the agent certify its own work. Git records how code changed. This graph would record which changes were accepted, under which requirements and policies, and on the basis of which evidence. The two histories are related, but they answer different questions. CI already records test results, and provenance systems already bind evidence to artifacts. The addition is linking the acceptance decisions themselves, across successive changes. What follows is a proposed design, not something I'm claiming Uncle fully does today.</p>
 <ol>
 <li><strong>Attest each accepted change.</strong> The record holds the source tree hash, the requirements and policy version, hashes of the test and review evidence, and the identities and scope of human approvals. A trusted workflow signs it with a key the coding agent cannot use.</li>
 <li><strong>Link to what came before.</strong> Each attestation includes the hashes of the preceding accepted attestations. These links form a directed acyclic graph (DAG): a normal change references its predecessor, and a merge references every parent and adds validation of the combined result. Parent approvals alone don't approve a merge.<p>For example, suppose two agents independently produce changes B and C from accepted state A, and both pass their required checks. Merging B and C produces state D, which has a new tree identity. D needs its own validation and acceptance evidence; the approvals for B and C do not automatically approve their combination.</p></li>
-<li><strong>Verify by walking the graph.</strong> Starting from the current PR, a verifier follows the links to an explicitly trusted starting point, checks signatures against independently managed trust roots, matches evidence to artifacts, and enforces the acceptance policy. Missing evidence, failed required checks or absent approvals must prevent acceptance. Verified history can be cached, provided policy and trust changes invalidate the affected entries.</li>
+<li><strong>Verify by walking the graph.</strong> Starting from the current PR, a verifier follows the links to an explicitly trusted starting point, checks signatures against independently managed trust roots, matches evidence to artifacts, and enforces the acceptance policy. Missing evidence, failed required checks or absent approvals must prevent acceptance. Verified history can be cached, provided policy and trust changes invalidate the affected entries. Changes to the acceptance policy need independent authorization too. An agent can't loosen the requirements it is judged against, so a rejected change doesn't become acceptable because the policy moved under it. An authorized policy change can legitimately alter future decisions or trigger explicit reevaluation under the new policy.</li>
 <li><strong>Keep the records out of the agent's reach.</strong> Store the evidence durably, and anchor accepted graph heads outside the agent's control so a rewritten history can be detected.</li>
 </ol>
 <p>Cryptography protects the records and their relationships. It cannot prove the tests were sufficient or the software is correct. You can build this around existing CI and review tools, whether or not you use Uncle.</p>
