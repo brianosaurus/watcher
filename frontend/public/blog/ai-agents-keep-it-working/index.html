@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Hard Part of AI Coding Is the Second Change · Brian Woods</title>
+  <meta name="description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/ai-agents-keep-it-working/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Hard Part of AI Coding Is the Second Change">
+  <meta property="og:description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
+  <meta property="og:url" content="https://brian.biz/blog/ai-agents-keep-it-working/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-10">
+  <meta property="article:modified_time" content="2026-11-11">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="verification">
+  <meta property="article:tag" content="provenance">
+  <meta property="article:tag" content="uncle">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="The Hard Part of AI Coding Is the Second Change">
+  <meta name="twitter:description" content="AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "The Hard Part of AI Coding Is the Second Change",
+    "datePublished": "2026-11-10",
+    "dateModified": "2026-11-11",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/ai-agents-keep-it-working/",
+    "description": "AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.",
+    "keywords": ["ai-agents","verification","provenance","uncle"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    .table-scroll { overflow-x: auto; margin: 24px 0; }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--bg-elevated); color: var(--text-bright); }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="https://brian.biz/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="https://brian.biz/blog">Blog</a></p>
+    <h1>The Hard Part of AI Coding Is the Second Change</h1>
+    <p class="meta">Published 2026-11-10 · Updated 2026-11-11 · Brian Woods</p>
+
+
+<p>An AI agent builds a payment service. The tests pass. The demo works.</p>
+<p>Then you ask for retries. The agent adds them, but a timeout can mean the charge succeeded and the response got lost. Now a retry charges the customer twice.</p>
+<p>The feature works. The system got worse. The test suite may even be larger. Quantity has always been easier to measure than judgment.</p>
+<p><strong>AI makes building something that works once cheaper. Maintaining it means preserving what must stay true.</strong> Payments must not duplicate. Users must not see another tenant's data. Migrations must tolerate the previous application version.</p>
+<p>Before accepting a change, I want four answers:</p>
+<ul>
+<li><strong>Specification:</strong> What must remain true?</li>
+<li><strong>Validation:</strong> Which checks support that claim?</li>
+<li><strong>Provenance:</strong> Does the evidence describe the code we're shipping?</li>
+<li><strong>Authorization:</strong> Who can approve it?</li>
+</ul>
+<p>Use CI and branch protection. Bind evidence to the exact code, and put human gates where requirements change or risk is accepted. An agent's permission to work isn't permission to approve itself.</p>
+
+<p>Agents propose changes. Independent workflows produce evidence, and humans define the acceptance policy, approve changes to requirements, and accept risk. Routine changes may pass automatically under that policy, but agents must not be able to change the rules governing their own acceptance.</p>
+
+<h2>What a valid signature does and doesn't tell you</h2>
+<p>I tested this with a <a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/verify_demo.py">synthetic experiment</a> against <a href="https://github.com/unclehq/uncle">Uncle</a>'s verifier. In one case, a signed record of a build whose tests and audit failed came back <strong>VERIFIED</strong>. The record was authentic under the fixture's trust root. That didn't make the software ready to ship.</p>
+<p>These are two separate questions:</p>
+<ul>
+<li><strong>Attestation validity:</strong> Is this record authentic, intact, and bound to the expected artifact?</li>
+<li><strong>Release readiness:</strong> Does the record satisfy the required tests, reviews, approvals and acceptance policy?</li>
+</ul>
+<p>The verifier answers the first question. A verifier that authenticates a record of failed tests is behaving correctly, and its output said so: "NOT_READY ... attested as recorded, not as correct." The failure occurs when another system mistakes authenticity for authorization to release. An authentic record of failed tests is not evidence that a release should proceed.</p>
+<p>The 15 cases (<a href="https://brian.biz/blog/ai-agents-keep-it-working/experiment/results.json">full transcript</a>) cover single-change verifier behavior only. The harness controls the keys and approvals, and the verifier doesn't rerun tests. They say nothing about independent trust or a production workflow.</p>
+
+<h2>The trust boundary</h2>
+<p>Any scheme like this assumes the agent cannot modify the signing keys, the verifier's trust roots, or the effective acceptance policy. It also assumes that CI configuration and tests the agent can edit don't silently become trusted policy. If the agent can change any of these, a signature only authenticates a record produced inside the same compromised boundary.</p>
+<p>The experiment shows a case of this. An attacker's key signed the attestation and the repository's own trust file was replaced to match. The verifier returned VERIFIED, because by default it reads its trust root from the repo. Supplying the root from outside the repo made the same attestation fail.</p>
+<p>A local approval prompt isn't cryptographic proof of human intent either.</p>
+
+<h2>A proposal anyone can implement</h2>
+<p>The question is how to preserve that evidence across successive changes without allowing the agent to approve its own work.</p>
+<p>None of these primitives are new. Git provides content-addressed history, in-toto and SLSA define provenance and attestations, Sigstore handles signing and identity, and CI with branch protection enforces much of this inside a pull request. The open problem is connecting requirements, evidence and approvals across agent-driven changes without letting the agent certify its own work. Git records how code changed. This graph would record which changes were accepted, under which requirements and policies, and on the basis of which evidence. The two histories are related, but they answer different questions. CI already records test results, and provenance systems already bind evidence to artifacts. The addition is linking the acceptance decisions themselves, across successive changes. What follows is a proposed design, not something I'm claiming Uncle fully does today.</p>
+<ol>
+<li><strong>Attest each accepted change.</strong> The record holds the source tree hash, the requirements and policy version, hashes of the test and review evidence, and the identities and scope of human approvals. A trusted workflow signs it with a key the coding agent cannot use.</li>
+<li><strong>Link to what came before.</strong> Each attestation includes the hashes of the preceding accepted attestations. These links form a directed acyclic graph (DAG): a normal change references its predecessor, and a merge references every parent and adds validation of the combined result. Parent approvals alone don't approve a merge.<p>For example, suppose two agents independently produce changes B and C from accepted state A, and both pass their required checks. Merging B and C produces state D, which has a new tree identity. D needs its own validation and acceptance evidence; the approvals for B and C do not automatically approve their combination.</p></li>
+<li><strong>Verify by walking the graph.</strong> Starting from the current PR, a verifier follows the links to an explicitly trusted starting point, checks signatures against independently managed trust roots, matches evidence to artifacts, and enforces the acceptance policy. Missing evidence, failed required checks or absent approvals must prevent acceptance. Verified history can be cached, provided policy and trust changes invalidate the affected entries. Changes to the acceptance policy need independent authorization too. An agent can't loosen the requirements it is judged against, so a rejected change doesn't become acceptable because the policy moved under it. An authorized policy change can legitimately alter future decisions or trigger explicit reevaluation under the new policy.</li>
+<li><strong>Keep the records out of the agent's reach.</strong> Store the evidence durably, and anchor accepted graph heads outside the agent's control so a rewritten history can be detected.</li>
+</ol>
+<p>Cryptography protects the records and their relationships. It cannot prove the tests were sufficient or the software is correct. You can build this around existing CI and review tools, whether or not you use Uncle.</p>
+
+<h2>Back to the retries</h2>
+<p>Here is how that design would handle the payment change:</p>
+<ol>
+<li>The agent implements retries.</li>
+<li>Policy requires idempotency evidence, so those tests run in a workflow the agent doesn't control.</li>
+<li>The results are bound to the exact source tree, and that workflow signs the attestation.</li>
+<li>A failed required check blocks acceptance, however confident the agent's summary is.</li>
+<li>The next change references this one, but approvals don't carry over where the code or policy they covered has changed.</li>
+</ol>
+<p>It still can't guarantee correctness. The tests might miss a race condition, and production will find paths the validation environment never saw. The four questions govern whether a change is accepted. They don't replace observability, rollback, incident response or engineering judgment.</p>
+<p><strong>Generating the next version is getting cheap. Deciding whether to accept it is still the job.</strong></p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">verification</span>
+      <span class="tag">provenance</span>
+      <span class="tag">uncle</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="https://brian.biz/">Brian Woods</a> · <a href="https://brian.biz/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
