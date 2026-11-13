@@ -9,4 +9,8 @@ __pycache__/
 /actions.log
 /bc_reset.epoch
 .claude/settings.local.json
-.uncle
+.uncle/*
+!.uncle/docs/
+!.uncle/attestation.json
+!.uncle/attestation.sig
+!.uncle/allowed_signers
