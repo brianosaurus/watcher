@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import psutil
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -1780,9 +1780,21 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
+_UNCLEHQ_HOSTS = frozenset({"unclehq.org", "www.unclehq.org"})
+
+
 @app.get("/")
-def root() -> FileResponse:
-    """Brian Woods' portfolio page (static, lives in frontend/public/home.html)."""
+def root(request: Request) -> FileResponse:
+    """Brian Woods' portfolio page (static, lives in frontend/public/home.html).
+
+    Hosts unclehq.org / www.unclehq.org get the Uncle HQ page instead.
+    """
+    host = request.headers.get("host", "").lower()
+    host = re.sub(r":\d+$", "", host)  # strip one :port
+    if host.endswith("."):
+        host = host[:-1]  # strip one trailing dot
+    if host in _UNCLEHQ_HOSTS:
+        return FileResponse(STATIC_DIR / "unclehq" / "index.html")
     return FileResponse(STATIC_DIR / "home.html")
 
 

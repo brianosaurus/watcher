@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uncle HQ</title>
+  <meta name="description" content="Uncle HQ: home of Uncle, an open-source, terminal-native development system that orchestrates Claude, Codex, local models, and other coding agents.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://unclehq.org/">
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --accent-dim: rgba(123, 44, 191, 0.09);
+      --link: #0c7c9e;
+      --max-w: 860px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      overflow-wrap: break-word;
+    }
+    a { color: var(--link); }
+    main, header, footer { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+    header { padding-top: 48px; padding-bottom: 8px; }
+    .wordmark {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 12px;
+    }
+    h1 { color: var(--text-bright); font-size: 2rem; line-height: 1.2; margin: 0 0 12px; }
+    h2 { color: var(--text-bright); font-size: 1.35rem; margin: 40px 0 12px; }
+    .tagline { font-size: 1.2rem; color: var(--text-bright); font-weight: 600; margin: 0 0 16px; }
+    .lede { color: var(--muted); margin: 0 0 16px; }
+    .card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    pre {
+      background: var(--accent-dim);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+    footer { padding-top: 32px; padding-bottom: 48px; color: var(--muted); font-size: 0.95rem; border-top: 1px solid var(--border); margin-top: 40px; }
+    footer p { margin: 6px 0; }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.6rem; }
+      header { padding-top: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="wordmark">Uncle HQ</p>
+    <h1>The headquarters and home of Uncle.</h1>
+    <p class="tagline">AI coding agents build the software. Uncle makes them prove their work.</p>
+    <p class="lede">Uncle is an open-source (MIT), terminal-native development system that orchestrates Claude, Codex, local models, and other coding agents.</p>
+  </header>
+
+  <main>
+    <p>Describe an application or give Uncle a GitHub issue. It plans, implements, independently reviews, verifies, and prepares a pull request, with portable evidence tying the result to the code that was actually reviewed.</p>
+
+    <h2>First project</h2>
+    <div class="card">
+      <h3>Uncle: Uncle HQ's first project</h3>
+      <p>The first project from Uncle HQ is Uncle itself, open source under the MIT license.</p>
+      <p><a class="btn" href="https://github.com/unclehq/uncle" rel="noopener">https://github.com/unclehq/uncle</a></p>
+      <h3>Quick start</h3>
+      <p>macOS / Linux / WSL:</p>
+      <pre>curl -fsSL https://raw.githubusercontent.com/unclehq/uncle/main/install.sh -o install.sh && bash install.sh
+uncle --application 'build a groovy 1970s themed calculator react webapp with keyboard support' --attended</pre>
+      <p>You need at least one supported AI client installed and authenticated. See the <a href="https://github.com/unclehq/uncle" rel="noopener">README</a> for prerequisites and Windows instructions.</p>
+    </div>
+
+    <h2>What makes Uncle different?</h2>
+    <ul>
+      <li><strong>Independent review.</strong> The agent implementing a change cannot approve its own implementation.</li>
+      <li><strong>Artifact identity.</strong> The change is the unit of trust: review, verification, approval and publication are tied to the relevant Git tree.</li>
+      <li><strong>Verifiable change provenance.</strong> Machine-readable evidence and portable attestations using established standards (in-toto, DSSE).</li>
+      <li><strong>Model flexibility.</strong> Use different supported runners and models for implementation, review and other stages.</li>
+      <li><strong>Local-first operation.</strong> Uncle runs on your machine in a terminal UI, with no Uncle-hosted backend, account or telemetry.</li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>Created by Brian Woods.</p>
+    <p>Portfolio: <a href="https://brian.biz/" rel="noopener">https://brian.biz</a></p>
+  </footer>
+</body>
+</html>
