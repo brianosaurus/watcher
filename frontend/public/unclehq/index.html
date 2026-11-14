@@ -7,6 +7,8 @@
   <meta name="description" content="Uncle HQ: home of Uncle, an open-source, terminal-native development system that orchestrates Claude, Codex, local models, and other coding agents.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://unclehq.org/">
+  <link rel="icon" type="image/png" sizes="64x64" href="/static/unclehq/favicon.png">
+  <link rel="apple-touch-icon" href="/static/unclehq/apple-touch-icon.png">
 
   <style>
     :root {
@@ -33,6 +35,7 @@
     a { color: var(--link); }
     main, header, footer { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
     header { padding-top: 48px; padding-bottom: 8px; }
+    .logo { display: block; width: 200px; max-width: 60%; height: auto; margin: 0 0 20px; border-radius: 8px; }
     .wordmark {
       font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
       font-weight: 600;
@@ -86,6 +89,7 @@
 </head>
 <body>
   <header>
+    <img class="logo" src="/static/unclehq/logo.png" alt="Uncle HQ logo" width="200" height="245">
     <p class="wordmark">Uncle HQ</p>
     <h1>The headquarters and home of Uncle.</h1>
     <p class="tagline">AI coding agents build the software. Uncle makes them prove their work.</p>
