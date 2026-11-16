@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>We Put Our Coding Agent in a Container. People Started Paying for It. · Brian Woods</title>
-  <meta name="description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta name="description" content="The hard part of agentic programming isn't the model. It's the environment and the review around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/blog/agentic-programming-containers/">
   <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
@@ -12,7 +12,7 @@
 
   <meta property="og:type" content="article">
   <meta property="og:title" content="We Put Our Coding Agent in a Container. People Started Paying for It.">
-  <meta property="og:description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta property="og:description" content="The hard part of agentic programming isn't the model. It's the environment and the review around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
   <meta property="og:url" content="https://brian.biz/blog/agentic-programming-containers/">
   <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
   <meta property="article:published_time" content="2026-11-16">
@@ -23,7 +23,7 @@
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="We Put Our Coding Agent in a Container. People Started Paying for It.">
-  <meta name="twitter:description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta name="twitter:description" content="The hard part of agentic programming isn't the model. It's the environment and the review around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
   <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +42,7 @@
       "url": "https://brian.biz/"
     },
     "url": "https://brian.biz/blog/agentic-programming-containers/",
-    "description": "The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.",
+    "description": "The hard part of agentic programming isn't the model. It's the environment and the review around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.",
     "keywords": ["ai-agents","containers","daytona","uncle"]
   }
   </script>
@@ -268,19 +268,19 @@
 </ul>
 <p>None of this makes the agent faster. It makes the agent's output worth reading, which turns out to be the expensive part. (I wrote about the evidence-binding idea in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a>)</p>
 
-<h2>The speedup: put it in a box</h2>
-<p>Here's the part the title promised. The slowest step in agentic programming isn't the model. It's everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace.</p>
-<p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Docker image. Daytona advertises sandbox creation in under 90 milliseconds, which is less time than it takes to explain to a coworker why the agent needs sudo.</p>
+<h2>The box: put it in a container</h2>
+<p>Here's the part the title promised. The agent isn't faster in a container, and I'm not claiming it is. What changes is everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace. A container makes those problems go away rather than making the agent quicker.</p>
+<p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Docker image.</p>
 <p>That changes a few things:</p>
 <ul>
-<li><strong>No setup tax.</strong> Nobody installs anything. The environment is defined once and every task starts from it clean.</li>
+<li><strong>No setup.</strong> Nobody installs anything. The environment is defined once and every task starts from it clean.</li>
 <li><strong>Isolation by default.</strong> If the agent does something creative with <code>rm</code>, it destroys a container nobody will miss.</li>
 <li><strong>Parallel by default.</strong> Ten issues means ten sandboxes, not ten browser tabs and a prayer.</li>
 <li><strong>Same environment every run.</strong> Uncle's evidence is only meaningful if the tests run in a known place. "Works on my machine" stops being a problem when nobody has a machine.</li>
 </ul>
-<p>So yes, "sped up" here mostly means we deleted the slow parts. That's how most speedups actually work.</p>
+<p>None of that is speed. It's safety, repeatability and scale, which turn out to be what people will pay for.</p>
 
-<h2>The product: Anya Sharp</h2>
+<h2>The product: <a href="https://serendb.com/anya-sharp">Anya Sharp</a></h2>
 <p>Put Uncle in a container, give it a name and a marketplace listing, and you get <a href="https://serendb.com/anya-sharp">Anya Sharp</a>, an AI software engineer you can hire on Seren.</p>
 <p>The workflow is the one you already have with human engineers, minus the standups:</p>
 <ol>
