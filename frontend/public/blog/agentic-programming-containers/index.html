@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How We Sped Up Agentic Programming with Containers · Brian Woods</title>
+  <meta name="description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/agentic-programming-containers/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How We Sped Up Agentic Programming with Containers">
+  <meta property="og:description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta property="og:url" content="https://brian.biz/blog/agentic-programming-containers/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-16">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="containers">
+  <meta property="article:tag" content="daytona">
+  <meta property="article:tag" content="uncle">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How We Sped Up Agentic Programming with Containers">
+  <meta name="twitter:description" content="The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "How We Sped Up Agentic Programming with Containers",
+    "datePublished": "2026-11-16",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/agentic-programming-containers/",
+    "description": "The slowest part of agentic programming isn't the model. It's the setup around it. How Uncle, Daytona sandboxes and Anya Sharp turn a coding agent into something people pay for.",
+    "keywords": ["ai-agents","containers","daytona","uncle"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    .table-scroll { overflow-x: auto; margin: 24px 0; }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--bg-elevated); color: var(--text-bright); }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="https://brian.biz/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="https://brian.biz/blog">Blog</a></p>
+    <h1>How We Sped Up Agentic Programming with Containers</h1>
+    <p class="meta">Published 2026-11-16 · Brian Woods</p>
+
+<p>Every agentic coding demo goes the same way. Someone types "build me a todo app," an AI writes four hundred lines in thirty seconds, and the room applauds. Nobody asks whether it runs. Nobody asks who reviewed it. Nobody asks what it did to the presenter's laptop while it was in there.</p>
+<p>Then you try it on a real repository. The agent needs Python 3.11 but you have 3.12. It needs Postgres. It runs <code>rm -rf</code> on something it was fairly confident about. It reports that all tests pass, which is technically true, because it didn't run any.</p>
+<p>So here's the unglamorous version: how we turned a coding agent into something strangers pay for, mostly by putting it in a box.</p>
+
+<h2>The harness: Uncle</h2>
+<p><a href="https://github.com/unclehq/uncle">Uncle</a> is an open-source coding harness built on one rule: the agent that writes the code doesn't get to grade it. That rule has served human engineering teams well for decades, and somehow every AI tool forgot it.</p>
+<p>Uncle takes a GitHub issue and walks it through planning, implementation, an independent review, verification, and a pull request. A few design choices do most of the work:</p>
+<ul>
+<li><strong>The implementer can't approve its own change.</strong> Review runs as a separate process, optionally on a different model, so the reviewer isn't just nodding along with itself.</li>
+<li><strong>Evidence comes from exit codes, not from the agent's opinion.</strong> If the agent says the tests passed, Uncle checks whether they ran and what they returned. Agents are very optimistic narrators.</li>
+<li><strong>Evidence is tied to the exact Git tree.</strong> Change one byte after review and the approval no longer applies.</li>
+<li><strong>Checks that never ran count as failures.</strong> A missing test isn't a passing test, despite what several companies' CI dashboards have implied over the years.</li>
+<li><strong>Changes are signed.</strong> Uncle emits in-toto attestations you can verify with a standalone script, so "the AI said it was fine" becomes something you can actually check.</li>
+</ul>
+<p>None of this makes the agent faster. It makes the agent's output worth reading, which turns out to be the expensive part. (I wrote about the evidence-binding idea in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a>)</p>
+
+<h2>The speedup: put it in a box</h2>
+<p>Here's the part the title promised. The slowest step in agentic programming isn't the model. It's everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace.</p>
+<p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Docker image. Daytona advertises sandbox creation in under 90 milliseconds, which is less time than it takes to explain to a coworker why the agent needs sudo.</p>
+<p>That changes a few things:</p>
+<ul>
+<li><strong>No setup tax.</strong> Nobody installs anything. The environment is defined once and every task starts from it clean.</li>
+<li><strong>Isolation by default.</strong> If the agent does something creative with <code>rm</code>, it destroys a container nobody will miss.</li>
+<li><strong>Parallel by default.</strong> Ten issues means ten sandboxes, not ten browser tabs and a prayer.</li>
+<li><strong>Same environment every run.</strong> Uncle's evidence is only meaningful if the tests run in a known place. "Works on my machine" stops being a problem when nobody has a machine.</li>
+</ul>
+<p>So yes, "sped up" here mostly means we deleted the slow parts. That's how most speedups actually work.</p>
+
+<h2>The product: Anya Sharp</h2>
+<p>Put Uncle in a container, give it a name and a marketplace listing, and you get <a href="https://serendb.com/anya-sharp">Anya Sharp</a>, an AI software engineer you can hire on Seren.</p>
+<p>The workflow is the one you already have with human engineers, minus the standups:</p>
+<ol>
+<li>You point Anya at a GitHub issue.</li>
+<li>Uncle plans it, implements it, has it reviewed by a separate reviewer, and runs the checks, all inside a fresh sandbox.</li>
+<li>You get a pull request with the evidence attached.</li>
+<li>You merge it. Anya never merges her own work. She's the only engineer I've ever worked with who doesn't argue about this.</li>
+</ol>
+<p>Spending is capped per task and per day, so a confused agent can't quietly run up a bill overnight. Every engineering manager I know has wanted that feature for humans.</p>
+<p>At the time of writing, Anya has completed 166 paid tasks for customers and ranks #4 among Seren's best-selling Employees. She has no customer reviews yet, which puts her ahead of most of us at the start of our careers.</p>
+
+<h2>What we learned</h2>
+<ul>
+<li><strong>The model is the easy part.</strong> Every model on the market can write a plausible function. What's hard is knowing whether the function is right, and that's a process problem, not a model problem.</li>
+<li><strong>Agents lie the way junior engineers lie: optimistically.</strong> "Tests pass" means "I believe tests would pass if someone ran them." Verify everything from the outside.</li>
+<li><strong>Containers aren't exciting, which is the point.</strong> The most valuable infrastructure is the kind nobody talks about until it breaks. We've had a few decades to learn this lesson and we keep relearning it.</li>
+<li><strong>Distribution beats architecture.</strong> Uncle has been open source the whole time. Putting it behind a "hire" button on a marketplace is what got people to use it. Nobody wants your harness. They want their issue closed.</li>
+<li><strong>Containers don't make the agent smarter.</strong> If the model misunderstands the issue, it now misunderstands it in an isolated, reproducible environment. That's progress, but you still have to read the PR.</li>
+</ul>
+
+<h2>Try it</h2>
+<ul>
+<li>Hire Anya on Seren: <a href="https://serendb.com/anya-sharp">serendb.com/anya-sharp</a></li>
+<li>Run the harness yourself: <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a></li>
+<li>The sandboxes: <a href="https://www.daytona.io">daytona.io</a></li>
+</ul>
+<p>If Anya opens a PR that breaks your build, file an issue. She'll fix it. Then you'll review that one too.</p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">containers</span>
+      <span class="tag">daytona</span>
+      <span class="tag">uncle</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="https://brian.biz/">Brian Woods</a> · <a href="https://brian.biz/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
