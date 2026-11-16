@@ -269,7 +269,7 @@
 <p>None of this makes the agent faster. It makes the agent's output worth reading, which turns out to be the expensive part. (I wrote about the evidence-binding idea in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a>)</p>
 
 <h2>The box: put it in a container</h2>
-<p>Here's where the container comes in. The agent isn't faster in a container, and I'm not claiming it is. What changes is everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace. A container makes those problems go away rather than making the agent quicker.</p>
+<p>Here's where the container comes in. What changes isn't the agent. It's everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace.</p>
 <p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Docker image.</p>
 <p>That changes a few things:</p>
 <ul>
