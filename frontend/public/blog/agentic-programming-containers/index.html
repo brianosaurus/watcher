@@ -261,13 +261,11 @@
 <p>Uncle takes a GitHub issue and walks it through planning, implementation, an independent review, verification, and a pull request. A few design choices do most of the work:</p>
 <ul>
 <li><strong>The implementer can't approve its own change.</strong> Review runs as a separate process, optionally on a different model, so the reviewer isn't just nodding along with itself.</li>
-<li><strong>Evidence comes from exit codes, not from the agent's opinion.</strong> If the agent says the tests passed, Uncle checks whether they ran and what they returned. Agents are very optimistic narrators.
-<p>[TODO: one real example where the agent said tests passed and the exit codes said otherwise. 2–3 sentences.]</p></li>
+<li><strong>Evidence comes from exit codes, not from the agent's opinion.</strong> If the agent says the tests passed, Uncle checks whether they ran and what they returned. Agents are very optimistic narrators.</li>
 <li><strong>Evidence is tied to the exact Git tree.</strong> Change one byte after review and the approval no longer applies.</li>
 <li><strong>Checks that never ran count as failures.</strong> A missing test isn't a passing test, despite what several companies' CI dashboards have implied over the years.</li>
 <li><strong>Changes are signed.</strong> Uncle emits in-toto attestations you can verify with a standalone script, so "the AI said it was fine" becomes something you can actually check.</li>
 </ul>
-<p>[TODO: reviewer rejection rate: across N tasks, the separate reviewer sent back X% of changes.]</p>
 <p>None of this makes the agent faster. It makes the agent's output worth reading, which turns out to be the expensive part. (I wrote about the evidence-binding idea in <a href="https://brian.biz/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a>)</p>
 
 <h2>The box: put it in a container</h2>
@@ -293,7 +291,6 @@
 </ol>
 <p>Spending is capped per task and per day, so a confused agent can't quietly run up a bill overnight. Every engineering manager I know has wanted that feature for humans.</p>
 <p>At the time of writing, Anya has completed 166 paid tasks for customers and ranks #4 among Seren's best-selling Employees. She has no customer reviews yet, which puts her ahead of most of us at the start of our careers.</p>
-<p>[TODO: context: over what period, how many customers, what share of PRs were merged.]</p>
 <p>Full disclosure: I built Uncle. Seren runs it as Anya.</p>
 
 <h2>What we learned</h2>
