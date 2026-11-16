@@ -257,7 +257,7 @@
 <p>So here's the unglamorous version: how we turned a coding agent into something strangers pay for, mostly by putting it in a box.</p>
 
 <h2>The harness: Uncle</h2>
-<p><a href="https://github.com/unclehq/uncle">Uncle</a> is an open-source coding harness built on one rule: the agent that writes the code doesn't get to grade it. That rule has served human engineering teams well for decades, and somehow every AI tool forgot it.</p>
+<p><a href="https://github.com/unclehq/uncle">Uncle</a> is an open-source coding harness built on one rule: the agent that writes the code doesn't get to grade it. That rule has served human engineering teams well for decades. It's surprisingly easy to forget when the same agent writes the code, runs the checks, and tells you everything passed.</p>
 <p>Uncle takes a GitHub issue and walks it through planning, implementation, an independent review, verification, and a pull request. A few design choices do most of the work:</p>
 <ul>
 <li><strong>The implementer can't approve its own change.</strong> Review runs as a separate process, optionally on a different model, so the reviewer isn't just nodding along with itself.</li>
@@ -270,17 +270,20 @@
 
 <h2>The box: put it in a container</h2>
 <p>Here's where the container comes in. What changes isn't the agent. It's everything around it: cloning the repo, installing the toolchain, finding out the toolchain is the wrong version, and cleaning up after the agent decided <code>/tmp</code> was its personal workspace.</p>
-<p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Docker image.</p>
+<p><a href="https://serendb.com">Seren</a> runs Uncle inside <a href="https://www.daytona.io">Daytona</a> sandboxes. Each task gets its own container with its own filesystem, process space and network, created from a Daytona snapshot.</p>
 <p>That changes a few things:</p>
 <ul>
-<li><strong>No setup.</strong> Nobody installs anything. The environment is defined once and every task starts from it clean.</li>
+<li><strong>No setup for the customer.</strong> Each task starts from the same stock Daytona snapshot with one pinned version of Uncle installed, instead of asking someone to install another toolchain.</li>
 <li><strong>Isolation by default.</strong> If the agent does something creative with <code>rm</code>, it destroys a container nobody will miss.</li>
 <li><strong>Parallel by default.</strong> Ten issues means ten sandboxes, not ten browser tabs and a prayer.</li>
 <li><strong>Same environment every run.</strong> Uncle's evidence is only meaningful if the tests run in a known place. "Works on my machine" stops being a problem when nobody has a machine.</li>
 </ul>
 <p>None of that is speed. It's safety, repeatability and scale, which turn out to be what people will pay for.</p>
+<p>A container isn't a magic security boundary. An agent can still misuse credentials, reach external services, or damage anything mounted into its environment. Isolation limits the blast radius, but you still have to control what the agent can reach.</p>
+<p>One detail from the plumbing. Anya's build script is the Seren side of this, separate from Uncle. It creates the sandbox through Daytona's API from a stock snapshot, installs one pinned Uncle commit, and drives the build as a session of commands. The pull request doesn't come from a push inside the sandbox. The script creates it with GitHub's API (blobs, a tree, a commit, and the branch last), so nothing appears in your repository until the end and a failure can't leave a half-written branch. Then it deletes the sandbox, retrying through Daytona outages, with auto-stop and auto-delete as a backstop.</p>
 
 <h2>The product: <a href="https://serendb.com/anya-sharp">Anya Sharp</a></h2>
+<p>Containers made Uncle practical to run as a hosted service. Seren gave people somewhere to find and hire it. We needed both.</p>
 <p>Put Uncle in a container, give it a name and a marketplace listing, and you get <a href="https://serendb.com/anya-sharp">Anya Sharp</a>, an AI software engineer you can hire on Seren.</p>
 <p>The workflow is the one you already have with human engineers, minus the standups:</p>
 <ol>
@@ -299,16 +302,9 @@
 <li><strong>Agents lie the way junior engineers lie: optimistically.</strong> "Tests pass" means "I believe tests would pass if someone ran them." Verify everything from the outside.</li>
 <li><strong>Containers aren't exciting, which is the point.</strong> The most valuable infrastructure is the kind nobody talks about until it breaks. We've had a few decades to learn this lesson and we keep relearning it.</li>
 <li><strong>Distribution beats architecture.</strong> Uncle has been open source the whole time. Putting it behind a "hire" button on a marketplace is what got people to use it. Nobody wants your harness. They want their issue closed.</li>
-<li><strong>Containers don't make the agent smarter.</strong> If the model misunderstands the issue, it now misunderstands it in an isolated, reproducible environment. That's progress, but you still have to read the PR.</li>
 </ul>
 
-<h2>Try it</h2>
-<ul>
-<li>Hire Anya on Seren: <a href="https://serendb.com/anya-sharp">serendb.com/anya-sharp</a></li>
-<li>Run the harness yourself: <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a></li>
-<li>The sandboxes: <a href="https://www.daytona.io">daytona.io</a></li>
-</ul>
-<p>If Anya opens a PR that breaks your build, file an issue. She'll fix it. Then you'll review that one too.</p>
+<p><strong>Containers don't make the agent smarter.</strong> If the model misunderstands the issue, it now misunderstands it in an isolated, reproducible environment. That's progress, but you still have to read the PR.</p>
 
     <div class="tags">
       <span class="tag">ai-agents</span>
