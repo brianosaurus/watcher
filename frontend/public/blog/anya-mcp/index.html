@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our AI Engineer Now Takes Calls From Other AIs · Brian Woods</title>
+  <meta name="description" content="Anya Sharp, the AI software engineer that runs on Uncle, is now an MCP server. Any AI tool that speaks the Model Context Protocol can hand her a GitHub issue and get back a reviewed, tested pull request.">
+  <meta name="theme-color" content="#fafaf7">
+  <link rel="canonical" href="https://brian.biz/blog/anya-mcp/">
+  <link rel="icon" type="image/png" href="/static/leeroy_chainkins.png">
+  <link rel="apple-touch-icon" href="/static/leeroy_chainkins.png">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Our AI Engineer Now Takes Calls From Other AIs">
+  <meta property="og:description" content="Anya Sharp, the AI software engineer that runs on Uncle, is now an MCP server. Any AI tool that speaks the Model Context Protocol can hand her a GitHub issue and get back a reviewed, tested pull request.">
+  <meta property="og:url" content="https://brian.biz/blog/anya-mcp/">
+  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="article:published_time" content="2026-11-17">
+  <meta property="article:tag" content="ai-agents">
+  <meta property="article:tag" content="mcp">
+  <meta property="article:tag" content="uncle">
+  <meta property="article:tag" content="seren">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Our AI Engineer Now Takes Calls From Other AIs">
+  <meta name="twitter:description" content="Anya Sharp, the AI software engineer that runs on Uncle, is now an MCP server. Any AI tool that speaks the Model Context Protocol can hand her a GitHub issue and get back a reviewed, tested pull request.">
+  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Our AI Engineer Now Takes Calls From Other AIs",
+    "datePublished": "2026-11-17",
+    "author": {
+      "@type": "Person",
+      "name": "Brian Woods",
+      "url": "https://brian.biz/"
+    },
+    "url": "https://brian.biz/blog/anya-mcp/",
+    "description": "Anya Sharp, the AI software engineer that runs on Uncle, is now an MCP server. Any AI tool that speaks the Model Context Protocol can hand her a GitHub issue and get back a reviewed, tested pull request.",
+    "keywords": ["ai-agents","mcp","uncle","seren"]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --bg-elevated: #ffffff;
+      --border: #d0d0cc;
+      --text: #2a2a2a;
+      --text-bright: #111111;
+      --muted: #5a5a55;
+      --accent: #7b2cbf;
+      --link: #0c7c9e;
+      --code-bg: #ffffff;
+      --max-w: 760px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.7 Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(58rem 40rem at 78% -8%, rgba(123, 44, 191, 0.09), transparent 60%),
+        radial-gradient(46rem 34rem at 8% 4%, rgba(20, 32, 31, 0.05), transparent 62%),
+        radial-gradient(60rem 46rem at 50% 108%, rgba(184, 124, 255, 0.08), transparent 60%);
+    }
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image:
+        linear-gradient(#d0d0cc 1px, transparent 1px),
+        linear-gradient(90deg, #d0d0cc 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(70% 55% at 50% 0%, #000 20%, transparent 75%);
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    nav {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      font-size: 14px;
+    }
+    nav a.back { color: var(--muted); }
+    nav a.back:hover { color: var(--link); }
+
+    article {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    .eyebrow a { color: var(--accent); }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin: 0 0 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 48px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin: 0 0 18px; }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-bright);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 24px 0;
+      padding: 4px 0 4px 20px;
+      color: var(--text-bright);
+      font-style: italic;
+    }
+
+    ul, ol { margin: 0 0 20px; padding-left: 24px; }
+    li { margin: 8px 0; }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    .table-scroll { overflow-x: auto; margin: 24px 0; }
+    .table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { background: var(--bg-elevated); color: var(--text-bright); }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      article { padding: 24px 18px 64px; }
+      pre { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="grid" aria-hidden="true"></div>
+
+  <nav>
+    <a class="back" href="https://brian.biz/">← Brian Woods</a>
+  </nav>
+
+  <article>
+    <p class="eyebrow"><a href="https://brian.biz/blog">Blog</a></p>
+    <h1>Our AI Engineer Now Takes Calls From Other AIs</h1>
+    <p class="meta">Published 2026-11-17 · Brian Woods</p>
+
+<p>Last time, we put our coding agent in a container and people started paying for it. This time, we gave it a phone number.</p>
+<p>Anya Sharp, the AI software engineer that runs on Uncle, is now an MCP server. Any AI tool that speaks the Model Context Protocol can hand her a GitHub issue and get back a reviewed, tested pull request.</p>
+<p>Yes, that means your AI can now hire another AI. If that sentence made you slightly uneasy, good. Hold onto that feeling. It's the right instinct, and it's the reason this works at all.</p>
+
+<h2>What changed</h2>
+<p>Before, you hired Anya the way you hire a contractor: you went to her page on Seren, pointed her at an issue, and waited for a pull request.</p>
+<p>Now the agent you're already working with can do that for you. If you're in Claude, Cursor or any other MCP client, your assistant sees Anya as a tool. It can hand her an issue, she runs the full Uncle pipeline in a fresh sandbox (plan, implement, independent review, verification), and a pull request with the evidence attached shows up in your repository.</p>
+<p>Your assistant keeps talking to you. Anya does the work somewhere else. Nobody installs anything, and nothing runs on your laptop.</p>
+<p>She's now completed 200 paid tasks, up from 166 when I wrote the last post.</p>
+
+<h2>Why delegation needs a referee</h2>
+<p>Here's the uneasy part. When one agent hands work to another, you now have two optimistic narrators instead of one. Your assistant asks Anya to fix the bug. Anya reports back that she fixed the bug. Your assistant tells you, with total confidence, that the bug is fixed. At no point did anyone check.</p>
+<p>That's the chain of trust most multi-agent demos run on, and it's roughly as reliable as a game of telephone played by interns.</p>
+<p>Uncle was built for exactly this. The agent that writes the code still can't approve it. Review still runs as a separate process. "Tests pass" still comes from exit codes, not from anyone's opinion, and the evidence is still tied to the exact Git tree. MCP doesn't change any of that. It just changes who's allowed to ask.</p>
+<p>So the chain now looks like this:</p>
+<ol>
+<li>Your assistant decides the issue should be delegated.</li>
+<li>Anya implements it.</li>
+<li>A separate reviewer checks it.</li>
+<li>Uncle verifies it from the outside and signs the evidence.</li>
+<li>You merge it, or you don't.</li>
+</ol>
+<p>Five steps, and nobody grades their own homework. That's not a new idea. Engineering teams have been running on it for decades. We just had to remind the robots.</p>
+
+<h2>Seren: the whole staff, one protocol</h2>
+<p>Anya was the first. Seren now exposes its marketplace over MCP too, so the other Seren Employees can be called the same way.</p>
+<p>That changes what a marketplace is. It used to be a website you visited. Now it's a set of tools your assistant can reach from wherever you already work. You don't go to the marketplace. The marketplace comes to your editor, which is how most software should have worked all along.</p>
+<p>It also means your assistant becomes a manager. It decides what to delegate, to whom, and checks what comes back. Given what we know about managers, the checking part is the one to watch.</p>
+
+<h2>What could go wrong</h2>
+<p>Plenty. Agents calling agents is a great way to build very fast, very confident mistakes.</p>
+<ul>
+<li><strong>Runaway spending.</strong> An assistant that can hire help can also hire help in a loop. Anya's per-task and per-day spending caps matter more now than they did when only humans could press the button.</li>
+<li><strong>Credentials.</strong> Delegating work means delegating access. Give Anya the narrowest repository access that does the job, the same way you'd treat a new contractor on day one.</li>
+<li><strong>Telephone.</strong> Your assistant summarizes Anya's result for you. Summaries are where details go to die. Read the pull request, not the summary.</li>
+<li><strong>Nobody merges but you.</strong> Anya still never merges her own work, and MCP doesn't change that. The last step stays human, on purpose.</li>
+</ul>
+<p>None of these are new problems. They're the same problems every company has with contractors, just faster and at three in the morning.</p>
+
+<h2>Try it</h2>
+<ul>
+<li>Hire Anya, or connect her over MCP: <a href="https://serendb.com/anya-sharp">serendb.com/anya-sharp</a></li>
+<li>The harness underneath: <a href="https://github.com/unclehq/uncle">github.com/unclehq/uncle</a></li>
+<li>The previous post: <a href="https://brian.biz/blog/agentic-programming-containers/">We Put Our Coding Agent in a Container. People Started Paying for It.</a></li>
+</ul>
+<p>Full disclosure: I built Uncle. Seren runs it as Anya.</p>
+<p>If your assistant hires Anya and she opens a PR that breaks your build, your assistant can file an issue and hire her again. You'll still review both. Some things shouldn't be delegated.</p>
+
+    <div class="tags">
+      <span class="tag">ai-agents</span>
+      <span class="tag">mcp</span>
+      <span class="tag">uncle</span>
+      <span class="tag">seren</span>
+    </div>
+  </article>
+
+  <footer>
+    <a href="https://brian.biz/">Brian Woods</a> · <a href="https://brian.biz/blog">Blog</a> · <a href="mailto:me@brian.biz">me@brian.biz</a>
+  </footer>
+</body>
+</html>
