@@ -331,6 +331,23 @@
       box-shadow: 0 4px 24px rgba(123, 44, 191, 0.07);
       transform: translateY(-1px);
     }
+    article.card { scroll-margin-top: 24px; }
+    article.card:target {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.18);
+    }
+    a.card-anchor {
+      margin-left: 8px;
+      font-weight: 400;
+      color: var(--muted);
+      opacity: 0;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+    article.card:hover a.card-anchor,
+    a.card-anchor:focus { opacity: 1; }
+    a.card-anchor:hover { color: var(--accent); text-decoration: none; }
+    @media (hover: none) { a.card-anchor { opacity: 0.6; } }
     article.card h3 {
       margin: 0 0 2px;
       font-size: 18px;
@@ -437,8 +454,8 @@
     <section aria-labelledby="open-source-heading">
       <h2 id="open-source-heading">Open source</h2>
       <div class="projects">
-        <article class="card">
-          <h3><a href="/blog/agentic-programming-containers/">We Put Our Coding Agent in a Container. People Started Paying for It.</a><span class="url">brian.biz/blog/agentic-programming-containers</span></h3>
+        <article class="card" id="containers">
+          <h3><a href="/blog/agentic-programming-containers/">We Put Our Coding Agent in a Container. People Started Paying for It.</a><span class="url">brian.biz/blog/agentic-programming-containers</span><a class="card-anchor" href="#containers" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>How I took Uncle, an open-source coding harness, into production as Anya Sharp on Seren.
           Daytona sandboxes isolate each task, independent review verifies changes, and GitHub API
           publication keeps intermediate work off customer branches. The result: 168 paid customer
@@ -449,8 +466,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3><a href="/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a><span class="url">brian.biz/blog/ai-agents-verify</span></h3>
+        <article class="card" id="verify">
+          <h3><a href="/blog/ai-agents-verify/">The Review Wasn't Wrong. It Was a Review of Different Code.</a><span class="url">brian.biz/blog/ai-agents-verify</span><a class="card-anchor" href="#verify" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>Agent A writes it, Agent B reviews it, Agent A edits one more file and ships. The review
           was fine; it was a review of different code. A weary, sarcastic case for pinning review
           evidence to a Git tree, with real <code>uncle verify</code> output (it says NOT VERIFIED
@@ -461,8 +478,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3><a href="/blog/ai-agents-keep-it-working/">The Hard Part of AI Coding Is the Second Change</a><span class="url">brian.biz/blog/ai-agents-keep-it-working</span></h3>
+        <article class="card" id="second-change">
+          <h3><a href="/blog/ai-agents-keep-it-working/">The Hard Part of AI Coding Is the Second Change</a><span class="url">brian.biz/blog/ai-agents-keep-it-working</span><a class="card-anchor" href="#second-change" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>AI makes the first working version cheaper. Maintaining a system requires explicit invariants, evidence tied to code, and clear authority to accept each change.</p>
           <div class="links">
             <a href="/blog/ai-agents-keep-it-working/">Read</a>
@@ -470,8 +487,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3>Open source contributions<span class="url">vLLM · Pydantic AI · SGLang · FlashAttention · llama.cpp · mistral.rs · GuideLLM</span></h3>
+        <article class="card" id="open-source-contributions">
+          <h3>Open source contributions<span class="url">vLLM · Pydantic AI · SGLang · FlashAttention · llama.cpp · mistral.rs · GuideLLM</span><a class="card-anchor" href="#open-source-contributions" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p><strong>Featured: mistral.rs <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">#2558</a>, a roughly 50x decode speedup (open).</strong> The x86_64 CPU
           MoE path dequantized the entire stacked expert tensor on every call, then used only the few experts
           the router picked. The fix slices out just the routed experts, runs a quantized matmul per expert,
@@ -533,8 +550,8 @@
     <section aria-labelledby="live-systems-heading">
       <h2 id="live-systems-heading">Live systems</h2>
       <div class="projects">
-        <article class="card">
-          <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span></h3>
+        <article class="card" id="leeroy">
+          <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span><a class="card-anchor" href="#leeroy" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>The operations dashboard for my automated Solana trading systems: running bots and their
           positions, on-chain wallet balances, per-trade execution timing (build, submit, and on-chain
           fill), slot-level latency, and live logs. It monitors the infrastructure the Solana research
@@ -552,8 +569,8 @@
       <p class="section-note">Independent studies, each built on public or self-collected data with the
       full pipeline, tests, and negative results published.</p>
       <div class="projects">
-        <article class="card">
-          <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span></h3>
+        <article class="card" id="optimum-ethereum">
+          <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span><a class="card-anchor" href="#optimum-ethereum" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>A causal study of block propagation latency and validator revenue, built from 216,000 mainnet
           slots of public Xatu and MEV relay data. Identification comes from the protocol's 4-second
           attestation deadline (a sharp regression discontinuity: correct head votes fall from 95.9% to
@@ -568,8 +585,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span></h3>
+        <article class="card" id="optimum-solana">
+          <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span><a class="card-anchor" href="#optimum-solana" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>Quantifies how block completion timing relates to Solana validator earnings, using two days
           of on-chain data collected from my own Frankfurt node. Within-leader-window fixed effects
           separate timing from leader quality; leader fees turn out to be the larger channel, at
@@ -583,8 +600,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span></h3>
+        <article class="card" id="david-ai">
+          <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span><a class="card-anchor" href="#david-ai" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
           quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
           Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
@@ -598,8 +615,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span></h3>
+        <article class="card" id="deccan">
+          <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span><a class="card-anchor" href="#deccan" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
           prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
           order, across 156 episodes on three procedurally generated task families. All six axes shifted
