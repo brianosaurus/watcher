@@ -488,7 +488,7 @@
         </article>
 
         <article class="card" id="open-source-contributions">
-          <h3>Open source contributions<span class="url">vLLM · Pydantic AI · SGLang · FlashAttention · llama.cpp · mistral.rs · GuideLLM</span><a class="card-anchor" href="#open-source-contributions" aria-label="Link to this card" title="Link to this card">#</a></h3>
+          <h3>Open source contributions<span class="url">vLLM · Pydantic AI · SGLang · Mamba · FlashAttention · llama.cpp · mistral.rs · GuideLLM</span><a class="card-anchor" href="#open-source-contributions" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p><strong>Featured: mistral.rs <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">#2558</a>, a roughly 50x decode speedup (open).</strong> The x86_64 CPU
           MoE path dequantized the entire stacked expert tensor on every call, then used only the few experts
           the router picked. The fix slices out just the routed experts, runs a quantized matmul per expert,
@@ -500,14 +500,24 @@
           process. The MMQ pool allocation can now fail gracefully: graph compute stops with
           <code>GGML_STATUS_ALLOC_FAILED</code>, cached CUDA graphs are dropped so a partial capture is never
           replayed, and the server fails that one request instead of crashing (fixes <a href="https://github.com/ggml-org/llama.cpp/issues/31974" rel="noopener noreferrer">#31974</a>).</p>
-          <p><strong>Featured: SGLang <a href="https://github.com/sgl-project/sglang/pull/51342" rel="noopener noreferrer">#51342</a>, one request's bad input no longer poisons the rest of the batch (open).</strong>
-          The Mamba SSD kernels zeroed out other sequences' contributions by multiplying by 0.0, but
-          <code>0 * inf</code> is still <code>nan</code>. One sequence with a non-finite value leaked through
-          <code>tl.dot</code> into every other sequence in the chunk, including their cached SSM state, which
-          stayed wrong for every later decode step (fixes <a href="https://github.com/sgl-project/sglang/issues/51108" rel="noopener noreferrer">#51108</a>).
-          The fix sanitizes the inputs on load. It is bit-identical on finite inputs, the new regression test
-          fails on unpatched code (30 of 30 outputs non-finite), the existing 371-case suite passes, and
-          there is no measurable slowdown.</p>
+          <p><strong>Featured: one bug, traced from SGLang back to Mamba. <a href="https://github.com/sgl-project/sglang/pull/51342" rel="noopener noreferrer">SGLang #51342</a>
+          and <a href="https://github.com/state-spaces/mamba/pull/1083" rel="noopener noreferrer">Mamba #1083</a> (both open).</strong>
+          A report (<a href="https://github.com/sgl-project/sglang/issues/51108" rel="noopener noreferrer">sglang#51108</a>) said one request's <code>inf</code>
+          could turn every other request in the same batch into <code>nan</code>, and then poison their cached
+          SSM state for every later decode step. The cause is <code>0 * inf</code>: the Mamba SSD kernels remove
+          other sequences' tokens by multiplying by a clean zero, and under IEEE 754 that is still
+          <code>nan</code>. I fixed it in SGLang by sanitizing the inputs on load, with a regression test that
+          fails on the unpatched code and bit-identical output on finite inputs.</p>
+          <p>Then I kept going. SGLang's kernels are a copy of the originals in
+          <code>state-spaces/mamba</code>, so I went to the source, reproduced the same bug there
+          (<a href="https://github.com/state-spaces/mamba/issues/1082" rel="noopener noreferrer">#1082</a>), and found it was wider than the downstream patch
+          covered. The original has three bad sites, not two: the carried state in the state-passing kernel was
+          reset by multiplying by zero too, and the chunk scan's <code>prev_states</code> needed the same
+          treatment. Upstream I also kept the fix narrow: sanitizing only for chunks that straddle a sequence
+          boundary, and leaving a lone sequence's own <code>nan</code> alone, since hiding it would turn a loud
+          failure into a quietly wrong answer (there is a test for that). I removed the chunk-state sanitize on its
+          own to prove it was not redundant (the tests still failed), and checked that vLLM's copy is not affected, because it splits chunks at sequence
+          boundaries instead. The upstream PR is the more complete of the two.</p>
           <p><strong>vLLM.</strong> Correctness work across the engine, scheduler, and KV-cache paths, mostly
           as a reviewer. On a KV-cache capacity fix, the review surfaced a decode-path livelock that became
           the fix's second commit (<a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">#52530</a>, <a href="/blog/one-block-short/">writeup</a>). On an Anthropic
@@ -534,6 +544,8 @@
             <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">mistral.rs PR #2558 (50x faster, open)</a>
             <a href="https://github.com/ggml-org/llama.cpp/pull/32440" rel="noopener noreferrer">llama.cpp PR #32440 (open)</a>
             <a href="https://github.com/sgl-project/sglang/pull/51342" rel="noopener noreferrer">SGLang PR #51342 (open)</a>
+            <a href="https://github.com/state-spaces/mamba/pull/1083" rel="noopener noreferrer">Mamba PR #1083 (open)</a>
+            <a href="https://github.com/state-spaces/mamba/issues/1082" rel="noopener noreferrer">Mamba #1082</a>
             <a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">vLLM PR #52557 (merged)</a>
             <a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">Pydantic AI PR #7522 (merged)</a>
             <a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">Review: vLLM #52530</a>
