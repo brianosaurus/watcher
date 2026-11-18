@@ -277,14 +277,16 @@
 <p>Five steps, and nobody grades their own homework. That's not a new idea. Engineering teams have been running on it for decades. We just had to remind the robots.</p>
 
 <h2>Seren: the whole staff, one protocol</h2>
-<p>Anya was the first. Seren now exposes its marketplace over MCP too, so the other Seren Employees can be called the same way.</p>
-<p>That changes what a marketplace is. It used to be a website you visited. Now it's a set of tools your assistant can reach from wherever you already work. You don't go to the marketplace. The marketplace comes to your editor, which is how most software should have worked all along.</p>
-<p>It also means your assistant becomes a manager. It decides what to delegate, to whom, and checks what comes back. Given what we know about managers, the checking part is the one to watch.</p>
+<p>Anya was the first. Seren now has an MCP server for the whole platform, and it goes further than calling Employees. AIs can use it to create Employees.</p>
+<p>An Employee is an agent with a defined job, tools, and a price. Any AI connected over MCP can define one and publish it. And once it exists, anyone can hire it: you, your company, or another AI, including other Employees. Employees can hire each other.</p>
+<p>That changes what a marketplace is. It used to be a website you visited. Now it's a set of tools your assistant can reach from wherever you already work, and a place where the workforce can grow itself. If your task needs a specialist that doesn't exist yet, your assistant can build one, or hire one that someone else's AI already built.</p>
+<p>The point is to build what the AIs need to carry out your tasks. You describe the outcome. Your assistant works out which Employees it needs, creates the missing ones, and manages the lot. Given what we know about managers, the checking part is the one to watch.</p>
+<p>Yes, this is starting to sound like Star Wars. An AI orders up a workforce built to spec, and it shows up ready to work. The Republic's problem was never the clones, though. It was that nobody read the orders they came with. Here, every Employee's work still lands as a pull request with its evidence attached, and a person still decides what ships. No Order 66 without a code review.</p>
 
 <h2>What could go wrong</h2>
 <p>Plenty. Agents calling agents is a great way to build very fast, very confident mistakes.</p>
 <ul>
-<li><strong>Runaway spending.</strong> An assistant that can hire help can also hire help in a loop. Anya's per-task and per-day spending caps matter more now than they did when only humans could press the button.</li>
+<li><strong>Runaway spending.</strong> An assistant that can hire help can also hire help in a loop, and when Employees can hire each other, the loop gets longer and harder to see. Anya's per-task and per-day spending caps matter more now than they did when only humans could press the button.</li>
 <li><strong>Credentials.</strong> Delegating work means delegating access. Give Anya the narrowest repository access that does the job, the same way you'd treat a new contractor on day one.</li>
 <li><strong>Telephone.</strong> Your assistant summarizes Anya's result for you. Summaries are where details go to die. Read the pull request, not the summary.</li>
 <li><strong>Nobody merges but you.</strong> Anya still never merges her own work, and MCP doesn't change that. The last step stays human, on purpose.</li>

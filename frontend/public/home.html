@@ -471,66 +471,60 @@
         </article>
 
         <article class="card">
-          <h3><a href="https://github.com/vllm-project/vllm/pulls?q=is%3Apr+author%3Abrianosaurus" rel="noopener noreferrer">vLLM</a><span class="url">github.com/vllm-project/vllm</span></h3>
-          <p>Correctness work across the engine, scheduler, and KV-cache paths. Found and fixed a
-          prefix-cache bug in the V1 scheduler: when a session truncates tokens, a hash covering a
-          discarded token stays in <code>block_hashes</code>, so a later request whose prefix matches
-          the old tokens can be served KV computed from the new ones. The fix is one line in
-          <code>_update_request_as_session</code> with a regression test that fails without it
-          (#49377, #52806). Review contributor on a KV-cache capacity fix, where the review surfaced a
-          decode-path livelock that became the fix's second commit (#52530,
-          <a href="/blog/one-block-short/">writeup</a>), and on a stop-string leak traced through the
-          detokenizer and reasoning parser (#52599).</p>
+          <h3>Open source contributions<span class="url">vLLM · Pydantic AI · SGLang · FlashAttention · llama.cpp · mistral.rs · GuideLLM</span></h3>
+          <p><strong>Featured: mistral.rs <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">#2558</a>, a roughly 50x decode speedup (open).</strong> The x86_64 CPU
+          MoE path dequantized the entire stacked expert tensor on every call, then used only the few experts
+          the router picked. The fix slices out just the routed experts, runs a quantized matmul per expert,
+          and caches those on the layer. Qwen3-30B-A3B Q4_K_M on an RTX 4090 with ten layers of experts
+          offloaded to CPU: 0.26 tok/s before, 13.2 tok/s after on the same prompt (19.2 on a longer one).
+          Covered by new tests against the full-dequantize reference.</p>
+          <p><strong>Featured: llama.cpp <a href="https://github.com/ggml-org/llama.cpp/pull/32440" rel="noopener noreferrer">#32440</a>, no more process abort on CUDA out-of-memory (open).</strong>
+          When the VMM pool could not grow during <code>mul_mat_q</code>, the backend aborted the whole
+          process. The MMQ pool allocation can now fail gracefully: graph compute stops with
+          <code>GGML_STATUS_ALLOC_FAILED</code>, cached CUDA graphs are dropped so a partial capture is never
+          replayed, and the server fails that one request instead of crashing (fixes <a href="https://github.com/ggml-org/llama.cpp/issues/31974" rel="noopener noreferrer">#31974</a>).</p>
+          <p><strong>vLLM.</strong> Correctness work across the engine, scheduler, and KV-cache paths, mostly
+          as a reviewer. On a KV-cache capacity fix, the review surfaced a decode-path livelock that became
+          the fix's second commit (<a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">#52530</a>, <a href="/blog/one-block-short/">writeup</a>). On an Anthropic
+          <code>tool_reference</code> fix, I ran it against five chat templates and showed that four fail
+          silently (<a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">#52498</a>). Also traced a stop-string leak through the detokenizer and reasoning parser
+          (<a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">#52599</a>), and added H100 data showing <code>vllm bench serve</code> overstates throughput by up to
+          86% when it hides the prefix cache hit rate (<a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">#46938</a>). Merged: removal of the dead
+          <code>use_prefill_decode_attention</code> flag (<a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">#52557</a>).</p>
+          <p><strong>Pydantic AI.</strong> Merged a docs fix scoping the Code Execution Tool table to the
+          OpenAI Responses API (<a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">#7522</a>). Filed that <code>EmbeddingSettings.dimensions</code> claims Bedrock
+          support the Titan models do not have (<a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">#7520</a>, fix in <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">#7521</a>), and that <code>AGUIEventStream</code>
+          fails to emit agent-generated <code>FilePart</code>s (<a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">#7508</a>). Reviewed the maintainers' fix for the
+          latter, flagging a duplicated payload builder that parity tests would not catch drifting (<a href="https://github.com/pydantic/pydantic-ai/pull/7510#issuecomment-5311769102" rel="noopener noreferrer">#7510</a>).</p>
+          <p><strong>llama.cpp.</strong> Reviewed a report that cache reuse was disabled for Qwen3.5 and every
+          follow-up re-prefilled (<a href="https://github.com/ggml-org/llama.cpp/issues/32316#issuecomment-6897406059" rel="noopener noreferrer">#32316</a>). Reproduced it and showed the cause was
+          <code>--ctx-checkpoints 0</code> on a hybrid model, not <code>--cache-reuse</code> or IMROPE: with
+          checkpoints on, turn two dropped from 3.1 s to 0.3 s.</p>
+          <p><strong>Awaiting review.</strong> SGLang: tag non-intrusive dumps so draft and target model dumps
+          under speculative decoding stop colliding (<a href="https://github.com/sgl-project/sglang/pull/51084" rel="noopener noreferrer">#51084</a>). FlashAttention: <code>cross_entropy_loss</code>
+          read the wrong labels when <code>labels</code> was strided (<a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">#3182</a>). mistral.rs: CPU-offloaded MoE experts failing when activations are on CUDA (<a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">#2556</a>), plus
+          async-client fixes for four multimodal examples (<a href="https://github.com/EricLBuehler/mistral.rs/pull/2552" rel="noopener noreferrer">#2552</a>). GuideLLM: regenerate cached samples per epoch so each strategy in a
+          sweep gets fresh prompts (<a href="https://github.com/vllm-project/guidellm/pull/1589" rel="noopener noreferrer">#1589</a>).</p>
           <div class="links">
-            <a href="https://github.com/vllm-project/vllm/pull/52806" rel="noopener noreferrer">PR #52806</a>
-            <a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">Review: #52599</a>
-            <a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">Review: #52530</a>
-            <a href="https://github.com/vllm-project/vllm/issues/49377" rel="noopener noreferrer">Issue #49377</a>
-            <a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">PR #52557</a>
-            <a href="https://github.com/vllm-project/vllm/pull/52546" rel="noopener noreferrer">PR #52546</a>
-            <span class="tag">LLM inference internals</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <h3><a href="https://github.com/unclehq/uncle" rel="noopener noreferrer">Uncle</a><span class="url">github.com/unclehq/uncle</span></h3>
-          <p>A terminal-native software engineer: give it an issue or requirements and it plans the
-          change, coordinates the coding agents you already use (Claude, Codex, and others, not a
-          fixed pairing), and hands back a verified pull request. Specs and plans are
-          cryptographically pinned so approved intent cannot silently change, an independent
-          reviewer checks the implementing agent's own work, and a human holds the approval gate at
-          every stage. Seren also runs it commercially as Anya Sharp, in Daytona sandboxes (<a href="/blog/agentic-programming-containers/">case study</a>).</p>
-          <div class="links">
-            <a href="https://github.com/unclehq/uncle" rel="noopener noreferrer">Code</a>
-            <span class="tag">agentic coding · independent review · human approval gates</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <h3><a href="/h100">H100 Roofline Study</a><span class="url">brian.biz/h100</span></h3>
-          <p>
-          Roofline study of five open models on an H100: measure the card's real ceilings,
-          predict each model's decode rate from its weights, report the gap. Qwen3-8B holds 81% of
-          measured bandwidth. A concurrency sweep against one server turned out to be running at a 98%
-          prefix cache hit rate, overstating throughput by 86%, filed upstream as vllm#52884.
-          </p>
-          <div class="links">
-            <a href="/h100">Study</a>
-            <a href="https://github.com/vllm-project/vllm/issues/52884" rel="noopener noreferrer">Issue #52884</a>
-            <span class="tag">GPU performance · roofline analysis · vLLM</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <h3><a href="https://github.com/pydantic/pydantic-ai/issues?q=author%3Abrianosaurus" rel="noopener noreferrer">Pydantic AI</a><span class="url">github.com/pydantic/pydantic-ai</span></h3>
-          <p>Filed and fixed correctness issues in the agent framework's embeddings and AG-UI streaming
-          surfaces: <code>EmbeddingSettings.dimensions</code> claimed Bedrock support that the underlying Titan
-          models do not provide, and <code>AGUIEventStream</code> failed to emit agent-generated <code>FilePart</code>s.</p>
-          <div class="links">
-            <a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">Issue #7508</a>
-            <a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">Issue #7520</a>
-            <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">PR #7521</a>
-            <span class="tag">Agent frameworks</span>
+            <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">mistral.rs PR #2558 (50x faster, open)</a>
+            <a href="https://github.com/ggml-org/llama.cpp/pull/32440" rel="noopener noreferrer">llama.cpp PR #32440 (open)</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">vLLM PR #52557 (merged)</a>
+            <a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">Pydantic AI PR #7522 (merged)</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">Review: vLLM #52530</a>
+            <a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">Review: vLLM #52498</a>
+            <a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">Review: vLLM #52599</a>
+            <a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">Review: vLLM #46938</a>
+            <a href="https://github.com/pydantic/pydantic-ai/pull/7510#issuecomment-5311769102" rel="noopener noreferrer">Review: Pydantic AI #7510</a>
+            <a href="https://github.com/ggml-org/llama.cpp/issues/32316#issuecomment-6897406059" rel="noopener noreferrer">Review: llama.cpp #32316</a>
+            <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">Pydantic AI PR #7521</a>
+            <a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">Pydantic AI #7520</a>
+            <a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">Pydantic AI #7508</a>
+            <a href="https://github.com/sgl-project/sglang/pull/51084" rel="noopener noreferrer">SGLang PR #51084</a>
+            <a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">FlashAttention PR #3182</a>
+            <a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">mistral.rs PR #2556</a>
+            <a href="https://github.com/EricLBuehler/mistral.rs/pull/2552" rel="noopener noreferrer">mistral.rs PR #2552</a>
+            <a href="https://github.com/vllm-project/guidellm/pull/1589" rel="noopener noreferrer">GuideLLM PR #1589</a>
+            <span class="tag">LLM inference internals · agent frameworks</span>
           </div>
         </article>
       </div>
