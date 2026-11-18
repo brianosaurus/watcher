@@ -1798,6 +1798,12 @@ def root(request: Request) -> FileResponse:
     return FileResponse(STATIC_DIR / "home.html")
 
 
+@app.get("/favicon.ico")
+def favicon() -> FileResponse:
+    """Site-wide favicon fallback for pages with no <link rel="icon"> (e.g. /optimum, /david.ai, /deccan)."""
+    return FileResponse(STATIC_DIR / "uncle.png", media_type="image/png")
+
+
 @app.get("/resume.pdf")
 def resume_pdf() -> FileResponse:
     """Brian's resume, one click from the portfolio hero (source: frontend/public/resume.pdf)."""
