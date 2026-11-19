@@ -81,7 +81,7 @@ export default function App() {
     <>
       <header>
         <div className="brand">
-          <img src="/static/leeroy_chainkins.png" alt="Leeroy Chainkins" className="logo" />
+          <img src="/static/brian_woods_og.png" alt="Leeroy Chainkins" className="logo" />
           <h1>Leeroy Chainkins</h1>
         </div>
         <div className="meta">

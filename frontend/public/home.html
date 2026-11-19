@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Brian Woods · Staff / Principal ML & Systems Engineer</title>
-  <meta name="description" content="Brian Woods: ML systems engineer working on causal inference, live trading infrastructure, drift monitoring, and published research with the negative results left in.">
+  <meta name="description" content="Brian Woods: ML systems engineer working on LLM inference, agent infrastructure and causal inference: open-source contributions across vLLM, SGLang, llama.cpp and mistral.rs, a coding agent with paying customers, and measured research with the negative results left in.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/">
   <link rel="icon" type="image/png" href="/static/uncle.png">
@@ -13,17 +13,17 @@
   <!-- Open Graph -->
   <meta property="og:type" content="profile">
   <meta property="og:title" content="Brian Woods · Staff / Principal ML & Systems Engineer">
-  <meta property="og:description" content="Causal inference on messy observational data, and the production systems that serve what I model.">
+  <meta property="og:description" content="LLM inference, agent infrastructure and causal inference: open-source work across vLLM, SGLang, llama.cpp and mistral.rs, a coding agent with paying customers, and measured research with the negative results left in.">
   <meta property="og:url" content="https://brian.biz/">
-  <meta property="og:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta property="og:image" content="https://brian.biz/static/brian_woods_og.png">
   <meta property="profile:first_name" content="Brian">
   <meta property="profile:last_name" content="Woods">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Brian Woods · Staff / Principal ML & Systems Engineer">
-  <meta name="twitter:description" content="Causal inference on messy observational data, and the production systems that serve what I model.">
-  <meta name="twitter:image" content="https://brian.biz/static/leeroy_chainkins.png">
+  <meta name="twitter:description" content="LLM inference, agent infrastructure and causal inference: open-source work across vLLM, SGLang, llama.cpp and mistral.rs, a coding agent with paying customers, and measured research with the negative results left in.">
+  <meta name="twitter:image" content="https://brian.biz/static/brian_woods_og.png">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
     "givenName": "Brian",
     "familyName": "Woods",
     "jobTitle": "Staff / Principal ML & Systems Engineer",
-    "description": "Causal inference on messy observational data, and the production systems that serve what I model.",
+    "description": "LLM inference, agent infrastructure and causal inference: open-source work across vLLM, SGLang, llama.cpp and mistral.rs, a coding agent with paying customers, and measured research with the negative results left in.",
     "url": "https://brian.biz/",
     "email": "mailto:me@brian.biz",
     "sameAs": [
@@ -429,9 +429,10 @@
       <p class="role">Staff / Principal ML &amp; Systems Engineer</p>
       <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
       <p class="tagline">
-        I work on causal inference from messy observational data and the production systems
-        that serve what I model: live trading infrastructure, drift monitoring, and published
-        research with the negative results left in.
+        I work on LLM inference and agent infrastructure: open-source contributions across vLLM,
+        SGLang, llama.cpp, mistral.rs, state-spaces/mamba and FlashAttention, Uncle, a coding agent
+        with paying customers, and measured research with the negative results left in. I also do
+        causal inference on messy observational data.
       </p>
       <div class="actions">
         <a class="btn btn-primary" href="mailto:me@brian.biz" aria-label="Email Brian Woods">me@brian.biz</a>
@@ -458,8 +459,8 @@
           <h3><a href="/blog/agentic-programming-containers/">We Put Our Coding Agent in a Container. People Started Paying for It.</a><span class="url">brian.biz/blog/agentic-programming-containers</span><a class="card-anchor" href="#containers" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>How I took Uncle, an open-source coding harness, into production as Anya Sharp on Seren.
           Daytona sandboxes isolate each task, independent review verifies changes, and GitHub API
-          publication keeps intermediate work off customer branches. The result: 168 paid customer
-          tasks as of November 16, 2026.</p>
+          publication keeps intermediate work off customer branches. The result: 176 paid customer
+          tasks as of November 18, 2026.</p>
           <div class="links">
             <a href="/blog/agentic-programming-containers/">Read</a>
             <span class="tag">engineering case study · agentic systems · sandbox isolation · production deployment</span>
@@ -495,50 +496,22 @@
           and caches those on the layer. Qwen3-30B-A3B Q4_K_M on an RTX 4090 with ten layers of experts
           offloaded to CPU: 0.26 tok/s before, 13.2 tok/s after on the same prompt (19.2 on a longer one).
           Covered by new tests against the full-dequantize reference.</p>
+          <p><strong>Featured: <a href="https://github.com/sgl-project/sglang/pull/51342" rel="noopener noreferrer">SGLang #51342</a> + <a href="https://github.com/state-spaces/mamba/pull/1083" rel="noopener noreferrer">state-spaces/mamba #1083</a> (open).</strong>
+          In packed prefill, one request's <code>inf</code> or <code>NaN</code> corrupted every co-batched request's output and cached SSM state, because the kernels masked other sequences by multiplying by zero, and 0 × inf is NaN. Fixed in SGLang, traced to the upstream reference implementation, and fixed there at four sites with an 8-case regression matrix.</p>
           <p><strong>Featured: llama.cpp <a href="https://github.com/ggml-org/llama.cpp/pull/32440" rel="noopener noreferrer">#32440</a>, no more process abort on CUDA out-of-memory (open).</strong>
           When the VMM pool could not grow during <code>mul_mat_q</code>, the backend aborted the whole
           process. The MMQ pool allocation can now fail gracefully: graph compute stops with
           <code>GGML_STATUS_ALLOC_FAILED</code>, cached CUDA graphs are dropped so a partial capture is never
           replayed, and the server fails that one request instead of crashing (fixes <a href="https://github.com/ggml-org/llama.cpp/issues/31974" rel="noopener noreferrer">#31974</a>).</p>
-          <p><strong>Featured: one bug, traced from SGLang back to Mamba. <a href="https://github.com/sgl-project/sglang/pull/51342" rel="noopener noreferrer">SGLang #51342</a>
-          and <a href="https://github.com/state-spaces/mamba/pull/1083" rel="noopener noreferrer">Mamba #1083</a> (both open).</strong>
-          A report (<a href="https://github.com/sgl-project/sglang/issues/51108" rel="noopener noreferrer">sglang#51108</a>) said one request's <code>inf</code>
-          could turn every other request in the same batch into <code>nan</code>, and then poison their cached
-          SSM state for every later decode step. The cause is <code>0 * inf</code>: the Mamba SSD kernels remove
-          other sequences' tokens by multiplying by a clean zero, and under IEEE 754 that is still
-          <code>nan</code>. I fixed it in SGLang by sanitizing the inputs on load, with a regression test that
-          fails on the unpatched code and bit-identical output on finite inputs.</p>
-          <p>Then I kept going. SGLang's kernels are a copy of the originals in
-          <code>state-spaces/mamba</code>, so I went to the source, reproduced the same bug there
-          (<a href="https://github.com/state-spaces/mamba/issues/1082" rel="noopener noreferrer">#1082</a>), and found it was wider than the downstream patch
-          covered. The original has three bad sites, not two: the carried state in the state-passing kernel was
-          reset by multiplying by zero too, and the chunk scan's <code>prev_states</code> needed the same
-          treatment. Upstream I also kept the fix narrow: sanitizing only for chunks that straddle a sequence
-          boundary, and leaving a lone sequence's own <code>nan</code> alone, since hiding it would turn a loud
-          failure into a quietly wrong answer (there is a test for that). I removed the chunk-state sanitize on its
-          own to prove it was not redundant (the tests still failed), and checked that vLLM's copy is not affected, because it splits chunks at sequence
-          boundaries instead. The upstream PR is the more complete of the two.</p>
-          <p><strong>vLLM.</strong> Correctness work across the engine, scheduler, and KV-cache paths, mostly
-          as a reviewer. On a KV-cache capacity fix, the review surfaced a decode-path livelock that became
-          the fix's second commit (<a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">#52530</a>, <a href="/blog/one-block-short/">writeup</a>). On an Anthropic
-          <code>tool_reference</code> fix, I ran it against five chat templates and showed that four fail
-          silently (<a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">#52498</a>). Also traced a stop-string leak through the detokenizer and reasoning parser
-          (<a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">#52599</a>), and added H100 data showing <code>vllm bench serve</code> overstates throughput by up to
-          86% when it hides the prefix cache hit rate (<a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">#46938</a>). Merged: removal of the dead
-          <code>use_prefill_decode_attention</code> flag (<a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">#52557</a>).</p>
-          <p><strong>Pydantic AI.</strong> Merged a docs fix scoping the Code Execution Tool table to the
-          OpenAI Responses API (<a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">#7522</a>). Filed that <code>EmbeddingSettings.dimensions</code> claims Bedrock
-          support the Titan models do not have (<a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">#7520</a>, fix in <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">#7521</a>), and that <code>AGUIEventStream</code>
-          fails to emit agent-generated <code>FilePart</code>s (<a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">#7508</a>). Reviewed the maintainers' fix for the
-          latter, flagging a duplicated payload builder that parity tests would not catch drifting (<a href="https://github.com/pydantic/pydantic-ai/pull/7510#issuecomment-5311769102" rel="noopener noreferrer">#7510</a>).</p>
+          <p><strong>vLLM.</strong> Correctness work across the engine, scheduler, and KV-cache paths, mostly as a reviewer. Showed with H100 data that <code>vllm bench serve</code> overstates throughput by up to 86% when it hides the prefix cache hit rate (<a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">#46938</a>). On a KV-cache capacity fix, the review surfaced a decode-path livelock that became the fix's second commit (<a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">#52530</a>, <a href="/blog/one-block-short/">writeup</a>). On an Anthropic <code>tool_reference</code> fix, ran it against five chat templates and showed that four fail silently (<a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">#52498</a>). Traced a stop-string leak through the detokenizer and reasoning parser (<a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">#52599</a>). Merged: <a href="https://github.com/vllm-project/vllm/pull/52557" rel="noopener noreferrer">#52557</a>.</p>
+          <p><strong>Pydantic AI:</strong> merged docs fix (<a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">#7522</a>); Bedrock embedding-dimensions fix (<a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">#7521</a>).</p>
           <p><strong>llama.cpp.</strong> Reviewed a report that cache reuse was disabled for Qwen3.5 and every
           follow-up re-prefilled (<a href="https://github.com/ggml-org/llama.cpp/issues/32316#issuecomment-6897406059" rel="noopener noreferrer">#32316</a>). Reproduced it and showed the cause was
           <code>--ctx-checkpoints 0</code> on a hybrid model, not <code>--cache-reuse</code> or IMROPE: with
           checkpoints on, turn two dropped from 3.1 s to 0.3 s.</p>
           <p><strong>Awaiting review.</strong> SGLang: tag non-intrusive dumps so draft and target model dumps
           under speculative decoding stop colliding (<a href="https://github.com/sgl-project/sglang/pull/51084" rel="noopener noreferrer">#51084</a>). FlashAttention: <code>cross_entropy_loss</code>
-          read the wrong labels when <code>labels</code> was strided (<a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">#3182</a>). mistral.rs: CPU-offloaded MoE experts failing when activations are on CUDA (<a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">#2556</a>), plus
-          async-client fixes for four multimodal examples (<a href="https://github.com/EricLBuehler/mistral.rs/pull/2552" rel="noopener noreferrer">#2552</a>). GuideLLM: regenerate cached samples per epoch so each strategy in a
+          read the wrong labels when <code>labels</code> was strided (<a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">#3182</a>). mistral.rs: CPU-offloaded MoE experts failing when activations are on CUDA (<a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">#2556</a>). GuideLLM: regenerate cached samples per epoch so each strategy in a
           sweep gets fresh prompts (<a href="https://github.com/vllm-project/guidellm/pull/1589" rel="noopener noreferrer">#1589</a>).</p>
           <div class="links">
             <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">mistral.rs PR #2558 (50x faster, open)</a>
@@ -552,34 +525,13 @@
             <a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">Review: vLLM #52498</a>
             <a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">Review: vLLM #52599</a>
             <a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">Review: vLLM #46938</a>
-            <a href="https://github.com/pydantic/pydantic-ai/pull/7510#issuecomment-5311769102" rel="noopener noreferrer">Review: Pydantic AI #7510</a>
             <a href="https://github.com/ggml-org/llama.cpp/issues/32316#issuecomment-6897406059" rel="noopener noreferrer">Review: llama.cpp #32316</a>
             <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">Pydantic AI PR #7521</a>
-            <a href="https://github.com/pydantic/pydantic-ai/issues/7520" rel="noopener noreferrer">Pydantic AI #7520</a>
-            <a href="https://github.com/pydantic/pydantic-ai/issues/7508" rel="noopener noreferrer">Pydantic AI #7508</a>
             <a href="https://github.com/sgl-project/sglang/pull/51084" rel="noopener noreferrer">SGLang PR #51084</a>
             <a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">FlashAttention PR #3182</a>
             <a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">mistral.rs PR #2556</a>
-            <a href="https://github.com/EricLBuehler/mistral.rs/pull/2552" rel="noopener noreferrer">mistral.rs PR #2552</a>
             <a href="https://github.com/vllm-project/guidellm/pull/1589" rel="noopener noreferrer">GuideLLM PR #1589</a>
             <span class="tag">LLM inference internals · agent frameworks</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section aria-labelledby="live-systems-heading">
-      <h2 id="live-systems-heading">Live systems</h2>
-      <div class="projects">
-        <article class="card" id="leeroy">
-          <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span><a class="card-anchor" href="#leeroy" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>The operations dashboard for my automated Solana trading systems: running bots and their
-          positions, on-chain wallet balances, per-trade execution timing (build, submit, and on-chain
-          fill), slot-level latency, and live logs. It monitors the infrastructure the Solana research
-          below grew out of.</p>
-          <div class="links">
-            <a href="/leeroy">Open the dashboard</a>
-            <span class="tag">Live dashboard · Solana · FastAPI + React</span>
           </div>
         </article>
       </div>
@@ -590,6 +542,32 @@
       <p class="section-note">Independent studies, each built on public or self-collected data with the
       full pipeline, tests, and negative results published.</p>
       <div class="projects">
+        <article class="card" id="h100">
+          <h3><a href="/h100">What is an H100 actually doing?</a><span class="url">/h100</span><a class="card-anchor" href="#h100" aria-label="Link to this card" title="Link to this card">#</a></h3>
+          <p>A roofline study of five models: inference benchmarks report tokens per second, but that number
+          says nothing about whether the hardware is working hard, so this measures the card's real limits,
+          predicts each model from first principles, and reports where the predictions failed.</p>
+          <div class="links">
+            <a href="/h100">Read the study</a>
+            <span class="tag">LLM inference · roofline analysis · GPU performance</span>
+          </div>
+        </article>
+
+        <article class="card" id="deccan">
+          <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span><a class="card-anchor" href="#deccan" aria-label="Link to this card" title="Link to this card">#</a></h3>
+          <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
+          prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
+          order, across 156 episodes on three procedurally generated task families. All six axes shifted
+          scores, and detecting a 3-point gap between models turns out to require hundreds to thousands
+          of instances. The conclusion is a cost estimate: a comparison you can defend costs one to two
+          orders of magnitude more than these are usually given.</p>
+          <div class="links">
+            <a href="/deccan">Read the study</a>
+            <a href="https://github.com/brianosaurus/model-analysis" rel="noopener noreferrer">Code</a>
+            <span class="tag">LLM agents · measurement · statistics</span>
+          </div>
+        </article>
+
         <article class="card" id="optimum-ethereum">
           <h3><a href="/optimum">What is faster block propagation worth on Ethereum?</a><span class="url">/optimum</span><a class="card-anchor" href="#optimum-ethereum" aria-label="Link to this card" title="Link to this card">#</a></h3>
           <p>A causal study of block propagation latency and validator revenue, built from 216,000 mainnet
@@ -608,49 +586,18 @@
 
         <article class="card" id="optimum-solana">
           <h3><a href="/optimum/solana">The same question, asked of Solana</a><span class="url">/optimum/solana</span><a class="card-anchor" href="#optimum-solana" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>Quantifies how block completion timing relates to Solana validator earnings, using two days
-          of on-chain data collected from my own Frankfurt node. Within-leader-window fixed effects
-          separate timing from leader quality; leader fees turn out to be the larger channel, at
-          +0.00372 SOL per 100 ms of earlier completion. A modeled 6x transport projects to roughly
-          $794k per year for the largest operators. The confounds are stated up front: a single
-          vantage point, skip risk, and simultaneity between timing and demand.</p>
+          <p>Using two days of on-chain data from my own Frankfurt node, within-leader-window fixed effects
+          separate timing from leader quality and find that leader fees are the larger channel, at
+          +0.00372 SOL per 100 ms of earlier completion. A modeled 6x transport projects to roughly $794k
+          per year for the largest operators: a modeled projection, with confounds stated on the study page.</p>
           <div class="links">
             <a href="/optimum/solana">Read the study</a>
             <a href="https://github.com/brianosaurus/solana-optimum" rel="noopener noreferrer">Code</a>
             <span class="tag">Solana · fixed effects · revenue modeling</span>
           </div>
         </article>
-
-        <article class="card" id="david-ai">
-          <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span><a class="card-anchor" href="#david-ai" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
-          quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
-          Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
-          is an exchange rate between noisy and clean training hours. The experimental pipeline is
-          complete and verified by 213 tests. The fine-tunes await GPU compute, so the page reports
-          no results yet.</p>
-          <div class="links">
-            <a href="/david.ai">Read the study</a>
-            <a href="https://github.com/brianosaurus/audio-analysis" rel="noopener noreferrer">Code</a>
-            <span class="tag">Speech recognition · experimental design</span>
-          </div>
-        </article>
-
-        <article class="card" id="deccan">
-          <h3><a href="/deccan">Are agent benchmark scores stable enough to trust?</a><span class="url">/deccan</span><a class="card-anchor" href="#deccan" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>Tests whether agent benchmark comparisons survive perturbations that should not matter:
-          prompt paraphrase, tool renaming, distractor tools, instance resampling, temperature, and task
-          order, across 156 episodes on three procedurally generated task families. All six axes shifted
-          scores, and detecting a 3-point gap between models turns out to require hundreds to thousands
-          of instances. The conclusion is a cost estimate: a comparison you can defend costs one to two
-          orders of magnitude more than these are usually given.</p>
-          <div class="links">
-            <a href="/deccan">Read the study</a>
-            <a href="https://github.com/brianosaurus/model-analysis" rel="noopener noreferrer">Code</a>
-            <span class="tag">LLM agents · measurement · statistics</span>
-          </div>
-        </article>
       </div>
+      <p class="section-note">In progress: pre-registered ASR data-value ablation (pipeline done, fine-tuning pending).</p>
     </section>
 
     <footer>
