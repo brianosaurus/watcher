@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Brian Woods · Staff / Principal ML & Systems Engineer, LLM Inference</title>
-  <meta name="description" content="I build and debug high-performance AI infrastructure: LLM inference engines, GPU kernels, distributed execution systems, and production AI agents. My work spans vLLM, SGLang, Mamba, llama.cpp, and mistral.rs, with a focus on inference performance, numerical correctness, reliability, and rigorous measurement. I bring 30 years of production systems engineering experience, including large-scale infrastructure, technical leadership, and commercial AI deployments.">
+  <meta name="description" content="I build and debug high-performance AI infrastructure: LLM inference engines, GPU kernels, distributed execution systems, and production AI agents. My work spans vLLM, SGLang, LMCache, Mamba, llama.cpp, and mistral.rs, with a focus on inference performance, numerical correctness, reliability, and rigorous measurement. I bring 30 years of production systems engineering experience, including large-scale infrastructure, technical leadership, and commercial AI deployments.">
   <meta name="theme-color" content="#fafaf7">
   <link rel="canonical" href="https://brian.biz/">
   <link rel="icon" type="image/png" href="/static/uncle.png">
@@ -13,7 +13,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="profile">
   <meta property="og:title" content="Brian Woods · Staff / Principal ML & Systems Engineer, LLM Inference">
-  <meta property="og:description" content="LLM inference and AI infrastructure: open-source work across vLLM, SGLang, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.">
+  <meta property="og:description" content="LLM inference and AI infrastructure: open-source work across vLLM, SGLang, LMCache, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.">
   <meta property="og:url" content="https://brian.biz/">
   <meta property="og:image" content="https://brian.biz/static/uncle.png?v=2">
   <meta property="og:image:width" content="802">
@@ -24,7 +24,7 @@
   <!-- Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Brian Woods · Staff / Principal ML & Systems Engineer, LLM Inference">
-  <meta name="twitter:description" content="LLM inference and AI infrastructure: open-source work across vLLM, SGLang, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.">
+  <meta name="twitter:description" content="LLM inference and AI infrastructure: open-source work across vLLM, SGLang, LMCache, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.">
   <meta name="twitter:image" content="https://brian.biz/static/uncle.png?v=2">
 
   <!-- Fonts -->
@@ -40,7 +40,7 @@
     "givenName": "Brian",
     "familyName": "Woods",
     "jobTitle": "Staff / Principal ML & Systems Engineer (LLM Inference and AI Infrastructure)",
-    "description": "LLM inference and AI infrastructure: open-source work across vLLM, SGLang, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.",
+    "description": "LLM inference and AI infrastructure: open-source work across vLLM, SGLang, LMCache, Mamba, llama.cpp and mistral.rs, GPU performance research, and a commercial coding agent. 30 years of production systems engineering.",
     "url": "https://brian.biz/",
     "email": "mailto:me@brian.biz",
     "sameAs": [
@@ -514,7 +514,7 @@
       <p class="role">Staff / Principal ML &amp; Systems Engineer · LLM inference and AI infrastructure</p>
       <p class="edu">UC Berkeley graduate: M.S., Information &amp; Data Science, AI and machine learning concentration (2026)</p>
       <p class="tagline">
-        I build and debug high-performance AI infrastructure: LLM inference engines, GPU kernels, distributed execution systems, and production AI agents. My work spans vLLM, SGLang, Mamba, llama.cpp, and mistral.rs, with a focus on inference performance, numerical correctness, reliability, and rigorous measurement. I bring 30 years of production systems engineering experience, including large-scale infrastructure, technical leadership, and commercial AI deployments.
+        I build and debug high-performance AI infrastructure: LLM inference engines, GPU kernels, distributed execution systems, and production AI agents. My work spans vLLM, SGLang, LMCache, Mamba, llama.cpp, and mistral.rs, with a focus on inference performance, numerical correctness, reliability, and rigorous measurement. I bring 30 years of production systems engineering experience, including large-scale infrastructure, technical leadership, and commercial AI deployments.
       </p>
       <div class="actions">
         <a class="btn btn-primary" href="/resume.pdf" aria-label="Download Brian Woods resume PDF">Resume (PDF)</a>
@@ -529,7 +529,7 @@
       </p>
 
       <div class="spotlight">
-        <p class="lab">Strongest work · all open upstream, details below</p>
+        <p class="lab">Strongest work · details below</p>
         <ul>
           <li><a href="#mistral-rs-moe">mistral.rs #2558</a> <span class="m">· about 50x faster CPU-offloaded MoE decode (Qwen3-30B-A3B on an RTX 4090)</span></li>
           <li><a href="#mamba-nan">SGLang #51342 + Mamba #1083</a> <span class="m">· one request's NaN corrupting every co-batched request's state</span></li>
@@ -541,12 +541,12 @@
     <section id="inference" aria-labelledby="inference-heading">
       <h2 id="inference-heading">LLM inference &amp; systems engineering</h2>
       <p class="section-note">Fixes and measurements in inference engines, written up with the problem, the change, and the validation. Status is the upstream state as of November 18, 2026: most of these are open and unreviewed, and I mark which are not mine.</p>
-      <p class="legend"><span class="badge b-role">Author</span> wrote the change · <span class="badge b-role">Reviewer</span> reviewed someone else's work · <span class="badge b-role">Investigator</span> traced a bug · <span class="badge st-merged">Merged</span> <span class="badge st-open">Open</span> awaiting review · <span class="badge st-closed">Closed</span> not merged · <span class="badge st-issue">Issue</span></p>
+      <p class="legend"><span class="badge b-role">Author</span> wrote the change · <span class="badge b-role">Reviewer</span> reviewed someone else's work · <span class="badge b-role">Investigator</span> traced a bug<br>Status: <span class="badge st-merged">Merged</span> merged upstream · <span class="badge st-open">Open</span> awaiting review · <span class="badge st-closed">Closed</span> closed, not merged · <span class="badge st-issue">Issue</span> open issue</p>
       <div class="projects">
         <article class="card feature" id="mistral-rs-moe">
           <div class="badges"><span class="badge b-role">Author</span><span class="badge st-open">Open</span><span class="repo">EricLBuehler/mistral.rs</span></div>
           <h3><a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">CPU-offloaded MoE decode: dequantize only the routed experts (#2558)</a><a class="card-anchor" href="#mistral-rs-moe" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <dl class="facts"><dt>Problem</dt><dd>On x86_64 the CPU indexed-MoE path dequantized the whole stacked <code>[experts, n, k]</code> tensor on every call, then gathered the few experts the router had picked. <code>QTensor::indexed_gemv</code> is aarch64-only in candle-core 0.11.1, so x86 always took that fallback.</dd><dt>Change</dt><dd>Slice only the routed experts out of the packed storage, run a quantized matmul per expert, and cache those per-expert matmuls on the layer (<code>GgufMatMul</code>) so candle's repacking is paid once. Layouts it does not handle fall back to the old path; aarch64 still tries <code>indexed_gemv</code> first. Stacked on <a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">#2556</a> (also mine, open), which lets CPU-offloaded experts run at all when activations are on CUDA.</dd><dt>Result</dt><dd><strong>About 50x faster decode, measured on one setup:</strong> Qwen3-30B-A3B Q4_K_M, RTX 4090, experts for layers 30 to 39 on CPU, x86_64. Master plus #2556: 0.26 tok/s (54 tokens). This PR: 13.2 tok/s on the same prompt, 19.2 tok/s on a 189-token run.</dd><dt>Validation</dt><dd>New CPU-only tests compare the new path against the full-dequantize reference. <strong>Not tested:</strong> aarch64, other models, other GPUs. The cache keeps one repacked copy of each used expert; I estimate 3 to 4 GB extra RAM for ten offloaded layers of this model, but did not measure it.</dd></dl>
+          <dl class="facts"><dt>Problem</dt><dd>On x86_64 the CPU indexed-MoE path dequantized the whole stacked <code>[experts, n, k]</code> tensor on every call, then gathered the few experts the router had picked. <code>QTensor::indexed_gemv</code> is aarch64-only in candle-core 0.11.1, so x86 always took that fallback.</dd><dt>Change</dt><dd>Slice only the routed experts out of the packed storage, run a quantized matmul per expert, and cache those per-expert matmuls on the layer (<code>GgufMatMul</code>) so candle's repacking is paid once. Layouts it does not handle fall back to the old path; aarch64 still tries <code>indexed_gemv</code> first. Stacked on <a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">#2556</a> (also mine, open), which lets CPU-offloaded experts run at all when activations are on CUDA.</dd><dt>Result</dt><dd><strong>About 50x faster decode, measured on one setup:</strong> Qwen3-30B-A3B Q4_K_M, RTX 4090, experts for layers 30 to 39 on CPU, x86_64. Baseline is master plus #2556 (this PR is stacked on it): 0.26 tok/s (54 tokens). This PR: 13.2 tok/s on the same prompt.</dd><dt>Validation</dt><dd>New CPU-only tests compare the new path against the full-dequantize reference. <strong>Not tested:</strong> aarch64, other models, other GPUs. The cache keeps one repacked copy of each used expert; I estimate 3 to 4 GB extra RAM for ten offloaded layers of this model, but did not measure it.</dd></dl>
           <div class="links">
             <a href="https://github.com/EricLBuehler/mistral.rs/pull/2558" rel="noopener noreferrer">PR #2558</a>
             <a href="https://github.com/EricLBuehler/mistral.rs/pull/2556" rel="noopener noreferrer">PR #2556 (prerequisite)</a>
@@ -579,7 +579,7 @@
           <p>Mostly review and investigation work on KV-cache correctness, the scheduler, prefix caching, benchmarking methodology, and tool templates. The strongest examples, with the real outcome of each:</p>
           <ul class="contribs" style="margin-top:8px">
           <li><span><span class="badge b-role">Reviewer</span> <span class="badge st-open">PR open</span> <span class="repo-name">vLLM #46938</span></span><span class="what">Benchmark methodology. On someone else's PR to report prefix-cache hit rate in <code>vllm bench serve</code>, I added H100 data: a concurrency ladder built from repeated runs against one server sits at a 98.4% hit rate from the second point on and reports up to 86% more throughput than the same workload run cold. I also filed <a href="https://github.com/vllm-project/vllm/issues/52884" rel="noopener noreferrer">vllm#52884</a> asking for a warning (closed as completed). <a href="https://github.com/vllm-project/vllm/pull/46938#issuecomment-5344609655" rel="noopener noreferrer">Comment</a></span></li>
-          <li><span><span class="badge b-role">Author</span> <span class="badge st-closed">Closed · superseded</span> <span class="repo-name">vLLM #52806</span></span><span class="what">Prefix-cache correctness. When a session truncates tokens, a stale hash for a discarded token stays in <code>block_hashes</code>, so a later request can be served KV computed from different tokens. My fix was one line in <code>_update_request_as_session</code> plus a regression test that fails without it. It was closed unmerged as superseded by <a href="https://github.com/vllm-project/vllm/pull/59103" rel="noopener noreferrer">#59103</a>, which merged. The bug itself was first reported by another contributor in <a href="https://github.com/vllm-project/vllm/issues/49377" rel="noopener noreferrer">#49377</a>. <a href="https://github.com/vllm-project/vllm/pull/52806" rel="noopener noreferrer">PR</a></span></li>
+          <li><span><span class="badge b-role">Co-author</span> <span class="badge st-merged">Merged</span> <span class="repo-name">vLLM #52806 → #59103</span></span><span class="what">Prefix-cache correctness. When a session truncates tokens, a stale hash for a discarded token stays in <code>block_hashes</code>, so a later request can be served KV computed from different tokens. My #52806 (a one-line fix in <code>_update_request_as_session</code> plus a regression test that fails without it) was carried forward and merged as <a href="https://github.com/vllm-project/vllm/pull/59103" rel="noopener noreferrer">#59103</a>, where I am credited as co-author. <a href="https://github.com/vllm-project/vllm/pull/59103" rel="noopener noreferrer">PR #59103</a></span></li>
           <li><span><span class="badge b-role">Reviewer</span> <span class="badge st-closed">PR closed</span> <span class="repo-name">vLLM #52530</span></span><span class="what">KV-cache livelock. Reviewing a fix for requests the KV pool can never hold, I showed the same defect livelocks in the decode path (<a href="/blog/one-block-short/">writeup</a>); the author measured it and added it as the PR's second commit. The PR was later closed unmerged in favor of the maintainer-requested approach, which merged as #47272. <a href="https://github.com/vllm-project/vllm/pull/52530#pullrequestreview-4946863171" rel="noopener noreferrer">Review</a></span></li>
           <li><span><span class="badge b-role">Reviewer</span> <span class="badge st-open">PR open</span> <span class="repo-name">vLLM #52498</span></span><span class="what">Tool-template correctness. Ran the Anthropic <code>tool_reference</code> conversion against five chat templates: none rendered it correctly, and only one raised an error; the rest silently dropped it or leaked a raw dict into the prompt. The test also pinned an empty message. <a href="https://github.com/vllm-project/vllm/pull/52498#pullrequestreview-4946730475" rel="noopener noreferrer">Review</a></span></li>
           <li><span><span class="badge b-role">Investigator</span> <span class="badge st-issue">Issue open</span> <span class="repo-name">vLLM #52599</span></span><span class="what">Stop-string leak with GPT-OSS reasoning (<code>include_stop_str_in_output=false</code>), traced through the detokenizer and reasoning parser. <a href="https://github.com/vllm-project/vllm/issues/52599#issuecomment-5318270889" rel="noopener noreferrer">Comment</a></span></li>
@@ -594,8 +594,11 @@
           <ul class="contribs">
           <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">FlashAttention #3182</span></span><span class="what"><code>cross_entropy_loss</code> read the wrong labels when <code>labels</code> was strided: the Triton kernels assumed contiguous labels, giving a silently wrong loss and gradient. <a href="https://github.com/Dao-AILab/flash-attention/pull/3182" rel="noopener noreferrer">PR</a></span></li>
           <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">GuideLLM #1589</span></span><span class="what">In a multi-strategy sweep with <code>samples=N</code>, every strategy got the same prompts because the sample cache ignored the epoch. Measured against vLLM 0.33.0 (Qwen3-0.6B), the repeated prompts produced a 0.987 prefix-cache hit rate; the fix brings it to 0. Six new tests fail on unfixed <code>main</code>. <a href="https://github.com/vllm-project/guidellm/pull/1589" rel="noopener noreferrer">PR</a></span></li>
+          <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">SGLang #51449</span></span><span class="what">Speculative-decoding tree mask read with the wrong row stride on sliding-window layers, so drafts attended to non-ancestor drafts once context exceeded the window. The fix matches <code>_fwd_kernel</code>'s window offset; the regression test compares against a torch reference below, at and above the window. <a href="https://github.com/sgl-project/sglang/pull/51449" rel="noopener noreferrer">PR</a></span></li>
+          <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">LMCache #6759</span></span><span class="what">A repeated prompt that vLLM trimmed to a chunk boundary failed the whole request with HTTP 500, because LMCache tried to load the trailing partial chunk with no GPU blocks allocated. It now skips that chunk only when no group has blocks; a real inconsistency still raises. <a href="https://github.com/LMCache/LMCache/pull/6759" rel="noopener noreferrer">PR</a></span></li>
           <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">SGLang #51084</span></span><span class="what">Optional tags on non-intrusive dumps, so draft and target model dumps under speculative decoding stop colliding. <a href="https://github.com/sgl-project/sglang/pull/51084" rel="noopener noreferrer">PR</a></span></li>
-          <li><span><span class="badge b-role">Author</span> <span class="badge st-merged">Merged</span> <span class="badge st-open">Open</span> <span class="repo-name">Pydantic AI</span></span><span class="what">Merged docs fix scoping the Code Execution Tool table to the OpenAI Responses API (<a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">#7522</a>); open fix for <code>EmbeddingSettings.dimensions</code> claiming Bedrock support the Titan models lack (<a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">#7521</a>).</span></li>
+          <li><span><span class="badge b-role">Author</span> <span class="badge st-merged">Merged</span> <span class="repo-name">Pydantic AI #7522</span></span><span class="what">Docs fix: scoped the Code Execution Tool table to the OpenAI Responses API. <a href="https://github.com/pydantic/pydantic-ai/pull/7522" rel="noopener noreferrer">PR</a></span></li>
+          <li><span><span class="badge b-role">Author</span> <span class="badge st-open">Open</span> <span class="repo-name">Pydantic AI #7521</span></span><span class="what">Bedrock embedding-dimensions fix: <code>EmbeddingSettings.dimensions</code> claimed Bedrock support the Titan models lack. <a href="https://github.com/pydantic/pydantic-ai/pull/7521" rel="noopener noreferrer">PR</a></span></li>
           </ul>
         </article>
       </div>
@@ -690,26 +693,6 @@
       </div>
     </section>
 
-    <section id="systems" aria-labelledby="systems-heading">
-      <h2 id="systems-heading">Live distributed systems</h2>
-      <div class="projects">
-        <article class="card" id="leeroy">
-          <div class="badges"><span class="badge b-role">Builder</span></div>
-          <h3><a href="/leeroy">Leeroy Chainkins</a><span class="url">/leeroy</span><a class="card-anchor" href="#leeroy" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>The operations dashboard for a real-time distributed trading platform on Solana: running bots and their
-          positions, on-chain wallet balances, per-trade execution timing (build, submit, and on-chain
-          fill), slot-level latency, and live logs. The platform streams over gRPC/Geyser, executes
-          across regions, and keeps Rust extension modules on its latency-sensitive paths, with the full
-          ML lifecycle behind it: training, deployment, drift monitoring and kill rules. The Solana research
-          below grew out of this infrastructure.</p>
-          <div class="links">
-            <a href="/leeroy">Open the dashboard</a>
-            <span class="tag">production systems · operational visibility · FastAPI + React</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
     <section id="research" aria-labelledby="research-heading">
       <h2 id="research-heading">Machine learning research</h2>
       <p class="section-note">Independent studies, each built on public or self-collected data with the
@@ -759,21 +742,8 @@
           </div>
         </article>
 
-        <article class="card" id="david-ai">
-          <h3><a href="/david.ai">What is an hour of audio data worth?</a><span class="url">/david.ai</span><a class="card-anchor" href="#david-ai" aria-label="Link to this card" title="Link to this card">#</a></h3>
-          <p>A pre-registered ablation study of ASR training data value: how word error rate responds to
-          quantity, label noise, acoustic quality, and speaker diversity, using LibriSpeech and
-          Whisper-small across 35 planned fine-tuning runs and nine pre-registered hypotheses. The goal
-          is an exchange rate between noisy and clean training hours. The experimental pipeline is
-          complete and verified by 213 tests. The fine-tunes await GPU compute, so the page reports
-          no results yet.</p>
-          <div class="links">
-            <a href="/david.ai">Read the study</a>
-            <a href="https://github.com/brianosaurus/audio-analysis" rel="noopener noreferrer">Code</a>
-            <span class="tag">Speech recognition · experimental design</span>
-          </div>
-        </article>
       </div>
+      <p class="section-note" style="margin-top:20px">In progress: pre-registered ASR data-value ablation (pipeline done, fine-tuning pending).</p>
     </section>
 
     <footer>
